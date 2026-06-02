@@ -1,4 +1,4 @@
-import { LayoutDashboard, PackageSearch, TrendingUp, PackagePlus, BarChart2 } from 'lucide-react';
+import { LayoutDashboard, PackageSearch, TrendingUp, PackagePlus, BarChart2, Settings2 } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
@@ -9,6 +9,7 @@ export function Sidebar() {
     { icon: TrendingUp, label: 'Wishlist', path: '/explore' },
     { icon: PackageSearch, label: 'Catalog', path: '/owner/inventory' },
     { icon: BarChart2, label: 'Reports', path: '/reports' },
+    { icon: Settings2, label: 'Settings', path: '/trip-settings' },
   ];
 
   return (

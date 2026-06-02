@@ -239,13 +239,6 @@ export function OwnerDashboard() {
             <ClipboardCheck className="h-5 w-5" />
             Ledger
           </Button>
-          <Button 
-            onClick={() => navigate('/trip-settings')}
-            className="pill-button h-14 px-6 bg-white text-[#0D1B2E] hover:bg-slate-50 border border-slate-200 shadow-sm shrink-0"
-          >
-            <Settings className="h-5 w-5" />
-            Trip Settings
-          </Button>
         </div>
       </section>
 

@@ -1,7 +1,12 @@
-import { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
+import { useState, useMemo } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Search, MoreVertical, Edit2, Trash2, ExternalLink, Share2, Eye, Download, Info, Package } from 'lucide-react';
+import { 
+  ArrowLeft, Plus, Search, MoreVertical, Edit2, Trash2, 
+  ExternalLink, Share2, Download, Package, LayoutGrid, 
+  List, ArrowDownUp, Filter, Percent, DollarSign, TrendingUp,
+  Tag
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -18,14 +23,87 @@ import {
 } from '@/components/ui/dialog';
 import { useMaster } from '../context/MasterContext';
 import { useConfirm } from '../context/ConfirmContext';
+import { cn } from '@/lib/utils';
 
 export function OwnerInventoryScreen() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [sortBy, setSortBy] = useState<'recent' | 'price_asc' | 'price_desc' | 'margin' | 'sold'>('recent');
+  const [filterBy, setFilterBy] = useState<'all' | 'high_margin' | 'low_margin' | 'no_sales'>('all');
   
-  const { catalogItems: inventory, removeItem, loading } = useMaster();
+  const { catalogItems: inventory, removeItem, sales, tripSettings } = useMaster();
   const confirm = useConfirm();
+
+  const conversionRate = tripSettings?.manualRate || 1;
+  const shoppingCurrency = tripSettings?.shoppingCurrency || 'Yen';
+
+  // 1. Enrich inventory data with sales and margin insights
+  const enrichedInventory = useMemo(() => {
+    return inventory.map(item => {
+      let timesSold = 0;
+      let revenue = 0;
+      
+      sales.forEach(s => {
+        s.items.forEach((saleItem: any) => {
+          if (saleItem.name.toLowerCase() === item.name.toLowerCase()) {
+            timesSold += saleItem.qty;
+            revenue += saleItem.price * saleItem.qty;
+          }
+        });
+      });
+
+      const costInIDR = (item.cost || 0) * conversionRate;
+      const profit = item.price - costInIDR;
+      const marginPct = item.price > 0 ? (profit / item.price) * 100 : 0;
+
+      return {
+        ...item,
+        timesSold,
+        revenue,
+        costInIDR,
+        profit,
+        marginPct
+      };
+    });
+  }, [inventory, sales, conversionRate]);
+
+  // 2. Summary Stats
+  const totalCatalogValue = enrichedInventory.reduce((sum, item) => sum + item.price, 0);
+  const avgMargin = enrichedInventory.length > 0 
+    ? enrichedInventory.reduce((sum, item) => sum + item.marginPct, 0) / enrichedInventory.length 
+    : 0;
+
+  // 3. Filter & Sort
+  const processedInventory = useMemo(() => {
+    let result = [...enrichedInventory];
+
+    // Search
+    if (searchQuery) {
+      result = result.filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
+    }
+
+    // Filter
+    if (filterBy === 'high_margin') result = result.filter(item => item.marginPct >= 30);
+    if (filterBy === 'low_margin') result = result.filter(item => item.marginPct < 15);
+    if (filterBy === 'no_sales') result = result.filter(item => item.timesSold === 0);
+
+    // Sort
+    result.sort((a, b) => {
+      switch (sortBy) {
+        case 'price_desc': return b.price - a.price;
+        case 'price_asc': return a.price - b.price;
+        case 'margin': return b.marginPct - a.marginPct;
+        case 'sold': return b.timesSold - a.timesSold;
+        case 'recent': 
+        default:
+          return parseInt(b.id) - parseInt(a.id); // Assuming ID correlates to recency
+      }
+    });
+
+    return result;
+  }, [enrichedInventory, searchQuery, filterBy, sortBy]);
 
   const handleShareCatalog = () => {
     const url = `${window.location.origin}/catalog`;
@@ -35,24 +113,18 @@ export function OwnerInventoryScreen() {
     });
   };
 
-  const handlePreviewItem = (id: string) => {
-    navigate(`/items/${id}`);
-  };
-
   const handleRemove = async (id: string) => {
     const confirmed = await confirm({
       message: "Are you sure you want to remove this item from the catalog?",
       isDestructive: true,
       confirmText: "Remove"
     });
-    if (!confirmed) {
-      return;
-    }
+    if (!confirmed) return;
     try {
       await removeItem(id);
       toast.success('Item removed from catalog');
     } catch (e) {
-      toast.error('Failed to remove item. Please try again.');
+      toast.error('Failed to remove item.');
     }
   };
 
@@ -65,10 +137,10 @@ export function OwnerInventoryScreen() {
       
       let content = heading + title + dateStr + heading + `\n`;
       
-      inventory.forEach((item, index) => {
+      processedInventory.forEach((item, index) => {
         content += `${index + 1}. ${item.name.toUpperCase()}\n`;
         content += `   💵 Publish Price: Rp ${item.price.toLocaleString()}\n`;
-        content += `   📍 Status       : ${item.status.toUpperCase()}\n`;
+        content += `   📍 Status       : ACTIVE\n`;
         content += `   ✏️ Reference ID : #00${item.id}\n`;
         content += `${line}\n`;
       });
@@ -85,29 +157,36 @@ export function OwnerInventoryScreen() {
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
       
-      toast.success('Catalog downloaded successfully!', {
-        description: 'Every active item catalog is attached with publish price.'
-      });
+      toast.success('Catalog downloaded successfully!');
     } catch (e) {
       toast.error('Failed to download catalog.');
     }
   };
 
-  const filteredInventory = inventory.filter(item =>
-    item.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const getMarginColor = (margin: number) => {
+    if (margin >= 30) return "text-emerald-600 bg-emerald-50";
+    if (margin >= 15) return "text-[#C9A84C] bg-[#C9A84C]/10";
+    return "text-red-500 bg-red-50";
+  };
+
+  const getMarginBadgeStyle = (margin: number) => {
+    if (margin >= 30) return "bg-emerald-500 text-white";
+    if (margin >= 15) return "bg-[#C9A84C] text-[#0D1B2E]";
+    return "bg-red-500 text-white";
+  };
 
   return (
-    <div className="min-h-screen bg-[#f2f5f7] pb-24">
-      <header className="sticky top-0 z-50 bg-[#f2f5f7]/80 backdrop-blur-md px-4 pt-8 pb-4 flex items-center justify-between gap-3">
+    <div className="min-h-screen bg-[#F4F6F9] pb-24">
+      {/* Header */}
+      <header className="sticky top-0 z-50 bg-[#F4F6F9]/80 backdrop-blur-md px-4 pt-8 pb-4 flex items-center justify-between gap-3 border-b border-slate-200/50">
         <Button variant="ghost" size="icon" className="rounded-full bg-white shadow-sm hover:bg-slate-50 shrink-0" onClick={() => navigate('/owner')}>
           <ArrowLeft className="h-5 w-5 text-[#0D1B2E]" />
         </Button>
-        <h2 className="text-xl font-black text-[#0D1B2E] tracking-tight flex-1">Inventory</h2>
+        <h2 className="text-xl font-black text-[#0D1B2E] tracking-tight flex-1">Catalog</h2>
         <div className="flex items-center gap-2 shrink-0">
           <Button 
             variant="outline"
-            className="hidden rounded-full h-10 px-4 bg-white text-xs font-bold text-[#0D1B2E] shadow-sm items-center gap-2" 
+            className="hidden sm:flex rounded-full h-10 px-4 bg-white text-xs font-bold text-[#0D1B2E] shadow-sm items-center gap-2" 
             onClick={handleShareCatalog}
           >
             <Share2 className="h-4 w-4" /> Share Catalog
@@ -119,11 +198,30 @@ export function OwnerInventoryScreen() {
       </header>
 
       <div className="p-4 space-y-4">
+        {/* KPI Stats Bar */}
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
+          <div className="bg-white rounded-2xl p-3 shadow-sm border border-slate-100 flex flex-col justify-center">
+            <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1"><Package className="h-3 w-3" /> Total Items</p>
+            <p className="text-base sm:text-lg font-black text-[#0D1B2E] mt-0.5">{enrichedInventory.length}</p>
+          </div>
+          <div className="bg-white rounded-2xl p-3 shadow-sm border border-slate-100 flex flex-col justify-center">
+            <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1"><DollarSign className="h-3 w-3" /> Catalog Value</p>
+            <p className="text-base sm:text-lg font-black text-[#0D1B2E] mt-0.5 truncate">Rp {(totalCatalogValue / 1000).toFixed(0)}k</p>
+          </div>
+          <div className="bg-white rounded-2xl p-3 shadow-sm border border-slate-100 flex flex-col justify-center">
+            <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1"><Percent className="h-3 w-3" /> Avg Margin</p>
+            <p className={cn("text-base sm:text-lg font-black mt-0.5", getMarginColor(avgMargin).split(' ')[0])}>
+              {avgMargin.toFixed(1)}%
+            </p>
+          </div>
+        </div>
+
+        {/* Search & Export */}
         <div className="flex gap-2">
           <div className="relative flex-1">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <Input 
-              placeholder="Search your products..." 
+              placeholder="Search products..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-11 h-12 bg-white border-none shadow-sm rounded-full font-semibold" 
@@ -138,152 +236,294 @@ export function OwnerInventoryScreen() {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 gap-3 pb-24">
-          {filteredInventory.map((item, i) => (
-            <motion.div
-              key={item.id}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: i * 0.05 }}
+        {/* Filters & View Toggle */}
+        <div className="flex items-center justify-between gap-2 overflow-x-auto pb-1 scrollbar-hide">
+          <div className="flex items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="h-8 rounded-full bg-white border-slate-200 text-xs font-bold text-slate-600 px-3 gap-1.5 shrink-0">
+                  <ArrowDownUp className="h-3 w-3" />
+                  {sortBy === 'recent' ? 'Recent' : sortBy === 'margin' ? 'Top Margin' : sortBy === 'sold' ? 'Best Sellers' : sortBy === 'price_desc' ? 'Price: High' : 'Price: Low'}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="rounded-2xl">
+                <DropdownMenuItem className="text-sm font-bold" onClick={() => setSortBy('recent')}>Recently Added</DropdownMenuItem>
+                <DropdownMenuItem className="text-sm font-bold" onClick={() => setSortBy('sold')}>Best Sellers</DropdownMenuItem>
+                <DropdownMenuItem className="text-sm font-bold" onClick={() => setSortBy('margin')}>Highest Margin</DropdownMenuItem>
+                <DropdownMenuItem className="text-sm font-bold" onClick={() => setSortBy('price_desc')}>Price: High to Low</DropdownMenuItem>
+                <DropdownMenuItem className="text-sm font-bold" onClick={() => setSortBy('price_asc')}>Price: Low to High</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className={cn(
+                  "h-8 rounded-full text-xs font-bold px-3 gap-1.5 shrink-0",
+                  filterBy !== 'all' ? "bg-[#0D1B2E] text-white border-[#0D1B2E]" : "bg-white border-slate-200 text-slate-600"
+                )}>
+                  <Filter className="h-3 w-3" />
+                  {filterBy === 'all' ? 'All Items' : filterBy === 'high_margin' ? 'High Margin' : filterBy === 'low_margin' ? 'Low Margin' : 'No Sales'}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="rounded-2xl">
+                <DropdownMenuItem className="text-sm font-bold" onClick={() => setFilterBy('all')}>All Items</DropdownMenuItem>
+                <DropdownMenuItem className="text-sm font-bold" onClick={() => setFilterBy('high_margin')}>High Margin (\u003e30%)</DropdownMenuItem>
+                <DropdownMenuItem className="text-sm font-bold" onClick={() => setFilterBy('low_margin')}>Low Margin (\u003c15%)</DropdownMenuItem>
+                <DropdownMenuItem className="text-sm font-bold" onClick={() => setFilterBy('no_sales')}>No Sales Yet</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          <div className="flex items-center bg-white rounded-full p-1 border border-slate-200 shadow-sm shrink-0">
+            <button 
+              onClick={() => setViewMode('list')}
+              className={cn("p-1.5 rounded-full transition-colors", viewMode === 'list' ? "bg-[#F4F6F9] text-[#0D1B2E]" : "text-slate-400")}
             >
-              <Card 
-                className="fintech-card cursor-pointer group"
-                onClick={() => setSelectedItem(item)}
-              >
-                <CardContent className="p-4 flex gap-4 items-center">
-                  {/* Left: Image */}
-                  <div className="relative h-20 w-20 rounded-xl overflow-hidden shrink-0 bg-slate-100">
-                    <WatermarkOverlay />
-                    {item.image ? (
-                      <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
-                    ) : (
-                      <Package className="h-8 w-8 text-slate-300 absolute inset-0 m-auto" />
+              <List className="h-4 w-4" />
+            </button>
+            <button 
+              onClick={() => setViewMode('grid')}
+              className={cn("p-1.5 rounded-full transition-colors", viewMode === 'grid' ? "bg-[#F4F6F9] text-[#0D1B2E]" : "text-slate-400")}
+            >
+              <LayoutGrid className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Inventory List/Grid */}
+        {processedInventory.length === 0 ? (
+          <div className="py-20 flex flex-col items-center justify-center text-center px-4">
+            <Package className="h-12 w-12 text-slate-300 mb-4" />
+            <h3 className="text-lg font-black text-[#0D1B2E]">No products found</h3>
+            <p className="text-sm text-slate-500 mt-1 max-w-xs">Adjust your search or filters, or add new items to your catalog.</p>
+          </div>
+        ) : (
+          <div className={cn("pb-24", viewMode === 'grid' ? "grid grid-cols-2 gap-3" : "grid grid-cols-1 gap-3")}>
+            <AnimatePresence mode="popLayout">
+              {processedInventory.map((item, i) => (
+                <motion.div
+                  key={item.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ delay: i * 0.05, duration: 0.2 }}
+                >
+                  <Card 
+                    className={cn(
+                      "cursor-pointer group overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow relative",
+                      viewMode === 'list' ? "fintech-card" : "bg-white rounded-[2rem]"
                     )}
+                    onClick={() => setSelectedItem(item)}
+                  >
+                    {/* ENHANCED LIST VIEW */}
+                    {viewMode === 'list' && (
+                      <CardContent className="p-4 flex gap-4 items-center">
+                        <div className="relative h-20 w-20 rounded-2xl overflow-hidden shrink-0 bg-slate-100">
+                          <WatermarkOverlay />
+                          {item.image ? (
+                            <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
+                          ) : (
+                            <Package className="h-8 w-8 text-slate-300 absolute inset-0 m-auto" />
+                          )}
+                        </div>
+                        
+                        <div className="flex-1 min-w-0 flex flex-col justify-center space-y-1">
+                          <h4 className="text-base font-black text-[#0D1B2E] truncate pr-8">{item.name}</h4>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-xs font-bold text-slate-500 line-through decoration-slate-300">
+                              {item.cost} {item.currency}
+                            </span>
+                            <span className="text-[10px] font-black text-[#0D1B2E]">→ Rp {item.price.toLocaleString()}</span>
+                          </div>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Badge className={cn("px-1.5 py-0 text-[9px] uppercase font-black border-none h-4", getMarginColor(item.marginPct))}>
+                              {item.marginPct.toFixed(0)}% Margin
+                            </Badge>
+                            {item.timesSold > 0 ? (
+                              <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-0.5">
+                                <TrendingUp className="h-3 w-3" /> Sold {item.timesSold}x
+                              </span>
+                            ) : (
+                              <span className="text-[10px] font-semibold text-slate-400">0 Sales</span>
+                            )}
+                          </div>
+                        </div>
+
+                        <DropdownMenu>
+                          <DropdownMenuTrigger 
+                            onClick={(e) => e.stopPropagation()} 
+                            className="absolute top-2 right-2 inline-flex h-8 w-8 items-center justify-center rounded-full hover:bg-slate-100 transition-colors outline-none shrink-0"
+                          >
+                            <MoreVertical className="h-4 w-4 text-slate-400" />
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="rounded-2xl shadow-xl border-slate-100 p-2" onClick={(e) => e.stopPropagation()}>
+                            <DropdownMenuItem className="gap-3 text-sm font-bold text-[#0D1B2E] p-3 rounded-xl cursor-pointer" onClick={(e) => { e.stopPropagation(); navigate(`/owner/edit-item/${item.id}`); }}>
+                              <Edit2 className="h-4 w-4 text-slate-400" /> Edit Item
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              className="gap-3 text-sm font-bold text-[#0D1B2E] p-3 rounded-xl cursor-pointer"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toast.success('Product link copied!', { description: 'Share this link with your customers.' });
+                              }}
+                            >
+                              <ExternalLink className="h-4 w-4 text-slate-400" /> Copy Link
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              className="gap-3 text-sm font-bold text-red-600 p-3 rounded-xl cursor-pointer hover:bg-red-50 hover:text-red-700"
+                              onClick={(e) => { e.stopPropagation(); handleRemove(item.id); }}
+                            >
+                              <Trash2 className="h-4 w-4" /> Remove
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </CardContent>
+                    )}
+
+                    {/* ENHANCED GRID VIEW */}
+                    {viewMode === 'grid' && (
+                      <div className="flex flex-col h-full relative">
+                        <Badge className={cn("absolute top-2 left-2 z-10 border-none font-black text-[9px] px-1.5 py-0 h-4 uppercase shadow-sm", getMarginBadgeStyle(item.marginPct))}>
+                          {item.marginPct.toFixed(0)}% Mrg
+                        </Badge>
+                        <div className="relative aspect-square w-full bg-slate-100 overflow-hidden rounded-t-[2rem]">
+                          <WatermarkOverlay />
+                          {item.image ? (
+                            <img src={item.image} alt={item.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                          ) : (
+                            <Package className="h-8 w-8 text-slate-300 absolute inset-0 m-auto" />
+                          )}
+                        </div>
+                        <div className="p-3 flex flex-col flex-1 justify-between gap-1.5">
+                          <h4 className="text-xs font-black text-[#0D1B2E] line-clamp-2 leading-tight">{item.name}</h4>
+                          <div>
+                            <p className="text-sm font-black text-[#0D1B2E] tracking-tight">Rp {(item.price / 1000).toLocaleString()}k</p>
+                            <p className="text-[9px] font-bold text-slate-400 mt-0.5">
+                              {item.timesSold > 0 ? <span className="text-emerald-600">{item.timesSold} sold</span> : '0 sales'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </Card>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        )}
+      </div>
+
+      {/* Catalog Product Detail Enhanced Modal */}
+      <Dialog open={selectedItem !== null} onOpenChange={(open) => { if (!open) setSelectedItem(null); }}>
+        <DialogContent className="max-w-md w-[95%] p-0 overflow-hidden border-none rounded-[2rem]">
+          {selectedItem && (
+            <div className="flex flex-col">
+              {/* Cover Image Header */}
+              <div className="relative h-56 w-full bg-[#f2f5f7]">
+                <WatermarkOverlay />
+                {selectedItem.image ? (
+                  <img src={selectedItem.image} alt={selectedItem.name} className="h-full w-full object-cover" />
+                ) : (
+                  <Package className="h-12 w-12 text-slate-300 absolute inset-0 m-auto" />
+                )}
+                <Badge className="absolute top-4 left-4 bg-[#C9A84C] text-[#0D1B2E] border-none font-black shadow-lg">LIVE IN CATALOG</Badge>
+              </div>
+
+              {/* Content Body */}
+              <div className="p-5 space-y-6">
+                <div>
+                  <div className="flex items-center justify-between gap-2">
+                    <h3 className="text-xl font-black text-[#0D1B2E] leading-tight">{selectedItem.name}</h3>
+                    <span className="text-xs font-bold text-slate-400 shrink-0">#00{selectedItem.id.replace(/\D/g, '').slice(0,3) || '1'}</span>
                   </div>
+                  <p className="text-2xl font-black text-[#0D1B2E] tracking-tight mt-1">Rp {selectedItem.price.toLocaleString()}</p>
+                </div>
+
+                {/* Margins & Sales Analytics */}
+                <div className="space-y-4">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Financial Insights</p>
                   
-                  {/* Middle: Name & Badge */}
-                  <div className="flex-1 min-w-0 flex flex-col justify-center space-y-1.5">
-                    <h4 className="text-base font-black text-[#0D1B2E] truncate">{item.name}</h4>
-                    <div className="flex items-center gap-2">
-                      <Badge className="bg-[#C9A84C]/20 text-[#0D1B2E] hover:bg-[#C9A84C]/30 border-none px-2 py-0.5 text-[9px] uppercase font-bold tracking-wider">
-                        Active
-                      </Badge>
-                      <span className="text-xs font-bold text-slate-400">#00{item.id.replace(/\D/g, '').slice(0,3) || '1'}</span>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="p-3 rounded-2xl bg-[#F4F6F9] space-y-1">
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Base Cost</p>
+                      <p className="text-sm font-black text-[#0D1B2E]">{selectedItem.cost} {selectedItem.currency}</p>
+                      <p className="text-[9px] text-slate-400 font-medium">~Rp {selectedItem.costInIDR.toLocaleString()}</p>
+                    </div>
+                    <div className="p-3 rounded-2xl bg-[#F4F6F9] space-y-1">
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Est. Profit / Item</p>
+                      <p className={cn("text-sm font-black", selectedItem.profit > 0 ? "text-emerald-600" : "text-red-500")}>
+                        Rp {selectedItem.profit.toLocaleString()}
+                      </p>
+                      <p className="text-[9px] text-slate-400 font-medium">Margin: {selectedItem.marginPct.toFixed(1)}%</p>
                     </div>
                   </div>
 
-                  {/* Right: Dropdown & Price */}
-                  <div className="shrink-0 flex flex-col items-end justify-between h-20 text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger 
-                        onClick={(e) => e.stopPropagation()} 
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-full hover:bg-slate-100 transition-colors outline-none shrink-0"
-                      >
-                        <MoreVertical className="h-5 w-5 text-slate-400" />
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="rounded-2xl shadow-xl border-slate-100 p-2" onClick={(e) => e.stopPropagation()}>
-                        <DropdownMenuItem className="gap-3 text-sm font-bold text-[#0D1B2E] p-3 rounded-xl cursor-pointer" onClick={(e) => { e.stopPropagation(); navigate(`/owner/edit-item/${item.id}`); }}>
-                          <Edit2 className="h-4 w-4 text-slate-400" /> Edit Item
-                        </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          className="gap-3 text-sm font-bold text-[#0D1B2E] p-3 rounded-xl cursor-pointer"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toast.success('Product link copied!', {
-                              description: 'Share this link with your customers.'
-                            });
-                          }}
-                        >
-                          <ExternalLink className="h-4 w-4 text-slate-400" /> Copy Link
-                        </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          className="gap-3 text-sm font-bold text-red-600 p-3 rounded-xl cursor-pointer hover:bg-red-50 hover:text-red-700"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleRemove(item.id);
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" /> Remove
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                    <p className="text-lg font-black text-[#0D1B2E] tracking-tight">Rp {item.price.toLocaleString()}</p>
+                  {/* Margin Visual Bar */}
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between text-[10px] font-bold">
+                      <span className="text-slate-500">Margin Health</span>
+                      <span className={getMarginColor(selectedItem.marginPct).split(' ')[0]}>{selectedItem.marginPct.toFixed(1)}%</span>
+                    </div>
+                    <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                      <div 
+                        className={cn("h-full transition-all rounded-full", getMarginBadgeStyle(selectedItem.marginPct).split(' ')[0])}
+                        style={{ width: `${Math.min(Math.max(selectedItem.marginPct, 0), 100)}%` }}
+                      />
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-      </div>
 
-      {/* Catalog Product Detail Popup Modal */}
-      <Dialog open={selectedItem !== null} onOpenChange={(open) => { if (!open) setSelectedItem(null); }}>
-        <DialogContent>
-          {selectedItem && (
-            <div className="space-y-6">
-              <DialogHeader className="text-left">
-                <DialogTitle className="text-xl font-black text-[#0D1B2E] tracking-tight">
-                  Product Details
-                </DialogTitle>
-                <DialogDescription className="text-sm text-slate-500 font-medium">
-                  Reference ID: #00{selectedItem.id}
-                </DialogDescription>
-              </DialogHeader>
-
-              {/* Cover Image & Name block */}
-              <div className="space-y-4">
-                <div className="relative h-48 w-full rounded-2xl overflow-hidden bg-[#f2f5f7]">
-                  <div className="h-48 w-full bg-slate-100 overflow-hidden relative">
-                    <WatermarkOverlay />
-                    {selectedItem.image ? (
-                      <img src={selectedItem.image} alt={selectedItem.name} className="h-full w-full object-cover" />
-                    ) : (
-                      <Package className="h-10 w-10 text-slate-300 absolute inset-0 m-auto" />
-                    )}
+                  {/* Sales Performance */}
+                  <div className="flex items-center justify-between p-3 rounded-2xl bg-[#F4F6F9] border border-slate-100">
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 rounded-full bg-white flex items-center justify-center shadow-sm">
+                        <TrendingUp className="h-4 w-4 text-[#0D1B2E]" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Total Sales</p>
+                        <p className="text-sm font-black text-[#0D1B2E]">{selectedItem.timesSold} Units</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Revenue</p>
+                      <p className="text-sm font-black text-[#0D1B2E]">Rp {selectedItem.revenue.toLocaleString()}</p>
+                    </div>
                   </div>
-                  <Badge className="absolute top-3 left-3 bg-[#C9A84C] text-[#0D1B2E] border-none font-bold">Live</Badge>
                 </div>
-                <h3 className="text-lg font-black text-[#0D1B2E] leading-tight">{selectedItem.name}</h3>
-              </div>
 
-              {/* Financial Breakdown Grid */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="p-4 rounded-2xl bg-[#f2f5f7] space-y-1">
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Publish Price</p>
-                  <p className="text-base font-black text-[#0D1B2E]">Rp {selectedItem.price.toLocaleString()}</p>
+                {/* Action Buttons */}
+                <div className="grid grid-cols-2 gap-2 pt-2">
+                  <Button 
+                    className="pill-button h-14 bg-[#0D1B2E] text-white hover:bg-[#162847]"
+                    onClick={() => {
+                      const id = selectedItem.id;
+                      setSelectedItem(null);
+                      navigate(`/owner/edit-item/${id}`);
+                    }}
+                  >
+                    <Edit2 className="h-4 w-4 mr-2" /> Edit
+                  </Button>
+                  <Button 
+                    className="pill-button h-14 bg-white border border-slate-200 text-[#0D1B2E] hover:bg-slate-50"
+                    onClick={() => {
+                      toast.success('Product link copied!');
+                      navigator.clipboard.writeText(`${window.location.origin}/items/${selectedItem.id}`);
+                    }}
+                  >
+                    <Share2 className="h-4 w-4 mr-2" /> Share
+                  </Button>
+                  <Button 
+                    variant="ghost"
+                    className="col-span-2 h-12 rounded-xl text-[10px] font-bold uppercase tracking-widest text-red-500 hover:bg-red-50 hover:text-red-600 mt-2"
+                    onClick={() => {
+                      const id = selectedItem.id;
+                      setSelectedItem(null);
+                      handleRemove(id);
+                    }}
+                  >
+                    <Trash2 className="h-3.5 w-3.5 mr-1.5" /> Remove from Catalog
+                  </Button>
                 </div>
-                <div className="p-4 rounded-2xl bg-[#f2f5f7] space-y-1">
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Est. Cost</p>
-                  <p className="text-base font-black text-[#0D1B2E]">{selectedItem.cost} {selectedItem.currency}</p>
-                </div>
-              </div>
-
-              {/* Action Buttons inside custom popup modal details */}
-              <div className="space-y-3 pt-2">
-                <Button 
-                  className="pill-button w-full h-14 bg-[#0D1B2E] text-white hover:bg-[#162847]"
-                  onClick={() => {
-                    const id = selectedItem.id;
-                    setSelectedItem(null);
-                    navigate(`/owner/edit-item/${id}`);
-                  }}
-                >
-                  <Edit2 className="h-5 w-5" /> Edit Product
-                </Button>
-
-
-
-                <Button 
-                  variant="ghost"
-                  className="w-full h-10 rounded-xl text-[10px] font-bold uppercase text-red-500 hover:bg-red-50"
-                  onClick={() => {
-                    const id = selectedItem.id;
-                    setSelectedItem(null);
-                    handleRemove(id);
-                  }}
-                >
-                  <Trash2 className="h-3.5 w-3.5 mr-1.5" /> Remove from Catalog
-                </Button>
               </div>
             </div>
           )}
