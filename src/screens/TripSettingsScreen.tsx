@@ -106,6 +106,7 @@ export function TripSettingsScreen() {
   const [watermarkEnabled, setWatermarkEnabled] = useState(false);
   const [watermarkImage, setWatermarkImage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingField, setEditingField] = useState<string | null>(null);
 
   // Sync inputs with master context once loaded
   useEffect(() => {
@@ -181,12 +182,12 @@ export function TripSettingsScreen() {
   const getCurrencyName = (code: string) => CURRENCIES.find(c => c.code === code)?.name || code;
 
   return (
-    <div className="min-h-screen bg-[#f2f5f7] pb-28">
-      <header className="sticky top-0 z-50 bg-[#f2f5f7]/80 backdrop-blur-md pt-8 pb-4 border-none h-auto flex items-center px-4 gap-4">
-        <Button variant="ghost" size="icon" className="rounded-full bg-white shadow-sm hover:bg-slate-50 shrink-0" onClick={() => navigate('/')}>
-          <ArrowLeft className="h-5 w-5 text-[#0D1B2E]" />
+    <div className="min-h-screen bg-background pb-28">
+      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-2xl pt-8 pb-4 border-none h-auto flex items-center px-4 gap-4">
+        <Button variant="ghost" size="icon" className="rounded-full bg-card shadow-sm hover:bg-muted shrink-0" onClick={() => navigate('/')}>
+          <ArrowLeft className="h-5 w-5 text-foreground" />
         </Button>
-        <h2 className="text-xl font-black tracking-tight text-[#0D1B2E]">Trip Settings</h2>
+        <h2 className="text-xl font-bold tracking-tight text-foreground">Trip Settings</h2>
       </header>
 
       <div className="p-6 space-y-8">
@@ -310,9 +311,9 @@ export function TripSettingsScreen() {
                     <DialogTrigger render={<Button variant="ghost" size="sm" className="text-primary font-bold text-xs h-8 px-3 rounded-lg hover:bg-primary/10" />}>
                       Change
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="sm:max-w-md rounded-[2rem] p-6 border-none bg-background shadow-2xl">
                       <DialogHeader>
-                        <DialogTitle className="text-left font-black uppercase italic text-xl">Select Shopping Currency</DialogTitle>
+                        <DialogTitle className="text-left font-bold text-xl text-foreground">Select Shopping Currency</DialogTitle>
                       </DialogHeader>
                       <div className="grid grid-cols-1 gap-2 mt-4">
                         {CURRENCIES.filter(c => c.code !== 'IDR').map(curr => (
@@ -386,13 +387,13 @@ export function TripSettingsScreen() {
                     <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-tighter">{getCurrencyName(payoutCurrency)}</p>
                   </div>
                 </div>
-                <Dialog>
+                  <Dialog>
                     <DialogTrigger render={<Button variant="ghost" size="sm" className="text-primary font-bold text-xs h-8 px-3 rounded-lg hover:bg-primary/10" />}>
                       Change
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="sm:max-w-md rounded-[2rem] p-6 border-none bg-background shadow-2xl">
                       <DialogHeader>
-                        <DialogTitle className="text-left font-black uppercase italic text-xl">Select Payout Currency</DialogTitle>
+                        <DialogTitle className="text-left font-bold text-xl text-foreground">Select Payout Currency</DialogTitle>
                       </DialogHeader>
                       <div className="grid grid-cols-1 gap-2 mt-4">
                         {CURRENCIES.map(curr => (
