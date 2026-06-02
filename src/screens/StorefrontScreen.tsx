@@ -23,20 +23,11 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
 import { WatermarkOverlay } from '../components/WatermarkOverlay';
-import { Input } from '@/components/ui/input';
 import { useMaster } from '../context/MasterContext';
-import { useConfirm } from '../context/ConfirmContext';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogDescription 
-} from '@/components/ui/dialog';
-import { toast } from 'sonner';
 import { db } from '../lib/supabase';
 
 export function StorefrontScreen() {
@@ -47,40 +38,7 @@ export function StorefrontScreen() {
   const [settings, setSettings] = useState<any>(null);
   const [avatar, setAvatar] = useState<string | null>(null);
 
-  // Sourcing request dialog states
-  const [isOpen, setIsOpen] = useState(false);
-  const [step, setStep] = useState<'contact' | 'otp' | 'order'>('contact');
-  const [clientName, setClientName] = useState('');
-  const [customerEmail, setCustomerEmail] = useState('');
-  const [customerPhone, setCustomerPhone] = useState('');
-  const [otp, setOtp] = useState('');
-  const [expectedOtp, setExpectedOtp] = useState('');
-  const [orderQty, setOrderQty] = useState('1');
-  const [activeTab, setActiveTab] = useState<'request' | 'history'>('request');
-  const [myHistory, setMyHistory] = useState<any[]>([]);
-  const [clientBudget, setClientBudget] = useState('');
-  const [clientLocation, setClientLocation] = useState('');
-  const [clientNotes, setClientNotes] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-  
-  const { catalogItems, saveWishlist, currentUser, tripSettings } = useMaster();
-  const confirm = useConfirm();
-
-  // Auto-load customer session
-  useEffect(() => {
-    try {
-      const session = localStorage.getItem('jstip_customer_session');
-      if (session) {
-        const data = JSON.parse(session);
-        if (data.email && data.name) {
-          setClientName(data.name);
-          setCustomerEmail(data.email);
-          setCustomerPhone(data.phone || '');
-          setStep('order');
-        }
-      }
-    } catch (e) {}
-  }, []);
+  const { currentUser, tripSettings } = useMaster();
 
   useEffect(() => {
     async function loadData() {
@@ -114,138 +72,7 @@ export function StorefrontScreen() {
     });
   };
 
-  const handleSendOtp = async () => {
-    if (!clientName.trim() || !customerEmail.trim() || !customerPhone.trim()) {
-      toast.error('Please fill in all contact details');
-      return;
-    }
 
-    setSubmitting(true);
-    try {
-      const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
-      setExpectedOtp(generatedOtp);
-      
-      const response = await fetch('/api/sendOtp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: customerEmail, otp: generatedOtp })
-      });
-
-      if (!response.ok) {
-        let errMsg = 'Failed to send email';
-        try {
-          const errData = await response.json();
-          errMsg = errData.message || errMsg;
-        } catch (e) {}
-        throw new Error(errMsg);
-      }
-      
-      toast.success('OTP sent to your email!');
-      setStep('otp');
-    } catch (err: any) {
-      toast.error(`Failed to send OTP: ${err.message || 'Network Error'}`);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleVerifyOtp = () => {
-    if (otp !== expectedOtp) {
-      toast.error('Invalid OTP. Please check your email.');
-      return;
-    }
-    // Save session to prevent asking OTP again
-    try {
-      localStorage.setItem('jstip_customer_session', JSON.stringify({
-        name: clientName,
-        email: customerEmail,
-        phone: customerPhone
-      }));
-    } catch (e) {}
-    
-    setStep('order');
-  };
-
-  const handleSubmitOrder = async (paymentMethod: 'cash' | 'stripe') => {
-    const qty = parseInt(orderQty) || 1;
-    const finalPrice = qty * (item?.price || 0);
-
-    const confirmed = await confirm({
-      title: paymentMethod === 'stripe' ? 'Pay Now with Stripe' : 'Submit Request',
-      description: `Submit order request for ${qty}x "${item.name}"?`
-    });
-    if (!confirmed) return;
-
-    setSubmitting(true);
-    const merchantId = item?.merchant_id || item?.merchantId;
-    const newRequest = {
-      id: 'wish_' + Date.now(),
-      name: `[${qty}x] ${item.name}`,
-      requester: `${clientName.trim()} (${customerEmail})`,
-      status: 'pending',
-      price: (item.cost || 0) * qty, 
-      sellPrice: item.price * qty,
-      qty: qty,
-      location: tripSettings?.trip?.origin || 'Seoul',
-      image: item.image,
-      note: clientNotes.trim() || undefined,
-      merchantId: merchantId,
-      merchant_id: merchantId,
-      paymentMethod,
-      paymentStatus: 'unpaid'
-    };
-
-    try {
-      await db.saveWishlist(newRequest, merchantId);
-
-      if (paymentMethod === 'stripe') {
-        const stripeRes = await fetch('/api/create-stripe-session', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            orderDetails: {
-              name: item.name,
-              price: item.price, // Unit price
-              quantity: qty,     // Actual quantity
-              image: newRequest.image,
-              notes: newRequest.note,
-              customerEmail,
-              customerId: customerEmail,
-              merchantId: merchantId
-            },
-            successUrl: window.location.href,
-            cancelUrl: window.location.href
-          })
-        });
-        
-        const stripeData = await stripeRes.json();
-        if (stripeData.url) {
-          window.location.replace(stripeData.url); // Use replace to avoid Stripe in back history
-          return;
-        } else {
-          throw new Error(stripeData.error || 'Failed to create Stripe session');
-        }
-      }
-
-      toast.success('Order request submitted successfully!', {
-        description: `Your request has been routed to the traveler's pending checklist.`
-      });
-      setIsOpen(false);
-      // Reset flow except customer info
-      setTimeout(() => {
-        // If session exists, stay on order step, otherwise contact
-        const session = localStorage.getItem('jstip_customer_session');
-        setStep(session ? 'order' : 'contact');
-        setClientNotes('');
-        setOrderQty('1');
-        setOtp('');
-      }, 500);
-    } catch (err: any) {
-      toast.error('Failed to submit request', { description: err.message });
-    } finally {
-      setSubmitting(false);
-    }
-  };
 
   if (loading) {
     return (
@@ -293,75 +120,12 @@ export function StorefrontScreen() {
             alt={item.name} 
             className="w-full h-full object-cover"
           />
-          <div className="absolute top-4 left-4 bg-emerald-500 text-white font-black px-3.5 py-1.5 rounded-xl shadow-lg text-[10px] tracking-wider uppercase flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-white animate-pulse" />
-            Available for Order
-          </div>
+
         </div>
 
         <div className="w-full md:w-2/3 xl:w-1/2 p-6 md:p-0 flex flex-col gap-6">
           
-          {/* Tabs for Logged-In Customer */}
-          {customerEmail && (
-            <div className="flex bg-slate-200/50 p-1 rounded-2xl w-full max-w-xs shadow-inner">
-              <button 
-                onClick={() => setActiveTab('request')}
-                className={`flex-1 py-2 text-xs font-black uppercase tracking-widest rounded-xl transition-all ${activeTab === 'request' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
-              >
-                Request Order
-              </button>
-              <button 
-                onClick={async () => {
-                  setActiveTab('history');
-                  const list = await db.getWishlist(item.merchant_id || item.merchantId);
-                  setMyHistory(list.filter((x: any) => x.requester.includes(customerEmail)));
-                }}
-                className={`flex-1 py-2 text-xs font-black uppercase tracking-widest rounded-xl transition-all ${activeTab === 'history' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
-              >
-                My Transactions
-              </button>
-            </div>
-          )}
-
-          {activeTab === 'history' ? (
-            <div className="space-y-4 animate-in slide-in-from-right-4 fade-in duration-300">
-              <h3 className="text-sm font-black uppercase tracking-widest text-slate-800 mb-2">My Transactions</h3>
-              {myHistory.length === 0 ? (
-                <div className="text-center p-8 bg-white rounded-3xl border border-dashed border-slate-200">
-                  <p className="text-xs text-muted-foreground font-bold">No transactions found.</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {myHistory.map(h => (
-                    <Card key={h.id} className="border-none shadow-sm bg-white overflow-hidden rounded-2xl">
-                      <CardContent className="p-4 space-y-2">
-                        <div className="flex justify-between items-start">
-                          <h4 className="font-bold text-sm text-slate-800 line-clamp-1">{h.name}</h4>
-                          <Badge variant="outline" className={`shrink-0 uppercase text-[9px] font-black tracking-widest border-none ${
-                            h.status === 'confirm' ? 'bg-emerald-100 text-emerald-800' : 
-                            h.status === 'pending' ? 'bg-slate-100 text-slate-600' :
-                            h.status === 'cancelled' ? 'bg-red-100 text-red-600' :
-                            'bg-blue-100 text-blue-800'
-                          }`}>
-                            {h.status === 'confirm' ? 'Acquired' : h.status}
-                          </Badge>
-                        </div>
-                        <div className="flex justify-between items-center text-xs">
-                          <span className="text-slate-500 font-medium">Qty: {h.qty || 1} • <span className="font-bold text-slate-800">Rp {((h.sellPrice || h.price || 0) * (h.qty || 1)).toLocaleString()}</span></span>
-                          <span className={`font-black text-[9px] uppercase tracking-widest px-2 py-1 rounded-md ${
-                            h.paymentStatus === 'paid' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
-                          }`}>
-                            {h.paymentMethod === 'stripe' ? 'Stripe' : 'Cash'} • {h.paymentStatus}
-                          </span>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </div>
-          ) : (
-            <>
+          {/* View Only Catalog */}
               {/* Title & Price Card */}
               <section className="space-y-3 animate-in slide-in-from-left-4 fade-in duration-300">
           <div className="space-y-1 text-left">
@@ -460,183 +224,8 @@ export function StorefrontScreen() {
           </div>
         </section>
 
-        {/* CTA Sourcing Request button */}
-        <div className="pt-4">
-          <Button 
-            className="w-full h-14 rounded-2xl font-black uppercase italic text-sm gap-3 shadow-lg shadow-primary/20 hover:scale-[1.01] active:scale-95 transition-all"
-            onClick={() => setIsOpen(true)}
-          >
-            <Sparkles className="h-5 w-5" /> Request Order
-          </Button>
-        </div>
-        </>
-          )}
         </div>
       </div>
-
-      {/* Sourcing Request Modal Dialog */}
-      <Dialog open={isOpen} onOpenChange={(open) => {
-        setIsOpen(open);
-        if (!open) {
-          // Soft reset if they close it
-          setTimeout(() => setStep('contact'), 500);
-        }
-      }}>
-        <DialogContent className="max-w-md">
-          <DialogHeader className="text-left pb-2">
-            <DialogTitle className="text-lg font-black tracking-tight uppercase italic text-primary flex items-center gap-2">
-              <MessageSquare className="h-5 w-5" /> Order Request
-            </DialogTitle>
-            <DialogDescription className="text-xs text-muted-foreground font-semibold">
-              {step === 'contact' ? "Enter your contact details to begin." :
-               step === 'otp' ? "Verify your email address." :
-               `Hi ${clientName.split(' ')[0]}! Specify your exact order requirements.`}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            {step === 'contact' && (
-              <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
-                <div className="space-y-1.5 text-left">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Full Name *</label>
-                  <div className="relative">
-                    <User className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
-                    <Input 
-                      placeholder="e.g. Jane Andrews" 
-                      value={clientName}
-                      onChange={e => setClientName(e.target.value)}
-                      className="h-11 pl-11 rounded-xl bg-muted/30 border-none font-bold text-sm text-slate-800" 
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-1.5 text-left">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Email Address *</label>
-                  <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
-                    <Input 
-                      type="email"
-                      placeholder="e.g. jane@email.com" 
-                      value={customerEmail}
-                      onChange={e => setCustomerEmail(e.target.value)}
-                      className="h-11 pl-11 rounded-xl bg-muted/30 border-none font-bold text-sm text-slate-800" 
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-1.5 text-left">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Phone Number / WhatsApp *</label>
-                  <div className="relative">
-                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
-                    <Input 
-                      type="tel"
-                      placeholder="e.g. +628123456789" 
-                      value={customerPhone}
-                      onChange={e => setCustomerPhone(e.target.value)}
-                      className="h-11 pl-11 rounded-xl bg-muted/30 border-none font-bold text-sm text-slate-800" 
-                    />
-                  </div>
-                </div>
-
-                <Button 
-                  disabled={submitting}
-                  className="w-full h-12 rounded-2xl font-black uppercase italic shadow-lg shadow-primary/10 gap-2 mt-2"
-                  onClick={handleSendOtp}
-                >
-                  {submitting ? 'Sending OTP...' : 'Send Verification OTP'}
-                </Button>
-              </motion.div>
-            )}
-
-            {step === 'otp' && (
-              <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
-                <div className="text-center space-y-2 mb-4">
-                  <Shield className="h-8 w-8 text-primary mx-auto" />
-                </div>
-                <Input 
-                  placeholder="6-digit OTP" 
-                  value={otp}
-                  onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  autoComplete="off"
-                  className="h-14 rounded-xl bg-muted border-none font-black text-xl text-center text-slate-800 tracking-widest mx-auto max-w-[200px] focus-visible:ring-primary/20" 
-                />
-                <Button 
-                  disabled={otp.length < 6}
-                  className="w-full h-12 rounded-2xl font-black uppercase italic shadow-lg shadow-primary/10 gap-2 mt-2"
-                  onClick={handleVerifyOtp}
-                >
-                  Verify
-                </Button>
-                <button 
-                  onClick={() => setStep('contact')}
-                  className="w-full text-xs font-bold text-muted-foreground uppercase tracking-widest pt-2 hover:text-slate-800"
-                >
-                  Change Email
-                </button>
-              </motion.div>
-            )}
-
-            {step === 'order' && (
-              <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="space-y-1.5 text-left col-span-1">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Quantity</label>
-                    <Input 
-                      type="number"
-                      min="1"
-                      value={orderQty}
-                      onChange={e => setOrderQty(e.target.value)}
-                      onFocus={e => e.target.select()}
-                      autoComplete="off"
-                      className="h-11 rounded-xl bg-muted border-none font-bold text-sm text-center text-slate-800 focus-visible:ring-primary/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
-                    />
-                  </div>
-
-                  <div className="space-y-1.5 text-left col-span-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Price</label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-black text-slate-500">Rp</span>
-                      <Input 
-                        disabled
-                        value={(item ? ((parseInt(orderQty) || 1) * item.price) : 0).toLocaleString()}
-                        className="h-11 pl-9 rounded-xl bg-muted border-none font-bold text-sm text-slate-800 disabled:opacity-100" 
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-1.5 text-left">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Additional Products & Notes</label>
-                  <Input 
-                    placeholder="Want to add another product? Type here!" 
-                    value={clientNotes}
-                    onChange={e => setClientNotes(e.target.value)}
-                    className="h-11 rounded-xl bg-muted/30 border-none font-bold text-sm text-slate-800" 
-                  />
-                </div>
-
-                <div className="pt-4 space-y-2">
-                  <Button 
-                    disabled={submitting}
-                    variant="outline"
-                    className="w-full h-12 rounded-xl font-bold uppercase tracking-widest text-xs gap-2 text-slate-500 hover:text-slate-800"
-                    onClick={() => handleSubmitOrder('cash')}
-                  >
-                    <Send className="h-4 w-4" /> {submitting ? 'Submitting...' : 'Pay with Cash'}
-                  </Button>
-                  <Button 
-                    disabled={submitting}
-                    className="w-full h-12 rounded-xl font-black uppercase italic tracking-wide shadow-lg shadow-primary/20 gap-2 text-sm"
-                    onClick={() => handleSubmitOrder('stripe')}
-                  >
-                    <DollarSign className="h-4 w-4" /> {submitting ? 'Redirecting...' : 'Pay Now (Stripe)'}
-                  </Button>
-                </div>
-              </motion.div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
