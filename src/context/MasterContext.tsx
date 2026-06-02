@@ -60,7 +60,7 @@ export function MasterProvider({ children }: { children: ReactNode }) {
   const [catalogItems, setCatalogItems] = useState<any[]>([]);
   const [wishlistItems, setWishlistItems] = useState<any[]>([]);
   const [tripSettings, setTripSettings] = useState<any>({
-    trip: { origin: 'Seoul', destination: 'Jakarta', weightLimit: 15, date: '22 May 2026' },
+    trip: { origin: 'Seoul', destination: 'Jakarta', weightLimit: 15, date: '' },
     currency: { code: 'SGD', symbol: 'S$', manualRate: 13500 }
   });
   const [boughtIds, setBoughtIds] = useState<string[]>(() => {

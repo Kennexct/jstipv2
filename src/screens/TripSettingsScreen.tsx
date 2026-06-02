@@ -92,6 +92,7 @@ export function TripSettingsScreen() {
 
   const [origin, setOrigin] = useState('');
   const [destination, setDestination] = useState('');
+  const [readyAt, setReadyAt] = useState('');
   const [limit, setLimit] = useState('15');
   const [settings, setSettings] = useState({
     code: 'SGD',
@@ -111,6 +112,7 @@ export function TripSettingsScreen() {
       if (tripSettings.trip) {
         setOrigin(tripSettings.trip.origin || 'Seoul');
         setDestination(tripSettings.trip.destination || 'Jakarta');
+        setReadyAt(tripSettings.trip.date || '');
         setLimit((tripSettings.trip.weightLimit || 15).toString());
       }
       if (tripSettings.currency) {
@@ -151,6 +153,7 @@ export function TripSettingsScreen() {
       trip: {
         origin,
         destination,
+        date: readyAt,
         weightLimit: parseInt(limit) || 15
       },
       currency: {
@@ -251,6 +254,16 @@ export function TripSettingsScreen() {
                   <option key={c.name} value={c.name}>{c.name}</option>
                 ))}
               </select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold text-muted-foreground ml-1">READY AT DESTINATION (DEPARTURE DATE) *</label>
+              <Input 
+                type="date"
+                value={readyAt}
+                onChange={(e) => setReadyAt(e.target.value)}
+                className="w-full h-12 rounded-xl bg-muted/30 border-none px-4 font-bold text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary"
+                required
+              />
             </div>
           </div>
         </section>

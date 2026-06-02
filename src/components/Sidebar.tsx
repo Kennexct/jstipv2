@@ -34,17 +34,17 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="hidden md:flex flex-col w-64 h-screen fixed left-0 top-0 border-r bg-[#0D1B2E] z-40">
+    <aside className="hidden md:flex flex-col w-64 h-screen fixed left-0 top-0 border-r bg-secondary z-40">
       {/* Branding Header */}
       <div className="h-20 flex items-center px-6 border-b border-white/10 shrink-0">
-        <h2 className="text-xl font-black uppercase italic tracking-tighter text-[#C9A84C]">JStip</h2>
+        <h2 className="text-xl font-black uppercase italic tracking-tighter text-primary">JStip</h2>
       </div>
 
       {/* Primary Action Button - MOVED TO TOP */}
       <div className="p-4 shrink-0">
         <NavLink
           to="/owner/list-item"
-          className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl bg-[#C9A84C] text-[#0D1B2E] font-black uppercase tracking-widest shadow-lg hover:scale-[1.02] active:scale-95 transition-all"
+          className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl bg-primary text-primary-foreground font-black uppercase tracking-widest shadow-lg hover:scale-[1.02] active:scale-95 transition-all"
         >
           <PackagePlus className="h-5 w-5" />
           <span>Add Product</span>
@@ -61,7 +61,7 @@ export function Sidebar() {
               cn(
                 "flex items-center gap-3 px-4 py-3 rounded-xl transition-all relative font-bold text-sm uppercase tracking-wide",
                 isActive
-                  ? "bg-[#C9A84C]/15 text-[#C9A84C]"
+                  ? "bg-primary/15 text-primary"
                   : "text-slate-400 hover:bg-white/5 hover:text-white"
               )
             }
@@ -71,7 +71,7 @@ export function Sidebar() {
                 {isActive && (
                   <motion.div
                     layoutId="sidebar-pill"
-                    className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 rounded-r-full bg-[#C9A84C]"
+                    className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 rounded-r-full bg-primary"
                     transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
                   />
                 )}
@@ -89,7 +89,7 @@ export function Sidebar() {
           className="flex items-center gap-3 px-2 py-2 rounded-2xl transition-colors"
         >
           <Avatar className="h-10 w-10 border-2 border-transparent">
-            <AvatarFallback className="font-black bg-[#C9A84C] text-[#0D1B2E]">
+            <AvatarFallback className="font-black bg-primary text-primary-foreground">
               {currentUser?.username?.charAt(0)?.toUpperCase() || 'U'}
             </AvatarFallback>
           </Avatar>

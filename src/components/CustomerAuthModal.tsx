@@ -85,10 +85,10 @@ export function CustomerAuthModal({ isOpen, onClose, onSuccess }: CustomerAuthMo
       <DialogContent className="sm:max-w-md rounded-[2rem] p-0 overflow-hidden border-none bg-white">
         <div className="p-6">
           <div className="text-center mb-6">
-            <div className="h-12 w-12 bg-[#F4F6F9] rounded-2xl mx-auto flex items-center justify-center mb-3">
-              {step === 'details' ? <User className="h-6 w-6 text-[#0D1B2E]" /> : <ShieldCheck className="h-6 w-6 text-emerald-600" />}
+            <div className="h-12 w-12 bg-muted rounded-2xl mx-auto flex items-center justify-center mb-3">
+              {step === 'details' ? <User className="h-6 w-6 text-foreground" /> : <ShieldCheck className="h-6 w-6 text-emerald-600" />}
             </div>
-            <DialogTitle className="text-xl font-black text-[#0D1B2E]">
+            <DialogTitle className="text-xl font-black text-foreground">
               {step === 'details' ? 'Create Account to Continue' : 'Verify Your Email'}
             </DialogTitle>
             <DialogDescription className="text-xs font-medium text-slate-500 mt-1">
@@ -117,7 +117,7 @@ export function CustomerAuthModal({ isOpen, onClose, onSuccess }: CustomerAuthMo
                       placeholder="e.g. John Doe"
                       value={formData.name}
                       onChange={(e) => setFormData({...formData, name: e.target.value})}
-                      className="pl-9 h-12 rounded-xl bg-[#F4F6F9] border-none font-semibold text-[#0D1B2E] placeholder:text-slate-400"
+                      className="pl-9 h-12 rounded-xl bg-muted border-none font-semibold text-foreground placeholder:text-slate-400"
                     />
                   </div>
                 </div>
@@ -132,7 +132,7 @@ export function CustomerAuthModal({ isOpen, onClose, onSuccess }: CustomerAuthMo
                       placeholder="e.g. 081234567890"
                       value={formData.phone}
                       onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                      className="pl-9 h-12 rounded-xl bg-[#F4F6F9] border-none font-semibold text-[#0D1B2E] placeholder:text-slate-400"
+                      className="pl-9 h-12 rounded-xl bg-muted border-none font-semibold text-foreground placeholder:text-slate-400"
                     />
                   </div>
                 </div>
@@ -147,7 +147,7 @@ export function CustomerAuthModal({ isOpen, onClose, onSuccess }: CustomerAuthMo
                       placeholder="e.g. john@example.com"
                       value={formData.email}
                       onChange={(e) => setFormData({...formData, email: e.target.value})}
-                      className="pl-9 h-12 rounded-xl bg-[#F4F6F9] border-none font-semibold text-[#0D1B2E] placeholder:text-slate-400"
+                      className="pl-9 h-12 rounded-xl bg-muted border-none font-semibold text-foreground placeholder:text-slate-400"
                     />
                   </div>
                 </div>
@@ -155,7 +155,7 @@ export function CustomerAuthModal({ isOpen, onClose, onSuccess }: CustomerAuthMo
                 <Button 
                   type="submit" 
                   disabled={loading}
-                  className="w-full h-14 rounded-xl bg-[#0D1B2E] text-white hover:bg-[#162847] font-black uppercase tracking-widest mt-2 shadow-xl"
+                  className="w-full h-14 rounded-xl bg-secondary text-secondary-foreground hover:bg-secondary/90 font-black uppercase tracking-widest mt-2 shadow-xl"
                 >
                   {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Send OTP Code'}
                 </Button>
@@ -177,14 +177,14 @@ export function CustomerAuthModal({ isOpen, onClose, onSuccess }: CustomerAuthMo
                     placeholder="• • • • • •"
                     value={otp}
                     onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                    className="h-16 text-center text-3xl tracking-[0.5em] font-black rounded-xl bg-[#F4F6F9] border-none text-[#0D1B2E] placeholder:text-slate-300"
+                    className="h-16 text-center text-3xl tracking-[0.5em] font-black rounded-xl bg-muted border-none text-foreground placeholder:text-slate-300"
                   />
                 </div>
 
                 <Button 
                   type="submit" 
                   disabled={loading || otp.length !== 6}
-                  className="w-full h-14 rounded-xl bg-[#C9A84C] text-[#0D1B2E] hover:bg-[#b8943d] font-black uppercase tracking-widest mt-2 shadow-xl"
+                  className="w-full h-14 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 font-black uppercase tracking-widest mt-2 shadow-xl"
                 >
                   {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Verify & Continue'}
                 </Button>
@@ -192,7 +192,7 @@ export function CustomerAuthModal({ isOpen, onClose, onSuccess }: CustomerAuthMo
                 <button 
                   type="button"
                   onClick={() => setStep('details')}
-                  className="w-full text-xs font-bold text-slate-400 hover:text-[#0D1B2E] pt-2"
+                  className="w-full text-xs font-bold text-slate-400 hover:text-foreground pt-2"
                 >
                   Wrong email? Go back
                 </button>
