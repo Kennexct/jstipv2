@@ -287,7 +287,7 @@ export function OwnerDashboard() {
               >
                 {activity.type === 'sale' ? (
                   <>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 flex-1 min-w-0">
                       <div className="h-12 w-12 rounded-full bg-[#C9A84C]/20 flex items-center justify-center shrink-0">
                         <ShoppingCart className="h-5 w-5 text-[#0D1B2E]" />
                       </div>
@@ -305,7 +305,7 @@ export function OwnerDashboard() {
                   </>
                 ) : (
                   <>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 flex-1 min-w-0">
                       <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
                         <Receipt className="h-5 w-5 text-slate-600" />
                       </div>

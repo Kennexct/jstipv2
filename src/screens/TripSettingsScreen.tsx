@@ -5,7 +5,8 @@ import {
   Check, 
   MapPin, 
   Globe,
-  Settings2
+  Settings2,
+  Edit2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -196,8 +197,14 @@ export function TripSettingsScreen() {
           </div>
           <div className="space-y-4 text-left">
             <div className="space-y-2">
-              <label className="text-[10px] font-bold text-muted-foreground ml-1">FROM (Origin Country)</label>
+              <div className="flex items-center justify-between">
+                <label className="text-[10px] font-bold text-muted-foreground ml-1">FROM (Origin Country)</label>
+                <button type="button" onClick={() => setEditingField(editingField === 'origin' ? null : 'origin')} className="p-1.5 bg-white shadow-sm rounded-lg text-primary hover:bg-slate-50 transition-colors">
+                  <Edit2 className="h-3 w-3" />
+                </button>
+              </div>
               <select 
+                disabled={editingField !== 'origin'}
                 value={origin} 
                 onChange={async (e) => {
                   const newOrigin = e.target.value;
@@ -236,8 +243,14 @@ export function TripSettingsScreen() {
               </select>
             </div>
             <div className="space-y-2">
-              <label className="text-[10px] font-bold text-muted-foreground ml-1">TO (Destination Country)</label>
+              <div className="flex items-center justify-between">
+                <label className="text-[10px] font-bold text-muted-foreground ml-1">TO (Destination Country)</label>
+                <button type="button" onClick={() => setEditingField(editingField === 'destination' ? null : 'destination')} className="p-1.5 bg-white shadow-sm rounded-lg text-primary hover:bg-slate-50 transition-colors">
+                  <Edit2 className="h-3 w-3" />
+                </button>
+              </div>
               <select 
+                disabled={editingField !== 'destination'}
                 value={destination} 
                 onChange={(e) => {
                   const newDest = e.target.value;
@@ -256,8 +269,14 @@ export function TripSettingsScreen() {
               </select>
             </div>
             <div className="space-y-2">
-              <label className="text-[10px] font-bold text-muted-foreground ml-1">READY AT DESTINATION (DEPARTURE DATE) *</label>
+              <div className="flex items-center justify-between">
+                <label className="text-[10px] font-bold text-muted-foreground ml-1">READY AT DESTINATION (DEPARTURE DATE) *</label>
+                <button type="button" onClick={() => setEditingField(editingField === 'readyAt' ? null : 'readyAt')} className="p-1.5 bg-white shadow-sm rounded-lg text-primary hover:bg-slate-50 transition-colors">
+                  <Edit2 className="h-3 w-3" />
+                </button>
+              </div>
               <Input 
+                disabled={editingField !== 'readyAt'}
                 type="date"
                 value={readyAt}
                 onChange={(e) => setReadyAt(e.target.value)}

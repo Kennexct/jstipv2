@@ -330,7 +330,7 @@ export function ReportsScreen() {
                   </div>
                   {topCustomer ? (
                     <>
-                      <p className="text-sm font-black" style={{ color: NAVY }}>{topCustomer[0]}</p>
+                      <p className="text-sm font-black truncate w-full" title={topCustomer[0]} style={{ color: NAVY }}>{topCustomer[0]}</p>
                       <p className="text-[10px] text-slate-400 font-medium">Rp {topCustomer[1].toLocaleString()} total</p>
                     </>
                   ) : <p className="text-xs text-slate-400">No sales yet</p>}
@@ -344,7 +344,7 @@ export function ReportsScreen() {
                   </div>
                   {bestSeller ? (
                     <>
-                      <p className="text-sm font-black" style={{ color: NAVY }}>{bestSeller.name}</p>
+                      <p className="text-sm font-black truncate w-full" title={bestSeller.name} style={{ color: NAVY }}>{bestSeller.name}</p>
                       <p className="text-[10px] text-slate-400 font-medium">{bestSeller.qty} units sold · {bestSeller.margin.toFixed(0)}% margin</p>
                     </>
                   ) : <p className="text-xs text-slate-400">No sales yet</p>}
@@ -366,13 +366,13 @@ export function ReportsScreen() {
                   <div className="divide-y divide-slate-50">
                     {Object.entries(customerMap).sort((a, b) => b[1] - a[1]).map(([name, total], i) => (
                       <div key={name} className="flex items-center justify-between px-4 py-3">
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
                           <div className="h-7 w-7 rounded-full flex items-center justify-center text-[10px] font-black" style={{ backgroundColor: i === 0 ? GOLD + '20' : '#f1f5f9', color: i === 0 ? GOLD : '#64748b' }}>
                             {i + 1}
                           </div>
-                          <p className="text-sm font-bold" style={{ color: NAVY }}>{name}</p>
+                          <p className="text-sm font-bold truncate" title={name} style={{ color: NAVY }}>{name}</p>
                         </div>
-                        <p className="text-sm font-black" style={{ color: NAVY }}>Rp {total.toLocaleString()}</p>
+                        <p className="text-sm font-black shrink-0 ml-2" style={{ color: NAVY }}>Rp {total.toLocaleString()}</p>
                       </div>
                     ))}
                   </div>
