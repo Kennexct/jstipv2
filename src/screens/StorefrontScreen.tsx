@@ -204,9 +204,9 @@ export function StorefrontScreen() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             orderDetails: {
-              name: newRequest.name,
-              price: finalPrice,
-              quantity: 1,
+              name: item.name,
+              price: item.price, // Unit price
+              quantity: qty,     // Actual quantity
               image: newRequest.image,
               notes: newRequest.note,
               customerEmail,
@@ -220,7 +220,7 @@ export function StorefrontScreen() {
         
         const stripeData = await stripeRes.json();
         if (stripeData.url) {
-          window.location.href = stripeData.url;
+          window.location.replace(stripeData.url); // Use replace to avoid Stripe in back history
           return;
         } else {
           throw new Error(stripeData.error || 'Failed to create Stripe session');
@@ -586,6 +586,7 @@ export function StorefrontScreen() {
                       min="1"
                       value={orderQty}
                       onChange={e => setOrderQty(e.target.value)}
+                      onFocus={e => e.target.select()}
                       autoComplete="off"
                       className="h-11 rounded-xl bg-muted border-none font-bold text-sm text-center text-slate-800 focus-visible:ring-primary/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
                     />
