@@ -179,8 +179,8 @@ export function PublicCatalogScreen() {
         </header>
 
         {/* ─── SEARCH & FILTERS ─── */}
-        <div className="px-6 md:px-8 space-y-5 pt-4 sticky top-[88px] md:top-20 bg-[#F4F6F9]/90 backdrop-blur-md z-30 pb-4">
-          <div className="relative max-w-2xl">
+        <div className="px-6 md:px-8 pt-4 sticky top-[88px] md:top-20 bg-[#F4F6F9]/90 backdrop-blur-md z-30 pb-4 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+          <div className="relative w-full md:max-w-md lg:max-w-xl shrink-0">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
               <Search className="h-5 w-5" />
             </div>
@@ -190,12 +190,12 @@ export function PublicCatalogScreen() {
               placeholder="Search products..." 
               className="h-14 w-full pl-12 pr-12 rounded-full border-none bg-white shadow-sm text-base font-bold text-slate-800 placeholder:text-slate-400 placeholder:font-normal"
             />
-            <button className="absolute right-3 top-1/2 -translate-y-1/2 h-8 w-8 bg-slate-100 rounded-full flex items-center justify-center">
+            <button className="absolute right-3 top-1/2 -translate-y-1/2 h-8 w-8 bg-[#F4F6F9] rounded-full flex items-center justify-center hover:bg-slate-200 transition-colors">
               <SlidersHorizontal className="h-4 w-4 text-slate-600" />
             </button>
           </div>
 
-          <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2 -mx-6 px-6 md:mx-0 md:px-0">
+          <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2 md:pb-0 w-full md:w-auto -mx-6 px-6 md:mx-0 md:px-0">
             {filters.map((filter) => {
               const isActive = activeFilter === filter;
               return (
@@ -203,8 +203,8 @@ export function PublicCatalogScreen() {
                   key={filter}
                   onClick={() => setActiveFilter(filter)}
                   className={cn(
-                    "shrink-0 px-6 py-2.5 rounded-full text-sm font-bold transition-all shadow-sm",
-                    isActive ? "bg-[#0D1B2E] text-white" : "bg-white text-slate-500 hover:bg-slate-50"
+                    "shrink-0 px-5 py-2.5 rounded-full text-sm font-bold transition-all shadow-sm border",
+                    isActive ? "bg-[#0D1B2E] text-white border-[#0D1B2E]" : "bg-white text-slate-500 border-slate-100 hover:bg-slate-50 hover:text-slate-700"
                   )}
                 >
                   {filter}
@@ -231,16 +231,15 @@ export function PublicCatalogScreen() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
                     onClick={() => navigate(`/items/${item.id}`)}
-                    className="bg-white rounded-[2rem] p-3 md:p-4 flex flex-col relative cursor-pointer hover:shadow-xl transition-all shadow-sm group border border-slate-100"
+                    className="bg-white rounded-[2rem] flex flex-col relative cursor-pointer hover:shadow-2xl transition-all shadow-sm group border border-slate-100 overflow-hidden"
                   >
-                    <div className="w-full aspect-square relative flex items-center justify-center mb-3">
-                      <div className="absolute inset-0 bg-[#F4F6F9] rounded-2xl opacity-50 group-hover:scale-105 transition-transform" />
+                    <div className="w-full aspect-[4/5] relative bg-slate-50 flex items-center justify-center overflow-hidden">
                       <WatermarkOverlay />
                       {item.image ? (
                         <img 
                           src={item.image} 
                           alt={item.name}
-                          className="relative z-10 w-full h-full object-contain drop-shadow-lg p-2 group-hover:-translate-y-1 transition-transform duration-300"
+                          className="relative z-10 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                         />
                       ) : (
                         <ShoppingBag className="relative z-10 h-10 w-10 text-slate-300" />
