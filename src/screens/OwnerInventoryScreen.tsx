@@ -101,18 +101,18 @@ export function OwnerInventoryScreen() {
     <div className="min-h-screen bg-[#f2f5f7] pb-24">
       <header className="sticky top-0 z-50 bg-[#f2f5f7]/80 backdrop-blur-md px-4 pt-8 pb-4 flex items-center justify-between gap-3">
         <Button variant="ghost" size="icon" className="rounded-full bg-white shadow-sm hover:bg-slate-50 shrink-0" onClick={() => navigate('/owner')}>
-          <ArrowLeft className="h-5 w-5 text-[#163300]" />
+          <ArrowLeft className="h-5 w-5 text-[#0D1B2E]" />
         </Button>
-        <h2 className="text-xl font-black text-[#163300] tracking-tight flex-1">Inventory</h2>
+        <h2 className="text-xl font-black text-[#0D1B2E] tracking-tight flex-1">Inventory</h2>
         <div className="flex items-center gap-2 shrink-0">
           <Button 
             variant="outline"
-            className="hidden rounded-full h-10 px-4 bg-white text-xs font-bold text-[#163300] shadow-sm items-center gap-2" 
+            className="hidden rounded-full h-10 px-4 bg-white text-xs font-bold text-[#0D1B2E] shadow-sm items-center gap-2" 
             onClick={handleShareCatalog}
           >
             <Share2 className="h-4 w-4" /> Share Catalog
           </Button>
-          <Button size="icon" className="rounded-full h-10 w-10 bg-[#163300] text-white hover:bg-[#1f4700]" onClick={() => navigate('/owner/list-item')}>
+          <Button size="icon" className="rounded-full h-10 w-10 bg-[#0D1B2E] text-white hover:bg-[#162847]" onClick={() => navigate('/owner/list-item')}>
             <Plus className="h-5 w-5" />
           </Button>
         </div>
@@ -131,7 +131,7 @@ export function OwnerInventoryScreen() {
           </div>
           <Button 
             variant="outline" 
-            className="h-12 rounded-full bg-white border-none shadow-sm font-bold text-xs gap-2 px-4 flex items-center justify-center text-[#163300] hover:bg-slate-50 shrink-0"
+            className="h-12 rounded-full bg-white border-none shadow-sm font-bold text-xs gap-2 px-4 flex items-center justify-center text-[#0D1B2E] hover:bg-slate-50 shrink-0"
             onClick={handleDownloadCatalog}
           >
             <Download className="h-4 w-4" /> Export
@@ -163,9 +163,9 @@ export function OwnerInventoryScreen() {
                   
                   {/* Middle: Name & Badge */}
                   <div className="flex-1 min-w-0 flex flex-col justify-center space-y-1.5">
-                    <h4 className="text-base font-black text-[#163300] truncate">{item.name}</h4>
+                    <h4 className="text-base font-black text-[#0D1B2E] truncate">{item.name}</h4>
                     <div className="flex items-center gap-2">
-                      <Badge className="bg-[#9fe870]/20 text-[#163300] hover:bg-[#9fe870]/30 border-none px-2 py-0.5 text-[9px] uppercase font-bold tracking-wider">
+                      <Badge className="bg-[#C9A84C]/20 text-[#0D1B2E] hover:bg-[#C9A84C]/30 border-none px-2 py-0.5 text-[9px] uppercase font-bold tracking-wider">
                         Active
                       </Badge>
                       <span className="text-xs font-bold text-slate-400">#00{item.id.replace(/\D/g, '').slice(0,3) || '1'}</span>
@@ -182,11 +182,11 @@ export function OwnerInventoryScreen() {
                         <MoreVertical className="h-5 w-5 text-slate-400" />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="rounded-2xl shadow-xl border-slate-100 p-2" onClick={(e) => e.stopPropagation()}>
-                        <DropdownMenuItem className="gap-3 text-sm font-bold text-[#163300] p-3 rounded-xl cursor-pointer" onClick={(e) => { e.stopPropagation(); navigate(`/owner/edit-item/${item.id}`); }}>
+                        <DropdownMenuItem className="gap-3 text-sm font-bold text-[#0D1B2E] p-3 rounded-xl cursor-pointer" onClick={(e) => { e.stopPropagation(); navigate(`/owner/edit-item/${item.id}`); }}>
                           <Edit2 className="h-4 w-4 text-slate-400" /> Edit Item
                         </DropdownMenuItem>
                         <DropdownMenuItem 
-                          className="gap-3 text-sm font-bold text-[#163300] p-3 rounded-xl cursor-pointer"
+                          className="gap-3 text-sm font-bold text-[#0D1B2E] p-3 rounded-xl cursor-pointer"
                           onClick={(e) => {
                             e.stopPropagation();
                             toast.success('Product link copied!', {
@@ -207,7 +207,7 @@ export function OwnerInventoryScreen() {
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
-                    <p className="text-lg font-black text-[#163300] tracking-tight">Rp {item.price.toLocaleString()}</p>
+                    <p className="text-lg font-black text-[#0D1B2E] tracking-tight">Rp {item.price.toLocaleString()}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -222,7 +222,7 @@ export function OwnerInventoryScreen() {
           {selectedItem && (
             <div className="space-y-6">
               <DialogHeader className="text-left">
-                <DialogTitle className="text-xl font-black text-[#163300] tracking-tight">
+                <DialogTitle className="text-xl font-black text-[#0D1B2E] tracking-tight">
                   Product Details
                 </DialogTitle>
                 <DialogDescription className="text-sm text-slate-500 font-medium">
@@ -241,27 +241,27 @@ export function OwnerInventoryScreen() {
                       <Package className="h-10 w-10 text-slate-300 absolute inset-0 m-auto" />
                     )}
                   </div>
-                  <Badge className="absolute top-3 left-3 bg-[#9fe870] text-[#163300] border-none font-bold">Live</Badge>
+                  <Badge className="absolute top-3 left-3 bg-[#C9A84C] text-[#0D1B2E] border-none font-bold">Live</Badge>
                 </div>
-                <h3 className="text-lg font-black text-[#163300] leading-tight">{selectedItem.name}</h3>
+                <h3 className="text-lg font-black text-[#0D1B2E] leading-tight">{selectedItem.name}</h3>
               </div>
 
               {/* Financial Breakdown Grid */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="p-4 rounded-2xl bg-[#f2f5f7] space-y-1">
                   <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Publish Price</p>
-                  <p className="text-base font-black text-[#163300]">Rp {selectedItem.price.toLocaleString()}</p>
+                  <p className="text-base font-black text-[#0D1B2E]">Rp {selectedItem.price.toLocaleString()}</p>
                 </div>
                 <div className="p-4 rounded-2xl bg-[#f2f5f7] space-y-1">
                   <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Est. Cost</p>
-                  <p className="text-base font-black text-[#163300]">{selectedItem.cost} {selectedItem.currency}</p>
+                  <p className="text-base font-black text-[#0D1B2E]">{selectedItem.cost} {selectedItem.currency}</p>
                 </div>
               </div>
 
               {/* Action Buttons inside custom popup modal details */}
               <div className="space-y-3 pt-2">
                 <Button 
-                  className="pill-button w-full h-14 bg-[#163300] text-white hover:bg-[#1f4700]"
+                  className="pill-button w-full h-14 bg-[#0D1B2E] text-white hover:bg-[#162847]"
                   onClick={() => {
                     const id = selectedItem.id;
                     setSelectedItem(null);

@@ -262,7 +262,7 @@ export function GlobalActionFab() {
           onClick={() => setIsOpen(!isOpen)}
           className={cn(
             "h-14 w-14 rounded-full shadow-xl transition-all duration-300 border-none",
-            isOpen ? "bg-slate-800 hover:bg-slate-900 text-white" : "bg-[#9fe870] hover:bg-[#8ade5f] text-[#163300]"
+            isOpen ? "bg-slate-800 hover:bg-slate-900 text-white" : "bg-[#C9A84C] hover:bg-[#b8943d] text-[#0D1B2E]"
           )}
         >
           <Zap className={cn("h-6 w-6 transition-all", isOpen ? "rotate-45" : "")} />
@@ -400,12 +400,12 @@ export function GlobalActionFab() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="text-xs font-bold truncate pr-2">{item.name}</div>
-                        <div className={cn("text-[10px] font-medium mt-0.5", selectedItemId === item.id ? "text-[#9fe870]" : "text-slate-500")}>
+                        <div className={cn("text-[10px] font-medium mt-0.5", selectedItemId === item.id ? "text-[#C9A84C]" : "text-slate-500")}>
                           Rp {item.price.toLocaleString()}
                         </div>
                       </div>
                       {selectedItemId === item.id && (
-                        <CheckCircle2 className="h-5 w-5 text-[#9fe870] shrink-0 mr-1" />
+                        <CheckCircle2 className="h-5 w-5 text-[#C9A84C] shrink-0 mr-1" />
                       )}
                     </button>
                   ))}
@@ -430,7 +430,7 @@ export function GlobalActionFab() {
                   type="button" 
                   onClick={handleAddDraftItem} 
                   disabled={!selectedItemId}
-                  className="h-12 rounded-2xl font-black text-xs gap-2 shadow-xl bg-[#9fe870] text-[#163300] hover:bg-[#8ade5f] px-5"
+                  className="h-12 rounded-2xl font-black text-xs gap-2 shadow-xl bg-[#C9A84C] text-[#0D1B2E] hover:bg-[#b8943d] px-5"
                 >
                   <PlusCircle className="h-4 w-4" /> Add Item
                 </Button>

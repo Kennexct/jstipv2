@@ -9,24 +9,25 @@
     --font-heading: 'Inter', sans-serif;
     --font-sans: 'Inter', sans-serif;
 
-    /* Base mappings for Wise Fintech Theme */
-    --color-background: #f2f5f7;
-    --color-foreground: #163300;
+    /* JStip Brand Palette: Deep Navy + Luxury Gold */
+    --color-background: #F4F6F9;
+    --color-foreground: #0D1B2E;
     --color-card: #ffffff;
-    --color-card-foreground: #163300;
-    --color-border: #e2e8f0;
-    --color-input: #e2e8f0;
-    --color-ring: #9fe870;
-    --color-muted: #f8fafc;
-    --color-muted-foreground: #475569;
+    --color-card-foreground: #0D1B2E;
+    --color-border: #E2E8F0;
+    --color-input: #E2E8F0;
+    --color-ring: #C9A84C;
+    --color-muted: #F8FAFC;
+    --color-muted-foreground: #64748B;
     --color-popover: #ffffff;
-    --color-popover-foreground: #163300;
-    --color-accent: #f1f5f9;
-    --color-accent-foreground: #163300;
+    --color-popover-foreground: #0D1B2E;
+    --color-accent: #F8F5EE;
+    --color-accent-foreground: #0D1B2E;
 
-    --color-primary: #9fe870;
-    --color-primary-foreground: #163300;
-    --color-secondary: #163300;
+    /* Gold as primary, Navy as secondary */
+    --color-primary: #C9A84C;
+    --color-primary-foreground: #0D1B2E;
+    --color-secondary: #0D1B2E;
     --color-secondary-foreground: #ffffff;
 
     --radius-sm: calc(var(--radius) * 0.6);
@@ -39,24 +40,24 @@
 }
 
 :root {
-    --background: oklch(0.97 0.01 240); /* #f2f5f7 */
-    --foreground: oklch(0.2 0.05 140); /* #163300 */
-    --card: oklch(1 0 0); /* #ffffff */
-    --card-foreground: oklch(0.2 0.05 140);
+    --background: oklch(0.96 0.01 230);   /* #F4F6F9 */
+    --foreground: oklch(0.17 0.04 240);   /* #0D1B2E */
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.17 0.04 240);
     --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.2 0.05 140);
-    --primary: oklch(0.88 0.16 130); /* #9fe870 */
-    --primary-foreground: oklch(0.2 0.05 140);
-    --secondary: oklch(0.2 0.05 140); /* #163300 */
+    --popover-foreground: oklch(0.17 0.04 240);
+    --primary: oklch(0.73 0.10 75);       /* #C9A84C gold */
+    --primary-foreground: oklch(0.17 0.04 240);
+    --secondary: oklch(0.17 0.04 240);    /* #0D1B2E navy */
     --secondary-foreground: oklch(1 0 0);
-    --muted: oklch(0.96 0.01 240);
-    --muted-foreground: oklch(0.4 0.02 240);
-    --accent: oklch(0.96 0.01 240);
-    --accent-foreground: oklch(0.2 0.05 140);
+    --muted: oklch(0.97 0.005 230);
+    --muted-foreground: oklch(0.45 0.02 240);
+    --accent: oklch(0.96 0.03 80);        /* warm gold tint */
+    --accent-foreground: oklch(0.17 0.04 240);
     --destructive: oklch(0.6 0.2 20);
     --border: oklch(0.92 0.01 240);
     --input: oklch(0.92 0.01 240);
-    --ring: oklch(0.88 0.16 130);
+    --ring: oklch(0.73 0.10 75);
     --radius: 1.25rem;
 }
 
@@ -72,11 +73,20 @@
   }
 }
 
-/* FinTech Specific Utility Classes */
+/* JStip FinTech Utility Classes */
 .fintech-card {
   @apply bg-white rounded-3xl border border-slate-100 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] transition-shadow hover:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.05)];
 }
 
 .pill-button {
   @apply rounded-full font-bold transition-transform active:scale-95 flex items-center justify-center gap-2;
+}
+
+/* Gold shimmer utility */
+.gold-text {
+  @apply text-[#C9A84C];
+}
+
+.navy-bg {
+  @apply bg-[#0D1B2E];
 }

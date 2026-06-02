@@ -15,7 +15,7 @@ export function BottomNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 border-t bg-background/90 backdrop-blur-lg pb-safe">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-[#0D1B2E]/10 bg-[#0D1B2E]/95 backdrop-blur-lg pb-safe">
       <div className="flex h-16 items-center justify-between px-4 max-w-md mx-auto relative">
         <div className="flex flex-1 justify-around">
           {navItemsLeft.map(({ icon: Icon, label, path }) => (
@@ -24,7 +24,7 @@ export function BottomNav() {
               to={path}
               className={({ isActive }) =>
                 `relative flex flex-col items-center justify-center gap-1 transition-colors w-16 ${
-                  isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+                  isActive ? 'text-[#C9A84C]' : 'text-slate-500 hover:text-white'
                 }`
               }
             >
@@ -35,7 +35,7 @@ export function BottomNav() {
                   {isActive && (
                     <motion.div
                       layoutId="nav-pill"
-                      className="absolute -top-1 h-1 w-8 rounded-full bg-primary"
+                      className="absolute -top-1 h-1 w-8 rounded-full bg-[#C9A84C]"
                       transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
                     />
                   )}
@@ -50,7 +50,7 @@ export function BottomNav() {
           <NavLink to="/owner/list-item" className="group">
             {({ isActive }) => (
               <div className={cn(
-                "flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-transform active:scale-95 border-4 border-[#f2f5f7] bg-[#163300] text-[#9fe870]",
+                "flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-transform active:scale-95 border-4 border-[#0D1B2E]/20 bg-[#C9A84C] text-[#0D1B2E]",
                 isActive ? "scale-105 shadow-xl" : "hover:scale-105"
               )}>
                 <PackagePlus className="h-6 w-6" />
@@ -66,7 +66,7 @@ export function BottomNav() {
               to={path}
               className={({ isActive }) =>
                 `relative flex flex-col items-center justify-center gap-1 transition-colors w-16 ${
-                  isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+                  isActive ? 'text-[#C9A84C]' : 'text-slate-500 hover:text-white'
                 }`
               }
             >
@@ -77,7 +77,7 @@ export function BottomNav() {
                   {isActive && (
                     <motion.div
                       layoutId="nav-pill"
-                      className="absolute -top-1 h-1 w-8 rounded-full bg-primary"
+                      className="absolute -top-1 h-1 w-8 rounded-full bg-[#C9A84C]"
                       transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
                     />
                   )}

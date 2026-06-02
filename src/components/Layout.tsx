@@ -8,7 +8,7 @@ export function Layout() {
   const isInvoiceRoute = location.pathname.startsWith('/invoice');
 
   return (
-    <div className="flex min-h-screen flex-col md:flex-row bg-[#f2f5f7]">
+    <div className="flex min-h-screen flex-col md:flex-row bg-[#F4F6F9]">
       {/* Desktop Sidebar */}
       {!isInvoiceRoute && <Sidebar />}
 

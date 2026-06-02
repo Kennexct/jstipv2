@@ -434,13 +434,13 @@ export function ExploreScreen() {
               )}
             </div>
             <div className="space-y-1 min-w-0 flex-1">
-              <h4 className="text-sm font-bold text-[#163300] truncate">
+              <h4 className="text-sm font-bold text-[#0D1B2E] truncate">
                 {item.name}
               </h4>
               <div className="flex flex-wrap items-center gap-1.5 text-xs font-semibold text-slate-500">
-                <span className="text-[#163300]">{item.requester}</span>
+                <span className="text-[#0D1B2E]">{item.requester}</span>
                 <span className="opacity-40">•</span>
-                <span className="font-bold text-[#163300]">Rp {(item.sellPrice || item.price).toLocaleString()}</span>
+                <span className="font-bold text-[#0D1B2E]">Rp {(item.sellPrice || item.price).toLocaleString()}</span>
                 <span className="opacity-40">•</span>
                 <span className="flex items-center gap-0.5"><MapPinIcon className="h-3 w-3" />{item.location}</span>
               </div>
@@ -590,17 +590,17 @@ export function ExploreScreen() {
     <div className="min-h-screen bg-[#f2f5f7] pb-24">
       <header className="sticky top-0 z-50 bg-[#f2f5f7]/80 backdrop-blur-md px-4 pt-8 pb-4 flex items-center justify-between gap-3">
         <Button variant="ghost" size="icon" className="rounded-full bg-white shadow-sm hover:bg-slate-50 shrink-0" onClick={() => navigate('/')}>
-          <ArrowLeft className="h-5 w-5 text-[#163300]" />
+          <ArrowLeft className="h-5 w-5 text-[#0D1B2E]" />
         </Button>
-        <h2 className="text-xl font-black text-[#163300] tracking-tight flex-1">Wishlist & Tasks</h2>
+        <h2 className="text-xl font-black text-[#0D1B2E] tracking-tight flex-1">Wishlist & Tasks</h2>
         <div className="flex items-center gap-2 shrink-0">
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger className="flex h-10 w-10 items-center justify-center rounded-full bg-[#163300] text-white hover:bg-[#1f4700] shrink-0 outline-none">
+            <DialogTrigger className="flex h-10 w-10 items-center justify-center rounded-full bg-[#0D1B2E] text-white hover:bg-[#162847] shrink-0 outline-none">
               <Plus className="h-5 w-5" />
             </DialogTrigger>
             <DialogContent>
               <DialogHeader className="text-left">
-                <DialogTitle className="text-xl font-black text-[#163300] tracking-tight">
+                <DialogTitle className="text-xl font-black text-[#0D1B2E] tracking-tight">
                   Record Request
                 </DialogTitle>
                 <DialogDescription className="text-sm font-medium text-slate-500">
@@ -627,9 +627,9 @@ export function ExploreScreen() {
                       htmlFor="ref-photo-upload"
                       className="flex flex-col items-center justify-center h-28 w-full rounded-2xl border-2 border-dashed border-slate-200 bg-[#f2f5f7] hover:bg-slate-100 transition-colors cursor-pointer text-center p-4 gap-1.5 group"
                     >
-                      <Camera className="h-6 w-6 text-slate-400 group-hover:text-[#163300] transition-colors" />
+                      <Camera className="h-6 w-6 text-slate-400 group-hover:text-[#0D1B2E] transition-colors" />
                       <div>
-                        <p className="text-xs font-bold text-[#163300]">Attach Photo</p>
+                        <p className="text-xs font-bold text-[#0D1B2E]">Attach Photo</p>
                         <p className="text-[10px] text-slate-500 font-medium">Tap to choose image</p>
                       </div>
                       <input 
@@ -685,7 +685,7 @@ export function ExploreScreen() {
 
                 <div className="pt-2">
                   <Button 
-                    className="pill-button w-full h-14 bg-[#163300] text-white hover:bg-[#1f4700]" 
+                    className="pill-button w-full h-14 bg-[#0D1B2E] text-white hover:bg-[#162847]" 
                     onClick={handleCreateWishlist}
                     disabled={isSubmitting}
                   >
@@ -748,7 +748,7 @@ export function ExploreScreen() {
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader className="text-left">
-                    <DialogTitle className="text-lg font-black text-[#163300] tracking-tight">Filter by Status</DialogTitle>
+                    <DialogTitle className="text-lg font-black text-[#0D1B2E] tracking-tight">Filter by Status</DialogTitle>
                     <DialogDescription className="text-sm text-slate-500 font-medium">Narrow down tasks by state</DialogDescription>
                   </DialogHeader>
                   <div className="grid grid-cols-1 gap-2 py-2">
@@ -762,7 +762,7 @@ export function ExploreScreen() {
                         className={cn(
                           "w-full text-left px-4 py-3.5 rounded-2xl text-sm font-bold transition-all",
                           (selectedStatusFilter === stat)
-                            ? "bg-[#9fe870] text-[#163300]"
+                            ? "bg-[#C9A84C] text-[#0D1B2E]"
                             : "bg-[#f2f5f7] text-slate-600 hover:bg-slate-200"
                         )}
                       >
@@ -869,12 +869,12 @@ export function ExploreScreen() {
       {viewMode === 'checklist' && (
         <div className="space-y-6">
           {/* Checklist header state */}
-          <Card className="border-none bg-[#163300] text-white shadow-md rounded-2xl overflow-hidden relative">
+          <Card className="border-none bg-[#0D1B2E] text-white shadow-md rounded-2xl overflow-hidden relative">
             <CardContent className="p-4 relative z-10 flex flex-col gap-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <div className="bg-[#9fe870]/20 p-2 rounded-xl">
-                    <ListTodo className="h-5 w-5 text-[#9fe870]" />
+                  <div className="bg-[#C9A84C]/20 p-2 rounded-xl">
+                    <ListTodo className="h-5 w-5 text-[#C9A84C]" />
                   </div>
                   <div>
                     <h3 className="text-sm font-black tracking-tight">Checkout Audit</h3>
@@ -882,14 +882,126 @@ export function ExploreScreen() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <span className="text-xl font-black text-[#9fe870] leading-none">{checkedCount} <span className="text-xs text-slate-400">/ {totalChecklistCount}</span></span>
+                  <span className="text-xl font-black text-[#C9A84C] leading-none">{checkedCount} <span className="text-xs text-slate-400">/ {totalChecklistCount}</span></span>
+                </div>
+            </div>
+
+            {/* Selected category pill indicator */}
+            {selectedStatusFilter !== 'all' && (
+              <div className="flex items-center gap-2 px-1">
+                <span className="text-[9px] font-black uppercase tracking-wider text-muted-foreground">Active Filter:</span>
+                <Badge className={cn("text-[9px] font-black h-5 uppercase tracking-wider rounded-full", getStatusStyle(selectedStatusFilter as any))}>
+                  {selectedStatusFilter}
+                </Badge>
+                <button 
+                  onClick={() => setSelectedStatusFilter('all')} 
+                  className="text-[9px] text-primary hover:underline font-black uppercase tracking-wider"
+                >
+                  Clear
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Fulfillment List */}
+          <div className="space-y-6">
+            <div className="flex items-center justify-between px-1">
+              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Traveler Taskboard</p>
+              <Badge variant="outline" className="text-[10px] h-5 border-dashed font-bold">{filteredMyWishlist.length} ITEMS</Badge>
+            </div>
+
+            {filteredMyWishlist.length === 0 ? (
+              <div className="text-center p-10 bg-muted/20 rounded-3xl border border-dashed text-muted-foreground flex flex-col items-center gap-2">
+                <Package className="h-8 w-8 opacity-40" />
+                <p className="text-xs font-bold uppercase tracking-widest">No matching requests</p>
+                <p className="text-[10px] max-w-xs leading-normal">Adjust search filters or use "Record Request" above to log manual entries.</p>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {/* 1. Category: ITEMS STILL PENDING SOURCING */}
+                {pendingWishlist.length > 0 ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 px-1">
+                      <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse shrink-0" />
+                      <p className="text-[10px] font-black uppercase tracking-wider text-slate-500">
+                        Pending Sourcing ({pendingWishlist.length})
+                      </p>
+                    </div>
+                    <div className="space-y-2.5">
+                      {pendingWishlist.map((item, i) => (
+                        <motion.div
+                          key={item.id}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: i * 0.03 }}
+                          className="relative"
+                        >
+                          {renderWishlistItem(item, i)}
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-4 rounded-3xl bg-emerald-50 text-emerald-700 text-center text-xs font-bold uppercase tracking-wide border border-emerald-100/60 shadow-sm flex items-center justify-center gap-2">
+                    <span>🎉 Excellent! All active requests are successfully sourced!</span>
+                  </div>
+                )}
+
+                {/* 2. Category: COMPLETED/FOUND WISHLIST ITEMS */}
+                {foundWishlist.length > 0 && (
+                  <div className="space-y-3 pt-3 border-t border-dashed border-slate-200">
+                    <div className="flex items-center gap-2 px-1">
+                      <span className="w-2 h-2 rounded-full bg-emerald-600 shrink-0" />
+                      <p className="text-[10px] font-black uppercase tracking-wider text-slate-500">
+                        Already Found & Acquired ({foundWishlist.length})
+                      </p>
+                    </div>
+                    <div className="space-y-2.5">
+                      {foundWishlist.map((item, i) => (
+                        <motion.div
+                          key={item.id}
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: i * 0.03 }}
+                          className="relative"
+                        >
+                          {renderWishlistItem(item, i, "opacity-75 hover:opacity-100 bg-slate-50/20 border-emerald-100/50")}
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </>
+      )}
+
+      {/* RENDER VIEW 2: SYSTEMATIC ITEM CHECKLIST */}
+      {viewMode === 'checklist' && (
+        <div className="space-y-6">
+          {/* Checklist header state */}
+          <Card className="border-none bg-[#0D1B2E] text-white shadow-md rounded-2xl overflow-hidden relative">
+            <CardContent className="p-4 relative z-10 flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="bg-[#C9A84C]/20 p-2 rounded-xl">
+                    <ListTodo className="h-5 w-5 text-[#C9A84C]" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-black tracking-tight">Checkout Audit</h3>
+                    <p className="text-[10px] text-slate-300 font-medium">Verify all items</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className="text-xl font-black text-[#C9A84C] leading-none">{checkedCount} <span className="text-xs text-slate-400">/ {totalChecklistCount}</span></span>
                 </div>
               </div>
 
               {/* Progress visual section */}
               <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
                 <div 
-                  className="h-full bg-[#9fe870] transition-all duration-500 rounded-full"
+                  className="h-full bg-[#C9A84C] transition-all duration-500 rounded-full"
                   style={{ width: `${completionPercentage}%` }}
                 />
               </div>
@@ -908,7 +1020,7 @@ export function ExploreScreen() {
                   onClick={() => setChecklistViewMode('transaction')}
                   className={cn(
                     "px-3 py-1 rounded-lg text-[10px] font-bold transition-all",
-                    checklistViewMode === 'transaction' ? "bg-white text-[#163300] shadow-sm" : "text-slate-500 hover:text-slate-800"
+                    checklistViewMode === 'transaction' ? "bg-white text-[#0D1B2E] shadow-sm" : "text-slate-500 hover:text-slate-800"
                   )}
                 >
                   By Transaction
@@ -917,7 +1029,7 @@ export function ExploreScreen() {
                   onClick={() => setChecklistViewMode('summary')}
                   className={cn(
                     "px-3 py-1 rounded-lg text-[10px] font-bold transition-all",
-                    checklistViewMode === 'summary' ? "bg-white text-[#163300] shadow-sm" : "text-slate-500 hover:text-slate-800"
+                    checklistViewMode === 'summary' ? "bg-white text-[#0D1B2E] shadow-sm" : "text-slate-500 hover:text-slate-800"
                   )}
                 >
                   By Item Summary
@@ -1023,7 +1135,7 @@ export function ExploreScreen() {
                             }
                           }}
                           className={cn(
-                            "fintech-card cursor-pointer hover:border-[#9fe870] transition-all select-none p-4",
+                            "fintech-card cursor-pointer hover:border-[#C9A84C] transition-all select-none p-4",
                             isBulkMode && selectedBulkIds.includes(item.id) ? "border-red-500 bg-red-50/50" : (checked && !isBulkMode ? "bg-slate-50 opacity-60 border-transparent shadow-none" : "")
                           )}
                         >
@@ -1040,7 +1152,7 @@ export function ExploreScreen() {
                                   )
                                 ) : (
                                   checked ? (
-                                    <CheckSquare className="h-8 w-8 text-[#163300] fill-[#9fe870]" />
+                                    <CheckSquare className="h-8 w-8 text-[#0D1B2E] fill-[#C9A84C]" />
                                   ) : (
                                     <Square className="h-8 w-8 text-slate-300" />
                                   )
@@ -1050,7 +1162,7 @@ export function ExploreScreen() {
                               {/* Item name and descriptors */}
                               <div className="space-y-1 min-w-0 flex-1">
                                 <h4 className={cn(
-                                  "text-sm font-bold text-[#163300] truncate",
+                                  "text-sm font-bold text-[#0D1B2E] truncate",
                                   checked && !isBulkMode ? "line-through text-slate-400" : ""
                                 )}>
                                   {item.name}
@@ -1063,7 +1175,7 @@ export function ExploreScreen() {
                                     {item.type === 'sale' ? 'Invoice' : 'Wishlist'}
                                   </span>
                                   <span className="opacity-40">•</span>
-                                  <span className="font-black text-[#163300] text-sm bg-slate-100 px-1.5 py-0.5 rounded">Qty {item.qty}</span>
+                                  <span className="font-black text-[#0D1B2E] text-sm bg-slate-100 px-1.5 py-0.5 rounded">Qty {item.qty}</span>
                                   <span className="opacity-40">•</span>
                                   <span>Client: {item.requester}</span>
                                 </div>
@@ -1088,7 +1200,7 @@ export function ExploreScreen() {
                                   <Button 
                                     variant="ghost" 
                                     size="sm" 
-                                    className="h-6 px-2 text-[10px] text-slate-500 hover:text-[#163300] hover:bg-slate-200/50"
+                                    className="h-6 px-2 text-[10px] text-slate-500 hover:text-[#0D1B2E] hover:bg-slate-200/50"
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       setEditingChecklistItem(item);
@@ -1129,18 +1241,18 @@ export function ExploreScreen() {
                               
                               <div className="shrink-0 flex flex-col items-center justify-center bg-slate-100 h-10 w-10 rounded-xl">
                                 <span className="text-[10px] font-black text-slate-400 uppercase leading-none">Total</span>
-                                <span className={cn("text-lg font-black leading-none", fullyChecked ? "text-slate-400" : "text-[#163300]")}>{group.qty}</span>
+                                <span className={cn("text-lg font-black leading-none", fullyChecked ? "text-slate-400" : "text-[#0D1B2E]")}>{group.qty}</span>
                               </div>
 
                               <div className="space-y-1 min-w-0 flex-1">
                                 <h4 className={cn(
-                                  "text-sm font-bold text-[#163300] truncate",
+                                  "text-sm font-bold text-[#0D1B2E] truncate",
                                   fullyChecked ? "line-through text-slate-400" : ""
                                 )}>
                                   {group.name}
                                 </h4>
                                 <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
-                                  <span className="font-bold text-[#163300]">{group.checkedQty}</span> / {group.qty} already bought
+                                  <span className="font-bold text-[#0D1B2E]">{group.checkedQty}</span> / {group.qty} already bought
                                 </div>
                               </div>
 
@@ -1169,14 +1281,14 @@ export function ExploreScreen() {
             {/* Sticky Progress Bar for Checklist */}
             <div className="fixed bottom-16 left-0 right-0 p-4 pb-6 bg-gradient-to-t from-[#f2f5f7] via-[#f2f5f7] to-transparent pointer-events-none z-30">
               <div className="max-w-md mx-auto">
-                <Card className="fintech-card p-4 pointer-events-auto shadow-xl shadow-slate-200/50 border-t-4 border-t-[#9fe870]">
+                <Card className="fintech-card p-4 pointer-events-auto shadow-xl shadow-slate-200/50 border-t-4 border-t-[#C9A84C]">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Shopping Progress</span>
-                    <span className="text-sm font-black text-[#163300]">{checkedCount} / {totalChecklistCount} Items</span>
+                    <span className="text-sm font-black text-[#0D1B2E]">{checkedCount} / {totalChecklistCount} Items</span>
                   </div>
                   <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden">
                     <div 
-                      className="h-full bg-[#9fe870] transition-all duration-500 ease-out" 
+                      className="h-full bg-[#C9A84C] transition-all duration-500 ease-out" 
                       style={{ width: `${completionPercentage}%` }}
                     />
                   </div>
@@ -1206,11 +1318,11 @@ export function ExploreScreen() {
                     {selectedDetailItem.status}
                   </Badge>
                 </div>
-                <DialogTitle className="text-2xl font-black text-[#163300] mt-3 leading-tight tracking-tight">
+                <DialogTitle className="text-2xl font-black text-[#0D1B2E] mt-3 leading-tight tracking-tight">
                   {selectedDetailItem.name}
                 </DialogTitle>
                 <DialogDescription className="text-sm font-medium text-slate-500 flex items-center gap-1.5 mt-1">
-                  Sourced for client <span className="text-[#163300] font-bold">{selectedDetailItem.requester}</span>
+                  Sourced for client <span className="text-[#0D1B2E] font-bold">{selectedDetailItem.requester}</span>
                 </DialogDescription>
               </DialogHeader>
 
@@ -1233,7 +1345,7 @@ export function ExploreScreen() {
                 ) : (
                   <label htmlFor="detail-image-upload" className="cursor-pointer block w-full h-32 rounded-2xl border-2 border-dashed border-slate-200 hover:bg-slate-50 transition-colors flex flex-col items-center justify-center p-4 bg-[#f2f5f7] text-slate-500 gap-2 text-center">
                     <Camera className="h-8 w-8 text-slate-400" />
-                    <span className="text-xs font-bold text-[#163300]">Add Photo Reference</span>
+                    <span className="text-xs font-bold text-[#0D1B2E]">Add Photo Reference</span>
                     <span className="text-[10px] text-slate-500">Tap to upload</span>
                   </label>
                 )}
@@ -1259,7 +1371,7 @@ export function ExploreScreen() {
                   >
                     <Minus className="h-4 w-4" />
                   </Button>
-                  <div className="flex-1 text-center font-black text-xl text-[#163300]">
+                  <div className="flex-1 text-center font-black text-xl text-[#0D1B2E]">
                     {selectedDetailItem.qty || 1}
                   </div>
                   <Button 
@@ -1317,7 +1429,7 @@ export function ExploreScreen() {
                               setSelectedDetailItem({ ...selectedDetailItem, price: finalIdrPrice });
                             }
                           }}
-                          className="h-14 pl-10 rounded-full bg-white border-none text-lg font-black text-[#163300]"
+                          className="h-14 pl-10 rounded-full bg-white border-none text-lg font-black text-[#0D1B2E]"
                         />
                       </div>
                       {computedPriceInIdr > 0 && editBudgetCurrency !== 'IDR' && (
@@ -1331,7 +1443,7 @@ export function ExploreScreen() {
                     <div className="space-y-1">
                       <label className="text-[10px] font-bold text-slate-500 uppercase">Sell Price (IDR)</label>
                       <div className="relative">
-                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#163300] font-bold">Rp</div>
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#0D1B2E] font-bold">Rp</div>
                         <Input 
                           type="text"
                           inputMode="numeric"
@@ -1345,7 +1457,7 @@ export function ExploreScreen() {
                               setSelectedDetailItem({ ...selectedDetailItem, sellPrice: parseInt(val) || 0 });
                             }
                           }}
-                          className="h-14 pl-10 rounded-full bg-white border-none text-lg font-black text-[#163300]"
+                          className="h-14 pl-10 rounded-full bg-white border-none text-lg font-black text-[#0D1B2E]"
                         />
                       </div>
                     </div>
@@ -1411,7 +1523,7 @@ export function ExploreScreen() {
 
               <div className="pt-4 flex gap-3">
                 <Button 
-                  className="pill-button w-full h-14 bg-[#163300] text-white hover:bg-[#1f4700]"
+                  className="pill-button w-full h-14 bg-[#0D1B2E] text-white hover:bg-[#162847]"
                   onClick={() => handleCloseDetail(true)}
                 >
                   Save & Close
@@ -1428,7 +1540,7 @@ export function ExploreScreen() {
           {editingChecklistItem && (
             <div className="space-y-4">
               <DialogHeader>
-                <DialogTitle className="text-xl font-black text-[#163300]">Edit Transaction Item</DialogTitle>
+                <DialogTitle className="text-xl font-black text-[#0D1B2E]">Edit Transaction Item</DialogTitle>
                 <DialogDescription className="text-xs font-medium text-slate-500">
                   Modifying {editingChecklistItem.type === 'wishlist' ? 'a wishlist request' : 'a logged sale invoice'}.
                 </DialogDescription>
@@ -1459,7 +1571,7 @@ export function ExploreScreen() {
                       >
                         <Minus className="h-4 w-4" />
                       </Button>
-                      <div className="flex-1 text-center font-black text-lg text-[#163300]">
+                      <div className="flex-1 text-center font-black text-lg text-[#0D1B2E]">
                         {editChecklistForm.qty}
                       </div>
                       <Button 
@@ -1530,7 +1642,7 @@ export function ExploreScreen() {
                 </Button>
                 
                 <Button 
-                  className="h-12 rounded-xl bg-[#163300] text-white hover:bg-[#1f4700] flex-1"
+                  className="h-12 rounded-xl bg-[#0D1B2E] text-white hover:bg-[#162847] flex-1"
                   onClick={async () => {
                     const isConfirmed = await confirm("Are you sure you want to save these changes?");
                     if (!isConfirmed) return;
@@ -1608,7 +1720,7 @@ export function ExploreScreen() {
               Close
             </Button>
             <Button 
-              className="flex-1 h-14 rounded-2xl font-black text-sm shadow-lg shadow-primary/20 bg-[#163300] hover:bg-[#1f4700] text-white"
+              className="flex-1 h-14 rounded-2xl font-black text-sm shadow-lg shadow-primary/20 bg-[#0D1B2E] hover:bg-[#162847] text-white"
               onClick={() => navigate(`/invoice/${invoiceModalSale?.id}`)}
             >
               View Full Invoice
