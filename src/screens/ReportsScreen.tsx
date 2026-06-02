@@ -192,7 +192,7 @@ export function ReportsScreen() {
         {Icon && <div className="h-8 w-8 rounded-xl flex items-center justify-center" style={{ backgroundColor: GOLD + '20' }}><Icon className="h-4 w-4" style={{ color: GOLD }} /></div>}
         <div>
           <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">{label}</p>
-          <p className={cn('text-lg font-black leading-tight mt-0.5', positive === true ? 'text-emerald-600' : positive === false ? 'text-red-500' : '')} style={positive === undefined ? { color: NAVY } : {}}>{value}</p>
+          <p className={cn('text-lg font-black leading-tight mt-0.5', positive === true ? 'text-[#0D1B2E]' : positive === false ? 'text-red-500' : '')} style={positive === undefined ? { color: NAVY } : {}}>{value}</p>
           {sub && <p className="text-[10px] text-slate-400 font-medium mt-0.5">{sub}</p>}
         </div>
       </CardContent>
@@ -286,12 +286,12 @@ export function ReportsScreen() {
                       {netProfit >= 0 ? '+' : ''}{marginPct}% margin
                     </Badge>
                   </div>
-                  <p className={cn('text-4xl font-black leading-none', netProfit >= 0 ? 'text-emerald-400' : 'text-red-400')}>
+                  <p className={cn('text-4xl font-black leading-none', netProfit >= 0 ? 'text-[#C9A84C]' : 'text-red-400')}>
                     Rp {netProfit.toLocaleString()}
                   </p>
                   <div className="flex items-center gap-1 mt-2">
                     {netProfit >= 0
-                      ? <><ArrowUpRight className="h-3.5 w-3.5 text-emerald-400" /><span className="text-[10px] text-white/60">Profitable trip</span></>
+                      ? <><ArrowUpRight className="h-3.5 w-3.5 text-[#C9A84C]" /><span className="text-[10px] text-white/60">Profitable trip</span></>
                       : <><ArrowDownRight className="h-3.5 w-3.5 text-red-400" /><span className="text-[10px] text-white/60">Expenses exceed income</span></>
                     }
                   </div>
@@ -442,7 +442,7 @@ export function ReportsScreen() {
                                     </div>
                                     <div className="flex justify-between text-[10px] text-slate-500">
                                       <span>Cost: Rp {totalCost.toLocaleString()}</span>
-                                      <span className={profit >= 0 ? 'text-emerald-600 font-bold' : 'text-red-500 font-bold'}>Margin: Rp {profit.toLocaleString()}</span>
+                                      <span className={profit >= 0 ? 'text-[#0D1B2E] font-bold' : 'text-red-500 font-bold'}>Margin: Rp {profit.toLocaleString()}</span>
                                     </div>
                                   </div>
                                 );
@@ -569,7 +569,7 @@ export function ReportsScreen() {
                             </div>
                           </div>
                           <div className="text-right">
-                            <p className="text-sm font-black text-emerald-600">+Rp {p.profit.toLocaleString()}</p>
+                            <p className="text-sm font-black text-[#0D1B2E]">+Rp {p.profit.toLocaleString()}</p>
                             <p className="text-[10px] text-slate-400">{p.margin.toFixed(1)}% margin</p>
                           </div>
                         </div>
@@ -630,7 +630,7 @@ export function ReportsScreen() {
                           <Calendar className="h-4 w-4" style={{ color: GOLD }} />
                           <p className="text-xs font-black uppercase tracking-widest" style={{ color: NAVY }}>{day.date}</p>
                         </div>
-                        <p className={cn('text-sm font-black', dayNet >= 0 ? 'text-emerald-600' : 'text-red-500')}>
+                        <p className={cn('text-sm font-black', dayNet >= 0 ? 'text-[#0D1B2E]' : 'text-red-500')}>
                           {dayNet >= 0 ? '+' : ''}Rp {dayNet.toLocaleString()}
                         </p>
                       </div>
@@ -642,7 +642,7 @@ export function ReportsScreen() {
                         </div>
                         <div className="p-3 text-center">
                           <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Revenue</p>
-                          <p className="text-xs font-black mt-0.5 text-emerald-600">Rp {daySales.toLocaleString()}</p>
+                          <p className="text-xs font-black mt-0.5 text-[#0D1B2E]">Rp {daySales.toLocaleString()}</p>
                         </div>
                         <div className="p-3 text-center">
                           <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Expenses</p>
@@ -660,7 +660,7 @@ export function ReportsScreen() {
                                 </div>
                                 <p className="text-xs font-bold" style={{ color: NAVY }}>{s.customerName}</p>
                               </div>
-                              <p className="text-xs font-black text-emerald-600">+Rp {s.total.toLocaleString()}</p>
+                              <p className="text-xs font-black text-[#0D1B2E]">+Rp {s.total.toLocaleString()}</p>
                             </div>
                           ))}
                           {day.expenses.map((e: any) => (
