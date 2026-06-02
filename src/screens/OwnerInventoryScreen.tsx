@@ -33,7 +33,7 @@ export function OwnerInventoryScreen() {
   const [sortBy, setSortBy] = useState<'recent' | 'price_asc' | 'price_desc' | 'margin' | 'sold'>('recent');
   const [filterBy, setFilterBy] = useState<'all' | 'high_margin' | 'low_margin' | 'no_sales'>('all');
   
-  const { catalogItems: inventory, removeItem, sales, tripSettings } = useMaster();
+  const { catalogItems: inventory, removeItem, sales, tripSettings, currentUser } = useMaster();
   const confirm = useConfirm();
 
   const conversionRate = tripSettings?.currency?.manualRate || 13500;
@@ -106,10 +106,11 @@ export function OwnerInventoryScreen() {
   }, [enrichedInventory, searchQuery, filterBy, sortBy]);
 
   const handleShareCatalog = () => {
-    const url = `${window.location.origin}/catalog`;
+    const username = currentUser?.username || 'store';
+    const url = `${window.location.origin}/catalog/${username}`;
     navigator.clipboard.writeText(url);
     toast.success('Public catalog link copied!', {
-      description: 'Your customers can now browse your active listings at /catalog.'
+      description: `Your customers can now browse your listings at /catalog/${username}.`
     });
   };
 
