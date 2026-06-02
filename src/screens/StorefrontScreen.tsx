@@ -172,7 +172,7 @@ export function StorefrontScreen() {
 
     const confirmed = await confirm({
       title: paymentMethod === 'stripe' ? 'Pay Now with Stripe' : 'Submit Request',
-      description: `Submit sourcing request for ${qty}x "${item.name}"?`
+      description: `Submit order request for ${qty}x "${item.name}"?`
     });
     if (!confirmed) return;
 
@@ -227,7 +227,7 @@ export function StorefrontScreen() {
         }
       }
 
-      toast.success('Sourcing request submitted successfully!', {
+      toast.success('Order request submitted successfully!', {
         description: `Your request has been routed to the traveler's pending checklist.`
       });
       setIsOpen(false);
@@ -267,7 +267,7 @@ export function StorefrontScreen() {
           The requested item catalog link is invalid or the traveler has removed this listing.
         </p>
         <Button className="mt-6 rounded-2xl font-bold gap-2 px-6" onClick={() => navigate('/')}>
-          <ArrowLeft className="h-4 w-4" /> Go to Hub
+          <ArrowLeft className="h-4 w-4" /> Go to Dashboard
         </Button>
       </div>
     );
@@ -295,7 +295,7 @@ export function StorefrontScreen() {
           />
           <div className="absolute top-4 left-4 bg-emerald-500 text-white font-black px-3.5 py-1.5 rounded-xl shadow-lg text-[10px] tracking-wider uppercase flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full bg-white animate-pulse" />
-            Live Sourcing Request
+            Available for Order
           </div>
         </div>
 
@@ -325,7 +325,7 @@ export function StorefrontScreen() {
 
           {activeTab === 'history' ? (
             <div className="space-y-4 animate-in slide-in-from-right-4 fade-in duration-300">
-              <h3 className="text-sm font-black uppercase tracking-widest text-slate-800 mb-2">My Sourcing History</h3>
+              <h3 className="text-sm font-black uppercase tracking-widest text-slate-800 mb-2">My Transactions</h3>
               {myHistory.length === 0 ? (
                 <div className="text-center p-8 bg-white rounded-3xl border border-dashed border-slate-200">
                   <p className="text-xs text-muted-foreground font-bold">No transactions found.</p>
@@ -366,7 +366,7 @@ export function StorefrontScreen() {
               <section className="space-y-3 animate-in slide-in-from-left-4 fade-in duration-300">
           <div className="space-y-1 text-left">
             <span className="text-[10px] font-black uppercase tracking-widest text-primary bg-primary/5 px-2.5 py-1 rounded-full inline-block">
-              Matched Sourcing Catalog
+              Product Details
             </span>
             <h2 className="text-2xl font-black uppercase italic tracking-tighter text-slate-800 leading-tight">
               {item.name}
@@ -376,7 +376,7 @@ export function StorefrontScreen() {
           <Card className="border-none shadow-sm bg-white overflow-hidden">
             <CardContent className="p-4 flex items-center justify-between">
               <div className="space-y-0.5 text-left">
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Publish Sourcing Price</p>
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Price</p>
                 <p className="text-2xl font-black text-primary font-mono">Rp {item.price.toLocaleString()}</p>
               </div>
               <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-100/60 font-bold px-3 py-1.5 rounded-xl text-[10px] leading-none uppercase shrink-0">
@@ -388,7 +388,7 @@ export function StorefrontScreen() {
 
         {/* Traveler details block */}
         <section className="space-y-3">
-          <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Sourcing Traveler</label>
+          <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Traveler</label>
           <Card className="border-none shadow-sm bg-white rounded-3xl">
             <CardContent className="p-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -420,7 +420,7 @@ export function StorefrontScreen() {
 
         {/* Trip Ledger details */}
         <section className="space-y-3">
-          <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Trip Sourcing Route Specifications</label>
+          <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Trip Route</label>
           <div className="p-4 rounded-3xl bg-slate-900 text-white space-y-4 shadow-xl relative overflow-hidden">
             <div className="flex justify-between items-center relative z-10">
               <div className="space-y-1 text-left">
@@ -428,7 +428,7 @@ export function StorefrontScreen() {
                 <p className="text-xs font-bold uppercase tracking-tight">{tripSettings?.trip?.date || '22 May 2026'}</p>
               </div>
               <div className="space-y-1 text-right">
-                <p className="text-[8px] opacity-40 font-black uppercase tracking-widest">Sourcing Currency</p>
+                <p className="text-[8px] opacity-40 font-black uppercase tracking-widest">Currency</p>
                 <p className="text-xs font-bold uppercase tracking-tight">{tripSettings?.currency?.code || 'SGD'} ({tripSettings?.currency?.symbol || 'S$'})</p>
               </div>
             </div>
@@ -441,7 +441,7 @@ export function StorefrontScreen() {
                   <Globe className="h-4 w-4 text-emerald-400" />
                 </div>
                 <div>
-                  <p className="text-[8px] opacity-40 font-black uppercase tracking-widest">Sourcing Origin</p>
+                  <p className="text-[8px] opacity-40 font-black uppercase tracking-widest">Origin</p>
                   <p className="text-xs font-bold uppercase tracking-tight">{tripSettings?.trip?.origin || 'Seoul'}</p>
                 </div>
               </div>
@@ -466,7 +466,7 @@ export function StorefrontScreen() {
             className="w-full h-14 rounded-2xl font-black uppercase italic text-sm gap-3 shadow-lg shadow-primary/20 hover:scale-[1.01] active:scale-95 transition-all"
             onClick={() => setIsOpen(true)}
           >
-            <Sparkles className="h-5 w-5" /> Request Traveler to Settle Sourcing
+            <Sparkles className="h-5 w-5" /> Request Order
           </Button>
         </div>
         </>
@@ -485,7 +485,7 @@ export function StorefrontScreen() {
         <DialogContent className="max-w-md">
           <DialogHeader className="text-left pb-2">
             <DialogTitle className="text-lg font-black tracking-tight uppercase italic text-primary flex items-center gap-2">
-              <MessageSquare className="h-5 w-5" /> Order Sourcing Request
+              <MessageSquare className="h-5 w-5" /> Order Request
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground font-semibold">
               {step === 'contact' ? "Enter your contact details to begin." :

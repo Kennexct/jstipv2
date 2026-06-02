@@ -121,7 +121,7 @@ export function OwnerRequestDetailScreen() {
       currency: newItemData.currency,
       shippingCost: 0,
       status: 'pending',
-      logs: ['Manually added via Hub']
+      logs: ['Manually added via Dashboard']
     };
     setItems([...items, newItem]);
     setNewItemData({ name: '', cost: 0, price: 0, currency: 'SGD' });

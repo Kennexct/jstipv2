@@ -43,7 +43,7 @@ export function LoginScreen() {
             <img src="/logo.png" alt="JStip Logo" className="h-full w-full object-cover" />
           </div>
           <h2 className="text-2xl font-black uppercase italic tracking-tighter text-slate-800">JStip</h2>
-          <p className="text-xs text-muted-foreground uppercase font-bold tracking-widest">Traveler Sourcing Ledger</p>
+          <p className="text-xs text-muted-foreground uppercase font-bold tracking-widest">Traveler Dashboard</p>
         </div>
 
         <Card className="border-none shadow-xl bg-white rounded-3xl overflow-hidden">

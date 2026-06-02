@@ -12,7 +12,7 @@ export function Sidebar() {
   const confirm = useConfirm();
 
   const navItems = [
-    { icon: LayoutDashboard, label: 'Hub', path: '/' },
+    { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
     { icon: TrendingUp, label: 'Wishlist', path: '/explore' },
     { icon: PackageSearch, label: 'Catalog', path: '/owner/inventory' },
     { icon: BarChart2, label: 'Reports', path: '/reports' },

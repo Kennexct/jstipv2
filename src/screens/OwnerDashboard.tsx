@@ -113,7 +113,7 @@ export function OwnerDashboard() {
       <div className="min-h-screen flex items-center justify-center bg-muted/5">
         <div className="flex flex-col items-center gap-3">
           <div className="h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Loading Hub Dashboard...</p>
+          <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Loading Dashboard...</p>
         </div>
       </div>
     );

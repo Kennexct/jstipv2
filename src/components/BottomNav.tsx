@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 
 export function BottomNav() {
   const navItemsLeft = [
-    { icon: LayoutDashboard, label: 'Hub', path: '/' },
+    { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
     { icon: TrendingUp, label: 'Wishlist', path: '/explore' },
   ];
 

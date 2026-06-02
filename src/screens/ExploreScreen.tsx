@@ -816,13 +816,13 @@ export function ExploreScreen() {
               </div>
             ) : (
               <div className="space-y-6">
-                {/* 1. Category: ITEMS STILL PENDING SOURCING */}
+                {/* 1. Category: ITEMS STILL PENDING */}
                 {pendingWishlist.length > 0 ? (
                   <div className="space-y-3">
                     <div className="flex items-center gap-2 px-1">
                       <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse shrink-0" />
                       <p className="text-[10px] font-black uppercase tracking-wider text-slate-500">
-                        Pending Sourcing ({pendingWishlist.length})
+                        Pending Orders ({pendingWishlist.length})
                       </p>
                     </div>
                     <div className="space-y-2.5">
