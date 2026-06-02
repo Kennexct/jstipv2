@@ -17,7 +17,8 @@ import {
   Shield,
   Phone,
   Mail,
-  User
+  User,
+  DollarSign
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -62,6 +63,22 @@ export function StorefrontScreen() {
   
   const { catalogItems, saveWishlist, currentUser, tripSettings } = useMaster();
   const confirm = useConfirm();
+
+  // Auto-load customer session
+  useEffect(() => {
+    try {
+      const session = localStorage.getItem('jstip_customer_session');
+      if (session) {
+        const data = JSON.parse(session);
+        if (data.email && data.name) {
+          setClientName(data.name);
+          setCustomerEmail(data.email);
+          setCustomerPhone(data.phone || '');
+          setStep('order');
+        }
+      }
+    } catch (e) {}
+  }, []);
 
   useEffect(() => {
     async function loadData() {
@@ -135,6 +152,15 @@ export function StorefrontScreen() {
       toast.error('Invalid OTP. Please check your email.');
       return;
     }
+    // Save session to prevent asking OTP again
+    try {
+      localStorage.setItem('jstip_customer_session', JSON.stringify({
+        name: clientName,
+        email: customerEmail,
+        phone: customerPhone
+      }));
+    } catch (e) {}
+    
     setStep('order');
   };
 
@@ -201,12 +227,11 @@ export function StorefrontScreen() {
         description: `Your request has been routed to the traveler's pending checklist.`
       });
       setIsOpen(false);
-      // Reset flow
+      // Reset flow except customer info
       setTimeout(() => {
-        setStep('contact');
-        setClientName('');
-        setCustomerEmail('');
-        setCustomerPhone('');
+        // If session exists, stay on order step, otherwise contact
+        const session = localStorage.getItem('jstip_customer_session');
+        setStep(session ? 'order' : 'contact');
         setClientNotes('');
         setOrderQty('1');
         setOtp('');
@@ -397,7 +422,7 @@ export function StorefrontScreen() {
             <DialogDescription className="text-xs text-muted-foreground font-semibold">
               {step === 'contact' ? "Enter your contact details to begin." :
                step === 'otp' ? "Verify your email address." :
-               "Specify your exact order requirements."}
+               `Hi ${clientName.split(' ')[0]}! Specify your exact order requirements.`}
             </DialogDescription>
           </DialogHeader>
 
@@ -525,14 +550,14 @@ export function StorefrontScreen() {
                   <Button 
                     disabled={submitting}
                     variant="outline"
-                    className="w-full h-12 rounded-2xl font-black uppercase italic gap-2 text-slate-500 hover:text-slate-700"
+                    className="w-full h-12 rounded-xl font-bold uppercase tracking-widest text-xs gap-2 text-slate-500 hover:text-slate-800"
                     onClick={() => handleSubmitOrder('cash')}
                   >
                     <Send className="h-4 w-4" /> {submitting ? 'Submitting...' : 'Pay with Cash'}
                   </Button>
                   <Button 
                     disabled={submitting}
-                    className="w-full h-12 rounded-2xl font-black uppercase italic shadow-lg shadow-primary/10 gap-2"
+                    className="w-full h-12 rounded-xl font-black uppercase italic tracking-wide shadow-lg shadow-primary/20 gap-2 text-sm"
                     onClick={() => handleSubmitOrder('stripe')}
                   >
                     <DollarSign className="h-4 w-4" /> {submitting ? 'Redirecting...' : 'Pay Now (Stripe)'}
