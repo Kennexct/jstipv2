@@ -14,7 +14,7 @@ export default async function handler(req, res) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer re_HxNLEtZK_HuDDyamNuLSvHYuiNFYXvP65`
+        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`
       },
       body: JSON.stringify({
         from: 'JStip Auth <onboarding@resend.dev>',

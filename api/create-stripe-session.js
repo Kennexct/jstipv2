@@ -17,8 +17,28 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing order details' });
     }
     
-    // Stripe mewajibkan nominal dikali 100 untuk mata uang IDR (karena dianggap memiliki 2 desimal di Stripe)
-    const unitAmount = Math.round(orderDetails.price * 100);
+    // SECURITY: Validate price from database to prevent Client-Side Price Manipulation
+    let finalPrice = orderDetails.price;
+    if (orderDetails.itemId && process.env.VITE_SUPABASE_URL && process.env.VITE_SUPABASE_ANON_KEY) {
+      try {
+        const supaUrl = process.env.VITE_SUPABASE_URL;
+        const supaKey = process.env.VITE_SUPABASE_ANON_KEY;
+        const dbRes = await fetch(`${supaUrl}/rest/v1/jstip_items?id=eq.${orderDetails.itemId}`, {
+          headers: { 'apikey': supaKey, 'Authorization': `Bearer ${supaKey}` }
+        });
+        if (dbRes.ok) {
+          const items = await dbRes.json();
+          if (items.length > 0) {
+            finalPrice = items[0].price; // Use trusted backend price
+          }
+        }
+      } catch (e) {
+        console.error('Failed to verify price against Supabase', e);
+      }
+    }
+
+    // Stripe mewajibkan nominal dikali 100 untuk mata uang IDR
+    const unitAmount = Math.round(finalPrice * 100);
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
