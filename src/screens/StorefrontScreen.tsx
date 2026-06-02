@@ -56,6 +56,8 @@ export function StorefrontScreen() {
   const [otp, setOtp] = useState('');
   const [expectedOtp, setExpectedOtp] = useState('');
   const [orderQty, setOrderQty] = useState('1');
+  const [activeTab, setActiveTab] = useState<'request' | 'history'>('request');
+  const [myHistory, setMyHistory] = useState<any[]>([]);
   const [clientBudget, setClientBudget] = useState('');
   const [clientLocation, setClientLocation] = useState('');
   const [clientNotes, setClientNotes] = useState('');
@@ -181,7 +183,9 @@ export function StorefrontScreen() {
       name: `[${qty}x] ${item.name}`,
       requester: `${clientName.trim()} (${customerEmail})`,
       status: 'pending',
-      price: finalPrice, 
+      price: item.price, 
+      sellPrice: item.price,
+      qty: qty,
       location: tripSettings?.trip?.origin || 'Seoul',
       image: item.image,
       note: clientNotes.trim() || undefined,
@@ -282,7 +286,7 @@ export function StorefrontScreen() {
 
       <div className="max-w-5xl mx-auto md:py-8 px-0 md:px-6 flex flex-col md:flex-row gap-0 md:gap-12">
         {/* Hero Image Section */}
-        <div className="w-full md:w-1/2 relative aspect-square bg-white md:rounded-[2rem] overflow-hidden shrink-0 border-b md:border border-slate-100 shadow-sm">
+        <div className="w-full md:w-1/3 xl:w-1/2 relative aspect-square bg-white md:rounded-[2rem] overflow-hidden shrink-0 border-b md:border border-slate-100 shadow-sm">
           <WatermarkOverlay />
           <img 
             src={item.image} 
@@ -295,9 +299,71 @@ export function StorefrontScreen() {
           </div>
         </div>
 
-        <div className="w-full md:w-1/2 p-6 md:p-0 space-y-6">
-        {/* Title & Price Card */}
-        <section className="space-y-3">
+        <div className="w-full md:w-2/3 xl:w-1/2 p-6 md:p-0 flex flex-col gap-6">
+          
+          {/* Tabs for Logged-In Customer */}
+          {customerEmail && (
+            <div className="flex bg-slate-200/50 p-1 rounded-2xl w-full max-w-xs shadow-inner">
+              <button 
+                onClick={() => setActiveTab('request')}
+                className={`flex-1 py-2 text-xs font-black uppercase tracking-widest rounded-xl transition-all ${activeTab === 'request' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
+              >
+                Request Order
+              </button>
+              <button 
+                onClick={async () => {
+                  setActiveTab('history');
+                  const list = await db.getWishlist(item.merchant_id || item.merchantId);
+                  setMyHistory(list.filter((x: any) => x.requester.includes(customerEmail)));
+                }}
+                className={`flex-1 py-2 text-xs font-black uppercase tracking-widest rounded-xl transition-all ${activeTab === 'history' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
+              >
+                My Transactions
+              </button>
+            </div>
+          )}
+
+          {activeTab === 'history' ? (
+            <div className="space-y-4 animate-in slide-in-from-right-4 fade-in duration-300">
+              <h3 className="text-sm font-black uppercase tracking-widest text-slate-800 mb-2">My Sourcing History</h3>
+              {myHistory.length === 0 ? (
+                <div className="text-center p-8 bg-white rounded-3xl border border-dashed border-slate-200">
+                  <p className="text-xs text-muted-foreground font-bold">No transactions found.</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {myHistory.map(h => (
+                    <Card key={h.id} className="border-none shadow-sm bg-white overflow-hidden rounded-2xl">
+                      <CardContent className="p-4 space-y-2">
+                        <div className="flex justify-between items-start">
+                          <h4 className="font-bold text-sm text-slate-800 line-clamp-1">{h.name}</h4>
+                          <Badge variant="outline" className={`shrink-0 uppercase text-[9px] font-black tracking-widest border-none ${
+                            h.status === 'confirm' ? 'bg-emerald-100 text-emerald-800' : 
+                            h.status === 'pending' ? 'bg-slate-100 text-slate-600' :
+                            h.status === 'cancelled' ? 'bg-red-100 text-red-600' :
+                            'bg-blue-100 text-blue-800'
+                          }`}>
+                            {h.status === 'confirm' ? 'Acquired' : h.status}
+                          </Badge>
+                        </div>
+                        <div className="flex justify-between items-center text-xs">
+                          <span className="text-slate-500 font-medium">Qty: {h.qty || 1} • <span className="font-bold text-slate-800">Rp {((h.sellPrice || h.price || 0) * (h.qty || 1)).toLocaleString()}</span></span>
+                          <span className={`font-black text-[9px] uppercase tracking-widest px-2 py-1 rounded-md ${
+                            h.paymentStatus === 'paid' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
+                          }`}>
+                            {h.paymentMethod === 'stripe' ? 'Stripe' : 'Cash'} • {h.paymentStatus}
+                          </span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <>
+              {/* Title & Price Card */}
+              <section className="space-y-3 animate-in slide-in-from-left-4 fade-in duration-300">
           <div className="space-y-1 text-left">
             <span className="text-[10px] font-black uppercase tracking-widest text-primary bg-primary/5 px-2.5 py-1 rounded-full inline-block">
               Matched Sourcing Catalog
@@ -403,7 +469,9 @@ export function StorefrontScreen() {
             <Sparkles className="h-5 w-5" /> Request Traveler to Settle Sourcing
           </Button>
         </div>
-      </div>
+        </>
+          )}
+        </div>
       </div>
 
       {/* Sourcing Request Modal Dialog */}

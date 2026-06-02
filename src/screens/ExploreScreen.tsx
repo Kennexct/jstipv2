@@ -443,6 +443,16 @@ export function ExploreScreen() {
                 <span className="font-bold text-[#0D1B2E]">Rp {(item.sellPrice || item.price).toLocaleString()}</span>
                 <span className="opacity-40">•</span>
                 <span className="flex items-center gap-0.5"><MapPinIcon className="h-3 w-3" />{item.location}</span>
+                {item.paymentMethod && (
+                  <>
+                    <span className="opacity-40">•</span>
+                    <span className={`font-black text-[9px] uppercase tracking-widest px-1.5 py-0.5 rounded-md ${
+                      item.paymentStatus === 'paid' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
+                    }`}>
+                      {item.paymentMethod === 'stripe' ? '💳 Stripe' : '💵 Cash'} {item.paymentStatus === 'paid' ? '- Paid' : '- Pend'}
+                    </span>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -473,12 +483,12 @@ export function ExploreScreen() {
                 <div className="absolute right-0 top-10 mt-1 bg-white border border-slate-100 rounded-2xl shadow-xl p-2.5 z-50 min-w-[170px] space-y-1 text-left cursor-default" onClick={e => e.stopPropagation()}>
                   <p className="text-[8px] font-black uppercase text-muted-foreground tracking-widest px-1.5 pb-1.5 border-b">Set Status</p>
                   {[
-                    { code: 'pending', label: '⏳ Pending', color: 'text-slate-600 hover:bg-slate-50/70' },
-                    { code: 'found', label: '🔍 Found', color: 'text-blue-600 hover:bg-blue-50/70' },
-                    { code: 'confirm', label: '✅ Confirm', color: 'text-emerald-600 hover:bg-emerald-50/70' },
-                    { code: 'out_of_stock', label: '❌ Out of Stock', color: 'text-amber-600 hover:bg-amber-50/70' },
-                    { code: 'cancelled', label: '🚫 Cancelled', color: 'text-red-500 hover:bg-red-50' },
-                  ].map((opt) => (
+                    { code: 'pending', label: '⏳ Pending', color: 'text-slate-600 hover:bg-slate-50/70', show: true },
+                    { code: 'found', label: '🔍 Found', color: 'text-blue-600 hover:bg-blue-50/70', show: !item.paymentMethod },
+                    { code: 'confirm', label: '✅ Confirm (Acquired)', color: 'text-emerald-600 hover:bg-emerald-50/70', show: true },
+                    { code: 'out_of_stock', label: '❌ Out of Stock', color: 'text-amber-600 hover:bg-amber-50/70', show: true },
+                    { code: 'cancelled', label: '🚫 Cancelled', color: 'text-red-500 hover:bg-red-50', show: true },
+                  ].filter(opt => opt.show).map((opt) => (
                     <button
                       key={opt.code}
                       type="button"
@@ -1383,12 +1393,12 @@ export function ExploreScreen() {
                 <label className="text-[9px] font-black uppercase tracking-widest text-slate-400">Status Control Panel</label>
                 <div className="grid grid-cols-3 gap-1.5">
                   {[
-                    { code: 'find', label: '🔍 Find' },
-                    { code: 'found', label: '✅ Found' },
-                    { code: 'out of stock', label: '❌ OOS' },
-                    { code: 'cancel', label: '🚫 Cancel' },
-                    { code: 'hold', label: '⏸️ Hold' },
-                  ].map((opt) => (
+                    { code: 'pending', label: '⏳ Pending', show: true },
+                    { code: 'found', label: '🔍 Found', show: !selectedDetailItem.paymentMethod },
+                    { code: 'confirm', label: '✅ Confirm', show: true },
+                    { code: 'out_of_stock', label: '❌ OOS', show: true },
+                    { code: 'cancelled', label: '🚫 Cancel', show: true },
+                  ].filter(opt => opt.show).map((opt) => (
                     <button
                       key={opt.code}
                       type="button"

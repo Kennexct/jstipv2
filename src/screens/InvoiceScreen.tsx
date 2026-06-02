@@ -56,9 +56,19 @@ export function InvoiceScreen() {
             </div>
           </div>
 
-          <div className="pt-4 border-t border-slate-100">
+          <div className="pt-4 border-t border-slate-100 relative">
+            {invoice.paymentStatus === 'paid' && (
+              <div className="absolute top-2 right-4 transform rotate-12 opacity-80 pointer-events-none">
+                <div className="border-4 border-emerald-500 text-emerald-500 px-4 py-1 rounded-xl text-2xl font-black uppercase tracking-widest inline-block shadow-sm">
+                  PAID IN FULL
+                </div>
+                <div className="text-center text-[10px] font-black text-emerald-600 mt-1 uppercase tracking-widest">
+                  VIA {invoice.paymentMethod === 'stripe' ? 'STRIPE' : 'CASH'}
+                </div>
+              </div>
+            )}
             <h4 className="text-[10px] uppercase font-black tracking-widest text-muted-foreground mb-2">Billed To</h4>
-            <p className="font-black text-lg text-slate-800 uppercase tracking-tight">{invoice.customerName || 'Walk-in Customer'}</p>
+            <p className="font-black text-lg text-slate-800 uppercase tracking-tight w-2/3">{invoice.customerName || 'Walk-in Customer'}</p>
           </div>
 
           <div className="space-y-4">
@@ -92,8 +102,17 @@ export function InvoiceScreen() {
               </div>
               <div className="flex justify-between text-xl font-black pt-3 border-t-2 border-dashed border-slate-200">
                 <span className="text-sm font-black uppercase tracking-widest self-end">Total Due</span>
-                <span className="text-primary text-3xl tracking-tighter">Rp {(invoice.total || 0).toLocaleString()}</span>
+                <span className="text-primary text-3xl tracking-tighter">
+                  Rp {invoice.paymentStatus === 'paid' ? '0' : (invoice.total || 0).toLocaleString()}
+                </span>
               </div>
+              {invoice.paymentStatus === 'paid' && (
+                <div className="flex justify-end pt-1">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500 bg-emerald-50 px-2 py-1 rounded-md">
+                    Already Paid via {invoice.paymentMethod === 'stripe' ? 'Stripe' : 'Cash'}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 
