@@ -427,14 +427,13 @@ export function StorefrontScreen() {
               <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
                 <div className="text-center space-y-2 mb-4">
                   <Shield className="h-8 w-8 text-primary mx-auto" />
-                  <h3 className="text-sm font-black text-slate-800">Enter Verification Code</h3>
-                  <p className="text-xs text-muted-foreground font-medium">Sent to {customerEmail}</p>
                 </div>
                 <Input 
                   placeholder="6-digit OTP" 
                   value={otp}
                   onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  className="h-14 rounded-xl bg-muted/30 border-none font-black text-xl text-center text-slate-800 tracking-widest mx-auto max-w-[200px]" 
+                  autoComplete="off"
+                  className="h-14 rounded-xl bg-muted border-none font-black text-xl text-center text-slate-800 tracking-widest mx-auto max-w-[200px] focus-visible:ring-primary/20" 
                 />
                 <Button 
                   disabled={otp.length < 6}
@@ -462,7 +461,8 @@ export function StorefrontScreen() {
                       min="1"
                       value={orderQty}
                       onChange={e => setOrderQty(e.target.value)}
-                      className="h-11 rounded-xl bg-muted/30 border-none font-bold text-sm text-center text-slate-800" 
+                      autoComplete="off"
+                      className="h-11 rounded-xl bg-muted border-none font-bold text-sm text-center text-slate-800 focus-visible:ring-primary/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
                     />
                   </div>
 
@@ -473,7 +473,7 @@ export function StorefrontScreen() {
                       <Input 
                         disabled
                         value={(item ? ((parseInt(orderQty) || 1) * item.price) : 0).toLocaleString()}
-                        className="h-11 pl-9 rounded-xl bg-muted/30 border-none font-bold text-sm text-slate-800 disabled:opacity-75" 
+                        className="h-11 pl-9 rounded-xl bg-muted border-none font-bold text-sm text-slate-800 disabled:opacity-100" 
                       />
                     </div>
                   </div>

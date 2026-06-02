@@ -1167,16 +1167,16 @@ export function ExploreScreen() {
             )}
             
             {/* Sticky Progress Bar for Checklist */}
-            <div className="fixed bottom-16 left-0 right-0 p-4 pb-6 bg-gradient-to-t from-[#f2f5f7] via-[#f2f5f7] to-transparent pointer-events-none z-30">
-              <div className="max-w-md mx-auto">
-                <Card className="fintech-card p-4 pointer-events-auto shadow-xl shadow-slate-200/50 border-t-4 border-t-[#C9A84C]">
+            <div className="fixed bottom-16 md:bottom-6 left-0 md:left-64 right-0 p-4 pb-6 bg-gradient-to-t from-slate-50 via-slate-50/90 to-transparent pointer-events-none z-30">
+              <div className="max-w-3xl mx-auto md:px-8">
+                <Card className="fintech-card p-4 pointer-events-auto shadow-xl shadow-slate-200/50 border-t-4 border-t-primary">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Shopping Progress</span>
-                    <span className="text-sm font-black text-[#0D1B2E]">{checkedCount} / {totalChecklistCount} Items</span>
+                    <span className="text-sm font-black text-foreground">{checkedCount} / {totalChecklistCount} Items</span>
                   </div>
-                  <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                  <div className="h-2.5 w-full bg-slate-200 rounded-full overflow-hidden">
                     <div 
-                      className="h-full bg-[#C9A84C] transition-all duration-500 ease-out" 
+                      className="h-full bg-primary transition-all duration-500 ease-out" 
                       style={{ width: `${completionPercentage}%` }}
                     />
                   </div>
