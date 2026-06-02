@@ -66,7 +66,7 @@ export default function App() {
             <Suspense fallback={<LoadingFallback />}>
             <Routes>
               {/* Public Storefront Route */}
-              <Route path="catalog" element={<PublicCatalogScreen />} />
+              <Route path="catalog/:username" element={<PublicCatalogScreen />} />
               <Route path="items/:id" element={<StorefrontScreen />} />
 
               {/* Auth routes */}
