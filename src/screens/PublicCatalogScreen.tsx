@@ -145,14 +145,31 @@ export function PublicCatalogScreen() {
         </div>
         
         <div className="flex items-center gap-6">
-          <button className="flex items-center gap-2 text-sm font-bold text-slate-600 hover:text-[#0D1B2E]">
+          <button 
+            onClick={() => {
+              const session = localStorage.getItem('jstip_customer_session');
+              if (!session) setAuthModalOpen(true);
+              else toast('Customer Dashboard (Wishlist) coming soon!');
+            }}
+            className="flex items-center gap-2 text-sm font-bold text-slate-600 hover:text-[#0D1B2E]"
+          >
             <Heart className="h-5 w-5" /> Wishlist
           </button>
-          <button className="flex items-center gap-2 text-sm font-bold text-slate-600 hover:text-[#0D1B2E]">
+          <button 
+            onClick={() => toast('Notifications coming soon!')}
+            className="flex items-center gap-2 text-sm font-bold text-slate-600 hover:text-[#0D1B2E]"
+          >
             <Bell className="h-5 w-5" /> Notifications
           </button>
           <div className="h-8 w-px bg-slate-200" />
-          <button className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center text-[#0D1B2E] hover:bg-slate-200">
+          <button 
+            onClick={() => {
+              const session = localStorage.getItem('jstip_customer_session');
+              if (!session) setAuthModalOpen(true);
+              else toast(`Logged in as ${JSON.parse(session).name}`);
+            }}
+            className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center text-[#0D1B2E] hover:bg-slate-200"
+          >
             <User className="h-5 w-5" />
           </button>
         </div>

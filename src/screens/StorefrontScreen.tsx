@@ -235,21 +235,22 @@ export function StorefrontScreen() {
         <div className="w-10 h-10" />
       </header>
 
-      {/* Hero Image Section */}
-      <div className="relative aspect-square w-full bg-slate-100 overflow-hidden">
-        <WatermarkOverlay />
-        <img 
-          src={item.image} 
-          alt={item.name} 
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute top-4 left-4 bg-emerald-500 text-white font-black px-3.5 py-1.5 rounded-xl shadow-lg text-[10px] tracking-wider uppercase flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-white animate-pulse" />
-          Live Sourcing Request
+      <div className="max-w-5xl mx-auto md:py-8 px-0 md:px-6 flex flex-col md:flex-row gap-0 md:gap-12">
+        {/* Hero Image Section */}
+        <div className="w-full md:w-1/2 relative aspect-square bg-white md:rounded-[2rem] overflow-hidden shrink-0 border-b md:border border-slate-100 shadow-sm">
+          <WatermarkOverlay />
+          <img 
+            src={item.image} 
+            alt={item.name} 
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute top-4 left-4 bg-emerald-500 text-white font-black px-3.5 py-1.5 rounded-xl shadow-lg text-[10px] tracking-wider uppercase flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full bg-white animate-pulse" />
+            Live Sourcing Request
+          </div>
         </div>
-      </div>
 
-      <div className="max-w-md mx-auto p-6 space-y-6">
+        <div className="w-full md:w-1/2 p-6 md:p-0 space-y-6">
         {/* Title & Price Card */}
         <section className="space-y-3">
           <div className="space-y-1 text-left">
@@ -357,6 +358,7 @@ export function StorefrontScreen() {
             <Sparkles className="h-5 w-5" /> Request Traveler to Settle Sourcing
           </Button>
         </div>
+      </div>
       </div>
 
       {/* Sourcing Request Modal Dialog */}
