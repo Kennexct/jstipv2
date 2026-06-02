@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+
 import { Mail, Phone, User, ShieldCheck, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -109,7 +109,7 @@ export function CustomerAuthModal({ isOpen, onClose, onSuccess }: CustomerAuthMo
                 className="space-y-4"
               >
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Full Name</Label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Full Name</label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                     <Input 
@@ -123,7 +123,7 @@ export function CustomerAuthModal({ isOpen, onClose, onSuccess }: CustomerAuthMo
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">WhatsApp / Phone</Label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">WhatsApp / Phone</label>
                   <div className="relative">
                     <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                     <Input 
@@ -138,7 +138,7 @@ export function CustomerAuthModal({ isOpen, onClose, onSuccess }: CustomerAuthMo
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Email Address</Label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Email Address</label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                     <Input 
@@ -170,7 +170,7 @@ export function CustomerAuthModal({ isOpen, onClose, onSuccess }: CustomerAuthMo
                 className="space-y-4"
               >
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500 text-center block">Enter 6-Digit Code</Label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 text-center block">Enter 6-Digit Code</label>
                   <Input 
                     required
                     maxLength={6}
