@@ -6,8 +6,11 @@ import {
   SlidersHorizontal, 
   Heart, 
   Bell,
-  ShoppingBag
+  ShoppingBag,
+  Share2
 } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { WatermarkOverlay } from '../components/WatermarkOverlay';
 import { Input } from '@/components/ui/input';
 import { db } from '../lib/supabase';
 import { toast } from 'sonner';
@@ -85,9 +88,14 @@ export function PublicCatalogScreen() {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-[#f2f5f7]/80 backdrop-blur-md pt-8 pb-4 border-none h-auto flex items-center px-6 gap-4">
         <h1 className="text-xl font-black tracking-tight text-[#163300] flex-1">Catalog</h1>
-        <button className="h-10 w-10 rounded-full bg-white flex items-center justify-center shadow-sm relative hover:scale-105 transition-transform">
-          <Bell className="h-5 w-5 text-slate-800" />
-          <span className="absolute top-2 right-2 h-2.5 w-2.5 bg-rose-500 rounded-full border-2 border-white" />
+        <button 
+          onClick={() => {
+            navigator.clipboard.writeText(window.location.href);
+            toast.success('Catalog link copied!', { description: 'Share this link with your customers to shop directly.' });
+          }}
+          className="h-10 px-4 rounded-full bg-white flex items-center gap-2 shadow-sm relative hover:scale-105 transition-transform text-xs font-bold text-[#163300]"
+        >
+          <Share2 className="h-4 w-4" /> Share Catalog
         </button>
       </header>
 
@@ -160,6 +168,7 @@ export function PublicCatalogScreen() {
                   <div className="w-full aspect-square relative flex items-center justify-center mb-4">
                     {/* Circle Backdrop */}
                     <div className="absolute inset-2 bg-[#f2f5f7] rounded-full opacity-50 group-hover:scale-105 transition-transform" />
+                    <WatermarkOverlay />
                     <img 
                       src={item.image || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80'} 
                       alt={item.name}

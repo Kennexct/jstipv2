@@ -1,9 +1,12 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { BottomNav } from './BottomNav';
 
 import { GlobalActionFab } from './GlobalActionFab';
 
 export function Layout() {
+  const location = useLocation();
+  const isInvoiceRoute = location.pathname.startsWith('/invoice');
+
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <main className="flex-1 overflow-x-hidden pb-24">
@@ -11,8 +14,12 @@ export function Layout() {
           <Outlet />
         </div>
       </main>
-      <BottomNav />
-      <GlobalActionFab />
+      {!isInvoiceRoute && (
+        <div className="print:hidden">
+          <BottomNav />
+          <GlobalActionFab />
+        </div>
+      )}
     </div>
   );
 }

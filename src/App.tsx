@@ -17,6 +17,7 @@ const LoginScreen = lazy(() => import('./screens/LoginScreen').then(m => ({ defa
 const SignUpScreen = lazy(() => import('./screens/SignUpScreen').then(m => ({ default: m.SignUpScreen })));
 const ReportsScreen = lazy(() => import('./screens/ReportsScreen').then(m => ({ default: m.ReportsScreen })));
 const LedgerScreen = lazy(() => import('./screens/LedgerScreen').then(m => ({ default: m.LedgerScreen })));
+const InvoiceScreen = lazy(() => import('./screens/InvoiceScreen').then(m => ({ default: m.InvoiceScreen })));
 
 function RequireAuth() {
   const { currentUser, loading } = useMaster();
@@ -53,14 +54,16 @@ const LoadingFallback = () => (
 );
 
 import { ConfirmProvider } from './context/ConfirmContext';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 export default function App() {
   return (
-    <MasterProvider>
-      <ConfirmProvider>
-        <BrowserRouter>
-          <ScrollToTop />
-          <Suspense fallback={<LoadingFallback />}>
+    <ErrorBoundary>
+      <MasterProvider>
+        <ConfirmProvider>
+          <BrowserRouter>
+            <ScrollToTop />
+            <Suspense fallback={<LoadingFallback />}>
             <Routes>
               {/* Public Storefront Route */}
               <Route path="catalog" element={<PublicCatalogScreen />} />
@@ -82,16 +85,18 @@ export default function App() {
                   <Route path="trip-settings" element={<TripSettingsScreen />} />
                   <Route path="reports" element={<ReportsScreen />} />
                   <Route path="ledger" element={<LedgerScreen />} />
+                  <Route path="invoice/:id" element={<InvoiceScreen />} />
                 </Route>
               </Route>
 
               {/* Catch all */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
-          </Suspense>
-          <Toaster position="top-center" />
-        </BrowserRouter>
-      </ConfirmProvider>
-    </MasterProvider>
+            </Suspense>
+            <Toaster position="top-center" />
+          </BrowserRouter>
+        </ConfirmProvider>
+      </MasterProvider>
+    </ErrorBoundary>
   );
 }

@@ -163,17 +163,16 @@ export function MasterProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      const [loadedExpenses, loadedSales, loadedItems, loadedWishlist, loadedSettings] = await Promise.all([
+      // PHASE 1: Load critical lightweight data to unblock the UI quickly
+      const [loadedExpenses, loadedSales, loadedSettings] = await Promise.all([
         db.getExpenses(currentUser.id),
         db.getSales(currentUser.id),
-        db.getItems(currentUser.id),
-        db.getWishlist(currentUser.id),
         db.getSettings(currentUser.id)
       ]);
+      
       setExpenses(loadedExpenses || []);
       setSales(loadedSales || []);
-      setCatalogItems(loadedItems || []);
-      setWishlistItems(loadedWishlist || []);
+      
       if (loadedSettings) {
         setTripSettings(loadedSettings);
         if (loadedSettings.boughtIds && Array.isArray(loadedSettings.boughtIds)) {
@@ -181,10 +180,22 @@ export function MasterProvider({ children }: { children: ReactNode }) {
           localStorage.setItem('jastip_checklist_bought_states', JSON.stringify(loadedSettings.boughtIds));
         }
       }
+
+      // Turn off loading screen immediately so user can see dashboard
+      setLoading(false);
+
+      // PHASE 2: Fetch heavy arrays (like base64 images in catalog/wishlist) in the background
+      Promise.all([
+        db.getItems(currentUser.id),
+        db.getWishlist(currentUser.id)
+      ]).then(([loadedItems, loadedWishlist]) => {
+        setCatalogItems(loadedItems || []);
+        setWishlistItems(loadedWishlist || []);
+      }).catch(err => console.error("Background heavy data fetch failed:", err));
+      
     } catch (e) {
       console.error('Failed to reload master dashboard data:', e);
       toast.error('Failed to sync live data with database');
-    } finally {
       setLoading(false);
     }
   };

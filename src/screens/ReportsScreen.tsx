@@ -40,7 +40,7 @@ export function ReportsScreen() {
     return acc + saleCost;
   }, 0);
 
-  const netProfitVal = totalSalesVal - totalExpensesVal;
+  const netProfitVal = totalSalesVal - totalCostVal - totalExpensesVal;
 
   const getOriginalCurrencyCode = (exp: any): string => {
     if (exp.originalCurrency) return exp.originalCurrency;
@@ -154,7 +154,7 @@ export function ReportsScreen() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f2f5f7] text-slate-900 pb-28">
+    <div className="min-h-screen bg-[#f2f5f7] text-slate-900 pb-28 print:min-h-0 print:pb-0 print:bg-white">
       {/* Print Styles Injection */}
       <style dangerouslySetInnerHTML={{__html: `
         @media print {
@@ -172,6 +172,7 @@ export function ReportsScreen() {
             text-align: center !important;
           }
           .print-table {
+            display: table !important;
             width: 100% !important;
             border-collapse: collapse !important;
             margin-top: 15px !important;
@@ -201,7 +202,7 @@ export function ReportsScreen() {
         
         {/* Printable Invoice Header (Hidden in UI, Visible on Print) */}
         <div className="hidden print-header text-center space-y-1">
-          <h1 className="text-xl font-bold uppercase tracking-tight">JastipFlow Ledger Statement</h1>
+          <h1 className="text-xl font-bold uppercase tracking-tight">JStip Ledger Statement</h1>
           <p className="text-xs text-slate-500 uppercase tracking-widest">Traveler Business Sourcing Records</p>
           <p className="text-[10px] text-slate-400">Generated on {new Date().toLocaleDateString()} {new Date().toLocaleTimeString()}</p>
           <div className="border-b-2 border-slate-900 my-4" />
@@ -287,7 +288,15 @@ export function ReportsScreen() {
               ) : (
                 <div className="divide-y divide-slate-100 max-h-[450px] overflow-y-auto">
                   {sales.map((sale) => (
-                    <div key={sale.id} className="p-5 space-y-4">
+                    <div 
+                      key={sale.id} 
+                      className="p-5 space-y-4 cursor-pointer hover:bg-slate-50 transition-colors relative group"
+                      onClick={() => navigate(`/invoice/${sale.id}`)}
+                      title="Click to view full invoice"
+                    >
+                      <div className="absolute right-4 top-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Badge className="bg-blue-50 text-blue-600 hover:bg-blue-100 border-none text-[9px] px-2 py-0.5 font-bold uppercase tracking-widest">View Invoice</Badge>
+                      </div>
                       <div className="flex justify-between items-start">
                         <div className="text-left space-y-1">
                           <h4 className="text-sm font-bold text-[#163300]">{sale.customerName}</h4>
@@ -315,7 +324,7 @@ export function ReportsScreen() {
                                 <span>Rp {totalPublish.toLocaleString()}</span>
                               </div>
                               <div className="flex justify-between text-[10px] font-medium text-slate-500">
-                                <span>Cost: Rp {unitCost.toLocaleString()}/ea</span>
+                                <span>Cost: Rp {totalCost.toLocaleString()}</span>
                                 <span className={profit >= 0 ? "text-emerald-600 font-bold" : "text-red-600 font-bold"}>
                                   Margin: Rp {profit.toLocaleString()}
                                 </span>

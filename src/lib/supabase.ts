@@ -128,6 +128,64 @@ const setLocal = (key: string, data: any) => {
 // PUBLIC API INTERFACE
 // ----------------------------------------------------
 export const db = {
+  // 0. Storage (Image Upload)
+  async uploadImage(base64Data: string, bucketName: string = 'catalog'): Promise<string> {
+    if (!isSupabaseConfigured()) {
+      return base64Data; // Fallback to storing raw base64 locally if offline
+    }
+
+    try {
+      const { url: rawUrl, key: rawKey } = getSupabaseConfig();
+      const supaUrl = rawUrl.trim().replace(/^["']|["']$/g, '').replace(/\/$/, '');
+      const supaKey = rawKey.trim().replace(/^["']|["']$/g, '');
+      
+      // Extract content type and raw base64
+      const matches = base64Data.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+      if (!matches || matches.length !== 3) {
+        return base64Data; // Not a valid base64 image, return as is
+      }
+      
+      const contentType = matches[1];
+      const b64 = matches[2];
+      
+      // Convert base64 to Blob
+      const byteCharacters = atob(b64);
+      const byteArrays = [];
+      for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+        const slice = byteCharacters.slice(offset, offset + 512);
+        const byteNumbers = new Array(slice.length);
+        for (let i = 0; i < slice.length; i++) {
+          byteNumbers[i] = slice.charCodeAt(i);
+        }
+        byteArrays.push(new Uint8Array(byteNumbers));
+      }
+      const blob = new Blob(byteArrays, { type: contentType });
+      
+      const fileName = `img_${Date.now()}_${Math.random().toString(36).substring(7)}.${contentType.split('/')[1]}`;
+      const uploadUrl = `${supaUrl}/storage/v1/object/${bucketName}/${fileName}`;
+
+      const res = await fetch(uploadUrl, {
+        method: 'POST',
+        headers: {
+          'apikey': supaKey,
+          'Authorization': `Bearer ${supaKey}`,
+          'Content-Type': contentType,
+        },
+        body: blob,
+      });
+
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
+
+      // Return the public URL
+      return `${supaUrl}/storage/v1/object/public/${bucketName}/${fileName}`;
+    } catch (e) {
+      console.error('Supabase image upload failed, falling back to base64:', e);
+      return base64Data; // Fallback gracefully
+    }
+  },
+
   // 1. Settings (Trip and Currency)
   async getSettings(merchantId?: string) {
     const suffix = merchantId ? `_${merchantId}` : '';

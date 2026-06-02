@@ -282,11 +282,14 @@ export function OwnerDashboard() {
             {allActivities.slice(0, 5).map((activity) => (
               <div 
                 key={activity.id} 
-                className={`flex items-center justify-between p-4 fintech-card ${activity.type !== 'sale' ? 'cursor-pointer hover:border-[#9fe870]' : ''}`}
+                className="flex items-center justify-between p-4 fintech-card cursor-pointer hover:border-[#9fe870] transition-colors"
                 onClick={() => {
-                  if (activity.type === 'sale') return;
-                  setEditingActivity(activity);
-                  setEditActivityForm({ ...editActivityForm, description: activity.description, amount: activity.amount });
+                  if (activity.type === 'sale') {
+                    navigate(`/invoice/${activity.id}`);
+                  } else {
+                    setEditingActivity(activity);
+                    setEditActivityForm({ ...editActivityForm, description: activity.description, amount: activity.amount });
+                  }
                 }}
               >
                 {activity.type === 'sale' ? (

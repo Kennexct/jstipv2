@@ -39,10 +39,10 @@ export function LoginScreen() {
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-2">
-          <div className="h-12 w-12 rounded-2xl bg-primary flex items-center justify-center text-white mx-auto shadow-lg shadow-primary/20">
-            <Shield className="h-6 w-6" />
+          <div className="h-20 w-20 mx-auto shadow-xl shadow-primary/20 rounded-[2rem] overflow-hidden bg-white flex items-center justify-center mb-2">
+            <img src="/logo.png" alt="JStip Logo" className="h-full w-full object-cover" />
           </div>
-          <h2 className="text-2xl font-black uppercase italic tracking-tighter text-slate-800">JastipFlow</h2>
+          <h2 className="text-2xl font-black uppercase italic tracking-tighter text-slate-800">JStip</h2>
           <p className="text-xs text-muted-foreground uppercase font-bold tracking-widest">Traveler Sourcing Ledger</p>
         </div>
 

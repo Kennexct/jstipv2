@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Search, MoreVertical, Edit2, Trash2, ExternalLink, Share2, Eye, Download, Info } from 'lucide-react';
+import { ArrowLeft, Plus, Search, MoreVertical, Edit2, Trash2, ExternalLink, Share2, Eye, Download, Info, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { WatermarkOverlay } from '../components/WatermarkOverlay';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
 import {
@@ -104,6 +105,13 @@ export function OwnerInventoryScreen() {
         </Button>
         <h2 className="text-xl font-black text-[#163300] tracking-tight flex-1">Inventory</h2>
         <div className="flex items-center gap-2 shrink-0">
+          <Button 
+            variant="outline"
+            className="hidden rounded-full h-10 px-4 bg-white text-xs font-bold text-[#163300] shadow-sm items-center gap-2" 
+            onClick={handleShareCatalog}
+          >
+            <Share2 className="h-4 w-4" /> Share Catalog
+          </Button>
           <Button size="icon" className="rounded-full h-10 w-10 bg-[#163300] text-white hover:bg-[#1f4700]" onClick={() => navigate('/owner/list-item')}>
             <Plus className="h-5 w-5" />
           </Button>
@@ -144,7 +152,8 @@ export function OwnerInventoryScreen() {
               >
                 <CardContent className="p-4 flex gap-4 items-center">
                   {/* Left: Image */}
-                  <div className="relative h-20 w-20 rounded-2xl overflow-hidden shrink-0 bg-slate-100 border border-slate-100 shadow-sm">
+                  <div className="relative h-20 w-20 rounded-xl overflow-hidden shrink-0 bg-slate-100">
+                    <WatermarkOverlay />
                     {item.image ? (
                       <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
                     ) : (
@@ -224,11 +233,14 @@ export function OwnerInventoryScreen() {
               {/* Cover Image & Name block */}
               <div className="space-y-4">
                 <div className="relative h-48 w-full rounded-2xl overflow-hidden bg-[#f2f5f7]">
-                  {selectedItem.image ? (
-                    <img src={selectedItem.image} alt={selectedItem.name} className="h-full w-full object-cover" />
-                  ) : (
-                    <Package className="h-10 w-10 text-slate-300 absolute inset-0 m-auto" />
-                  )}
+                  <div className="h-48 w-full bg-slate-100 overflow-hidden relative">
+                    <WatermarkOverlay />
+                    {selectedItem.image ? (
+                      <img src={selectedItem.image} alt={selectedItem.name} className="h-full w-full object-cover" />
+                    ) : (
+                      <Package className="h-10 w-10 text-slate-300 absolute inset-0 m-auto" />
+                    )}
+                  </div>
                   <Badge className="absolute top-3 left-3 bg-[#9fe870] text-[#163300] border-none font-bold">Live</Badge>
                 </div>
                 <h3 className="text-lg font-black text-[#163300] leading-tight">{selectedItem.name}</h3>
@@ -259,30 +271,7 @@ export function OwnerInventoryScreen() {
                   <Edit2 className="h-5 w-5" /> Edit Product
                 </Button>
 
-                <div className="grid grid-cols-2 gap-2">
-                  <Button 
-                    variant="outline"
-                    className="h-10 rounded-xl text-[10px] font-bold uppercase"
-                    onClick={() => {
-                      const id = selectedItem.id;
-                      setSelectedItem(null);
-                      handlePreviewItem(id);
-                    }}
-                  >
-                    <Eye className="h-3.5 w-3.5 mr-1" /> View Storefront
-                  </Button>
-                  <Button 
-                    variant="outline"
-                    className="h-10 rounded-xl text-[10px] font-bold uppercase"
-                    onClick={() => {
-                      toast.success('Product link copied!', {
-                        description: 'Share this link with your customers.'
-                      });
-                    }}
-                  >
-                    <Share2 className="h-3.5 w-3.5 mr-1" /> Share Link
-                  </Button>
-                </div>
+
 
                 <Button 
                   variant="ghost"

@@ -443,8 +443,20 @@ export function TripSettingsScreen() {
                           const file = e.target.files?.[0];
                           if (file) {
                             const reader = new FileReader();
-                            reader.onloadend = () => {
-                              setWatermarkImage(reader.result as string);
+                            reader.onloadend = async () => {
+                              toast.loading('Uploading watermark...', { id: 'watermark-upload' });
+                              const base64Image = reader.result as string;
+                              let uploadedImage = base64Image;
+
+                              try {
+                                const { db } = await import('../lib/supabase');
+                                uploadedImage = await db.uploadImage(base64Image, 'catalog');
+                              } catch (e) {
+                                console.error("Failed to upload watermark image:", e);
+                              }
+
+                              setWatermarkImage(uploadedImage);
+                              toast.success('Watermark uploaded!', { id: 'watermark-upload' });
                             };
                             reader.readAsDataURL(file);
                           }

@@ -13,11 +13,16 @@ import {
   Globe,
   Coins,
   Send,
-  Sparkles
+  Sparkles,
+  Shield,
+  Phone,
+  Mail,
+  User
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { WatermarkOverlay } from '../components/WatermarkOverlay';
 import { Input } from '@/components/ui/input';
 import { useMaster } from '../context/MasterContext';
 import { useConfirm } from '../context/ConfirmContext';
@@ -43,27 +48,31 @@ export function StorefrontScreen() {
 
   // Sourcing request dialog states
   const [isOpen, setIsOpen] = useState(false);
+  const [step, setStep] = useState<'contact' | 'otp' | 'order'>('contact');
   const [clientName, setClientName] = useState('');
+  const [customerEmail, setCustomerEmail] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
+  const [otp, setOtp] = useState('');
+  const [expectedOtp, setExpectedOtp] = useState('');
+  const [orderQty, setOrderQty] = useState('1');
   const [clientBudget, setClientBudget] = useState('');
   const [clientLocation, setClientLocation] = useState('');
   const [clientNotes, setClientNotes] = useState('');
-  const { catalogItems, saveWishlist } = useMaster();
+  const [submitting, setSubmitting] = useState(false);
+  
+  const { catalogItems, saveWishlist, currentUser, tripSettings } = useMaster();
   const confirm = useConfirm();
 
   useEffect(() => {
     async function loadData() {
       try {
-        const [items, loadedSettings] = await Promise.all([
-          db.getItems(),
-          db.getSettings()
-        ]);
-        setSettings(loadedSettings);
+        const items = await db.getItems();
 
         const foundItem = items.find(i => i.id === id);
         if (foundItem) {
           setItem(foundItem);
           setClientBudget(foundItem.price.toString());
-          setClientLocation(loadedSettings.trip?.origin || 'Seoul');
+          setClientLocation(tripSettings?.trip?.origin || 'Seoul');
         }
       } catch (e) {
         console.error('Failed to load storefront data:', e);
@@ -86,31 +95,80 @@ export function StorefrontScreen() {
     });
   };
 
-  const handleRequestSourcing = async () => {
-    if (!clientName.trim()) {
-      toast.error('Please enter your name to submit the request');
+  const handleSendOtp = async () => {
+    if (!clientName.trim() || !customerEmail.trim() || !customerPhone.trim()) {
+      toast.error('Please fill in all contact details');
       return;
     }
 
-    const budgetNum = parseInt(clientBudget.replace(/[^0-9]/g, '')) || 0;
-    if (budgetNum <= 0) {
-      toast.error('Please enter a valid target budget');
+    setSubmitting(true);
+    try {
+      const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+      setExpectedOtp(generatedOtp);
+      
+      const response = await fetch('/api/resend/emails', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer re_ZuqXFC69_9FnA4hZJqKA3eUNJkMnQvz9n`
+        },
+        body: JSON.stringify({
+          from: 'JStip <onboarding@resend.dev>',
+          to: [customerEmail],
+          subject: 'Your Storefront Request Verification Code',
+          html: `<div style="font-family: sans-serif; text-align: center; padding: 20px; background-color: #f2f5f7; border-radius: 12px;">
+                  <h2 style="color: #163300; margin-bottom: 8px;">Order Verification</h2>
+                  <p style="color: #64748b; font-size: 14px;">Use the following code to verify your request:</p>
+                  <h1 style="font-size: 36px; letter-spacing: 8px; color: #163300; margin: 24px 0;">${generatedOtp}</h1>
+                 </div>`
+        })
+      });
+
+      if (!response.ok) {
+        let errMsg = 'Failed to send email';
+        try {
+          const errData = await response.json();
+          errMsg = errData.message || errMsg;
+        } catch (e) {}
+        throw new Error(errMsg);
+      }
+      
+      toast.success('OTP sent to your email!');
+      setStep('otp');
+    } catch (err: any) {
+      toast.error(`Failed to send OTP: ${err.message || 'Network Error'}`);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleVerifyOtp = () => {
+    if (otp !== expectedOtp) {
+      toast.error('Invalid OTP. Please check your email.');
       return;
     }
+    setStep('order');
+  };
 
-    const confirmed = await confirm(`Are you sure you want to submit this sourcing request for "${item.name}" with a budget of Rp ${budgetNum.toLocaleString()}?`);
-    if (!confirmed) {
-      return;
-    }
+  const handleSubmitOrder = async () => {
+    const qty = parseInt(orderQty) || 1;
+    const finalPrice = qty * (item?.price || 0);
 
+    const confirmed = await confirm({
+      title: 'Submit Request',
+      description: `Submit sourcing request for ${qty}x "${item.name}"?`
+    });
+    if (!confirmed) return;
+
+    setSubmitting(true);
     const merchantId = item?.merchant_id || item?.merchantId;
     const newRequest = {
       id: 'wish_' + Date.now(),
-      name: item.name,
-      requester: clientName.trim(),
-      status: 'find',
-      price: budgetNum,
-      location: clientLocation.trim() || settings?.trip?.origin || 'Seoul',
+      name: `[${qty}x] ${item.name}`,
+      requester: `${clientName.trim()} (${customerEmail})`,
+      status: 'pending',
+      price: finalPrice, 
+      location: tripSettings?.trip?.origin || 'Seoul',
       image: item.image,
       note: clientNotes.trim() || undefined,
       merchantId: merchantId,
@@ -120,13 +178,23 @@ export function StorefrontScreen() {
     try {
       await db.saveWishlist(newRequest, merchantId);
       toast.success('Sourcing request submitted successfully!', {
-        description: `Traveler Jane Doe has been notified to search for "${item.name}" in ${newRequest.location}.`
+        description: `Your request has been routed to the traveler's pending checklist.`
       });
       setIsOpen(false);
-      setClientName('');
-      setClientNotes('');
+      // Reset flow
+      setTimeout(() => {
+        setStep('contact');
+        setClientName('');
+        setCustomerEmail('');
+        setCustomerPhone('');
+        setClientNotes('');
+        setOrderQty('1');
+        setOtp('');
+      }, 500);
     } catch (e) {
       toast.error('Failed to submit request. Please try again.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -168,7 +236,8 @@ export function StorefrontScreen() {
       </header>
 
       {/* Hero Image Section */}
-      <div className="relative aspect-square w-full max-w-md mx-auto overflow-hidden bg-muted/20 border-b">
+      <div className="relative aspect-square w-full bg-slate-100 overflow-hidden">
+        <WatermarkOverlay />
         <img 
           src={item.image} 
           alt={item.name} 
@@ -221,7 +290,7 @@ export function StorefrontScreen() {
                 </Avatar>
                 <div className="space-y-0.5 text-left">
                   <div className="flex items-center gap-1.5">
-                    <h4 className="text-sm font-bold text-slate-800">Jane Doe</h4>
+                    <h4 className="text-sm font-bold text-slate-800">{currentUser?.businessName || currentUser?.username || 'Star Traveler'}</h4>
                     <Badge variant="ghost" className="h-4 text-[7px] font-black uppercase bg-primary/10 text-primary border-none px-1 rounded-md">
                       Star Traveler
                     </Badge>
@@ -229,7 +298,7 @@ export function StorefrontScreen() {
                   <div className="flex items-center gap-2 text-xs text-muted-foreground font-semibold">
                     <span className="flex items-center gap-0.5 text-slate-700"><Star className="h-3 w-3 fill-yellow-400 text-yellow-400" /> 4.98</span>
                     <span>•</span>
-                    <span className="flex items-center gap-0.5"><MapPin className="h-3 w-3 text-red-500" /> {settings?.trip?.origin || 'Seoul'} → {settings?.trip?.destination || 'Jakarta'}</span>
+                    <span className="flex items-center gap-0.5"><MapPin className="h-3 w-3 text-red-500" /> {tripSettings?.trip?.origin || 'Seoul'} → {tripSettings?.trip?.destination || 'Jakarta'}</span>
                   </div>
                 </div>
               </div>
@@ -244,11 +313,11 @@ export function StorefrontScreen() {
             <div className="flex justify-between items-center relative z-10">
               <div className="space-y-1 text-left">
                 <p className="text-[8px] opacity-40 font-black uppercase tracking-widest">Departure Date</p>
-                <p className="text-xs font-bold uppercase tracking-tight">{settings?.trip?.date || '22 May 2026'}</p>
+                <p className="text-xs font-bold uppercase tracking-tight">{tripSettings?.trip?.date || '22 May 2026'}</p>
               </div>
               <div className="space-y-1 text-right">
                 <p className="text-[8px] opacity-40 font-black uppercase tracking-widest">Sourcing Currency</p>
-                <p className="text-xs font-bold uppercase tracking-tight">{settings?.currency?.code || 'SGD'} ({settings?.currency?.symbol || 'S$'})</p>
+                <p className="text-xs font-bold uppercase tracking-tight">{tripSettings?.currency?.code || 'SGD'} ({tripSettings?.currency?.symbol || 'S$'})</p>
               </div>
             </div>
             
@@ -261,13 +330,13 @@ export function StorefrontScreen() {
                 </div>
                 <div>
                   <p className="text-[8px] opacity-40 font-black uppercase tracking-widest">Sourcing Origin</p>
-                  <p className="text-xs font-bold uppercase tracking-tight">{settings?.trip?.origin || 'Seoul'}</p>
+                  <p className="text-xs font-bold uppercase tracking-tight">{tripSettings?.trip?.origin || 'Seoul'}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2 text-right justify-end">
                 <div>
                   <p className="text-[8px] opacity-40 font-black uppercase tracking-widest">Destination</p>
-                  <p className="text-xs font-bold uppercase tracking-tight">{settings?.trip?.destination || 'Jakarta'}</p>
+                  <p className="text-xs font-bold uppercase tracking-tight">{tripSettings?.trip?.destination || 'Jakarta'}</p>
                 </div>
                 <div className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center shrink-0">
                   <MapPin className="h-4 w-4 text-red-400" />
@@ -291,70 +360,156 @@ export function StorefrontScreen() {
       </div>
 
       {/* Sourcing Request Modal Dialog */}
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent>
+      <Dialog open={isOpen} onOpenChange={(open) => {
+        setIsOpen(open);
+        if (!open) {
+          // Soft reset if they close it
+          setTimeout(() => setStep('contact'), 500);
+        }
+      }}>
+        <DialogContent className="max-w-md">
           <DialogHeader className="text-left pb-2">
             <DialogTitle className="text-lg font-black tracking-tight uppercase italic text-primary flex items-center gap-2">
               <MessageSquare className="h-5 w-5" /> Order Sourcing Request
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground font-semibold">
-              Fill in your details below to book this sourcing request directly into the traveler's active catalog docket.
+              {step === 'contact' ? "Enter your contact details to begin." :
+               step === 'otp' ? "Verify your email address." :
+               "Specify your exact order requirements."}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
-            <div className="space-y-1.5 text-left">
-              <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Your Full Name *</label>
-              <Input 
-                placeholder="e.g. Jane Andrews" 
-                value={clientName}
-                onChange={e => setClientName(e.target.value)}
-                className="h-11 rounded-xl bg-muted/30 border-none font-bold text-sm text-slate-800" 
-              />
-            </div>
+            {step === 'contact' && (
+              <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
+                <div className="space-y-1.5 text-left">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Full Name *</label>
+                  <div className="relative">
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
+                    <Input 
+                      placeholder="e.g. Jane Andrews" 
+                      value={clientName}
+                      onChange={e => setClientName(e.target.value)}
+                      className="h-11 pl-11 rounded-xl bg-muted/30 border-none font-bold text-sm text-slate-800" 
+                    />
+                  </div>
+                </div>
 
-            <div className="space-y-1.5 text-left">
-              <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Target Budget (Rp) *</label>
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-black text-slate-500">Rp</span>
+                <div className="space-y-1.5 text-left">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Email Address *</label>
+                  <div className="relative">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
+                    <Input 
+                      type="email"
+                      placeholder="e.g. jane@email.com" 
+                      value={customerEmail}
+                      onChange={e => setCustomerEmail(e.target.value)}
+                      className="h-11 pl-11 rounded-xl bg-muted/30 border-none font-bold text-sm text-slate-800" 
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5 text-left">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Phone Number / WhatsApp *</label>
+                  <div className="relative">
+                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
+                    <Input 
+                      type="tel"
+                      placeholder="e.g. +628123456789" 
+                      value={customerPhone}
+                      onChange={e => setCustomerPhone(e.target.value)}
+                      className="h-11 pl-11 rounded-xl bg-muted/30 border-none font-bold text-sm text-slate-800" 
+                    />
+                  </div>
+                </div>
+
+                <Button 
+                  disabled={submitting}
+                  className="w-full h-12 rounded-2xl font-black uppercase italic shadow-lg shadow-primary/10 gap-2 mt-2"
+                  onClick={handleSendOtp}
+                >
+                  {submitting ? 'Sending OTP...' : 'Send Verification OTP'}
+                </Button>
+              </motion.div>
+            )}
+
+            {step === 'otp' && (
+              <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
+                <div className="text-center space-y-2 mb-4">
+                  <Shield className="h-8 w-8 text-primary mx-auto" />
+                  <h3 className="text-sm font-black text-slate-800">Enter Verification Code</h3>
+                  <p className="text-xs text-muted-foreground font-medium">Sent to {customerEmail}</p>
+                </div>
                 <Input 
-                  placeholder="0"
-                  value={clientBudget === '' ? '' : Number(clientBudget.replace(/[^0-9]/g, '')).toLocaleString()}
-                  onChange={e => setClientBudget(e.target.value.replace(/[^0-9]/g, ''))}
-                  inputMode="numeric"
-                  className="h-11 pl-10 rounded-xl bg-muted/30 border-none font-bold text-sm text-slate-850 text-slate-800" 
+                  placeholder="6-digit OTP" 
+                  value={otp}
+                  onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  className="h-14 rounded-xl bg-muted/30 border-none font-black text-xl text-center text-slate-800 tracking-widest mx-auto max-w-[200px]" 
                 />
-              </div>
-            </div>
+                <Button 
+                  disabled={otp.length < 6}
+                  className="w-full h-12 rounded-2xl font-black uppercase italic shadow-lg shadow-primary/10 gap-2 mt-2"
+                  onClick={handleVerifyOtp}
+                >
+                  Verify
+                </Button>
+                <button 
+                  onClick={() => setStep('contact')}
+                  className="w-full text-xs font-bold text-muted-foreground uppercase tracking-widest pt-2 hover:text-slate-800"
+                >
+                  Change Email
+                </button>
+              </motion.div>
+            )}
 
-            <div className="space-y-1.5 text-left">
-              <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Target Sourcing City</label>
-              <Input 
-                placeholder="e.g. Seoul" 
-                value={clientLocation}
-                onChange={e => setClientLocation(e.target.value)}
-                className="h-11 rounded-xl bg-muted/30 border-none font-bold text-sm text-slate-800" 
-              />
-            </div>
+            {step === 'order' && (
+              <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-1.5 text-left col-span-1">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Quantity</label>
+                    <Input 
+                      type="number"
+                      min="1"
+                      value={orderQty}
+                      onChange={e => setOrderQty(e.target.value)}
+                      className="h-11 rounded-xl bg-muted/30 border-none font-bold text-sm text-center text-slate-800" 
+                    />
+                  </div>
 
-            <div className="space-y-1.5 text-left">
-              <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Request Notes / Custom Requests</label>
-              <Input 
-                placeholder="e.g. Please pick the 75ml option, gift box packaging if possible." 
-                value={clientNotes}
-                onChange={e => setClientNotes(e.target.value)}
-                className="h-11 rounded-xl bg-muted/30 border-none font-bold text-sm text-slate-850 text-slate-800" 
-              />
-            </div>
+                  <div className="space-y-1.5 text-left col-span-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Price</label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-black text-slate-500">Rp</span>
+                      <Input 
+                        disabled
+                        value={(item ? ((parseInt(orderQty) || 1) * item.price) : 0).toLocaleString()}
+                        className="h-11 pl-9 rounded-xl bg-muted/30 border-none font-bold text-sm text-slate-800 disabled:opacity-75" 
+                      />
+                    </div>
+                  </div>
+                </div>
 
-            <div className="pt-2">
-              <Button 
-                className="w-full h-12 rounded-2xl font-black uppercase italic shadow-lg shadow-primary/10 gap-2"
-                onClick={handleRequestSourcing}
-              >
-                <Send className="h-4 w-4" /> Submit Sourcing Task
-              </Button>
-            </div>
+                <div className="space-y-1.5 text-left">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Additional Products & Notes</label>
+                  <Input 
+                    placeholder="Want to add another product? Type here!" 
+                    value={clientNotes}
+                    onChange={e => setClientNotes(e.target.value)}
+                    className="h-11 rounded-xl bg-muted/30 border-none font-bold text-sm text-slate-800" 
+                  />
+                </div>
+
+                <div className="pt-2">
+                  <Button 
+                    disabled={submitting}
+                    className="w-full h-12 rounded-2xl font-black uppercase italic shadow-lg shadow-primary/10 gap-2"
+                    onClick={handleSubmitOrder}
+                  >
+                    <Send className="h-4 w-4" /> {submitting ? 'Submitting...' : 'Submit Final Order'}
+                  </Button>
+                </div>
+              </motion.div>
+            )}
           </div>
         </DialogContent>
       </Dialog>

@@ -44,14 +44,62 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useMaster } from '../context/MasterContext';
 import { useConfirm } from '../context/ConfirmContext';
+import { useState, ChangeEvent, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { motion } from 'motion/react';
+import { 
+  Search, 
+  Filter, 
+  Plus, 
+  Package, 
+  ArrowLeft,
+  DollarSign, 
+  MapPin as MapPinIcon, 
+  Clock, 
+  MoreVertical, 
+  CheckCircle2, 
+  Users,
+  Camera,
+  X,
+  Check,
+  Ban,
+  AlertCircle,
+  CheckSquare,
+  Square,
+  ShoppingBag,
+  ListTodo,
+  Info,
+  Calendar,
+  Edit2,
+  Trash2,
+  Minus
+} from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { 
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+import { useMaster } from '../context/MasterContext';
+import { useConfirm } from '../context/ConfirmContext';
 
 export interface WishlistItem {
   id: string;
   name: string;
   requester: string;
-  status: 'find' | 'found' | 'out of stock' | 'cancel' | 'hold';
+  status: 'pending' | 'found' | 'confirm' | 'out_of_stock' | 'cancelled';
   price: number;
   sellPrice?: number;
+  cost?: number;
+  qty?: number;
   location: string;
   image?: string;
 }
@@ -136,6 +184,9 @@ export function ExploreScreen() {
   const [editingChecklistItem, setEditingChecklistItem] = useState<any>(null);
   const [editChecklistForm, setEditChecklistForm] = useState({ name: '', qty: 1, price: 0, customerName: '' });
 
+  // Invoice Modal state
+  const [invoiceModalSale, setInvoiceModalSale] = useState<any | null>(null);
+
   const handleCloseDetail = async (explicitSave: boolean = false) => {
     if (selectedDetailItem) {
       const original = myWishlist.find(w => w.id === selectedDetailItem.id);
@@ -148,22 +199,17 @@ export function ExploreScreen() {
 
       if (isDirty) {
         if (explicitSave) {
-          // Explicit save triggered by the Save & Close button
           await saveWishlist(selectedDetailItem);
         } else {
-          // Accidental close (ESC or click outside)
           const discard = await confirm("You have unsaved changes. Are you sure you want to discard them and close?");
           if (!discard) {
-            // Abort the closing process, let the user continue editing
             return;
           }
-          // If they confirmed discard, we do NOT save and simply let it close.
         }
       }
     }
     setSelectedDetailItem(null);
   };
-
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -190,6 +236,18 @@ export function ExploreScreen() {
       setIsSubmitting(false);
       return;
     }
+    setIsSubmitting(true);
+
+    let uploadedImage = formImage;
+    if (formImage && formImage.startsWith('data:')) {
+      try {
+        const { db } = await import('../lib/supabase');
+        uploadedImage = await db.uploadImage(formImage, 'catalog');
+      } catch (e) {
+        console.error("Failed to upload wishlist image:", e);
+      }
+    }
+
     const newEntry: WishlistItem = {
       id: 'w_' + Date.now(),
       name: formName,
@@ -197,15 +255,14 @@ export function ExploreScreen() {
       price: 0,
       qty: parseInt(formQty) || 1,
       requester: formCustomer || 'Walk-in Client',
-      status: 'find',
-      image: formImage || undefined
+      status: 'pending',
+      image: uploadedImage || undefined
     };
 
     try {
       await saveWishlist(newEntry);
       toast.success('Fulfillment task recorded successfully!');
       setIsDialogOpen(false);
-      // Reset Form
       setFormName('');
       setFormQty('1');
       setFormLocation('');
@@ -224,35 +281,60 @@ export function ExploreScreen() {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = async () => {
+        toast.loading('Uploading photo...', { id: 'wishlist-upload' });
         const base64Image = reader.result as string;
+        let uploadedImage = base64Image;
+
+        try {
+          const { db } = await import('../lib/supabase');
+          uploadedImage = await db.uploadImage(base64Image, 'catalog');
+        } catch (e) {
+          console.error("Failed to upload wishlist detail image:", e);
+        }
+
         const updatedItem = {
           ...selectedDetailItem,
-          image: base64Image
+          image: uploadedImage
         };
         
         try {
           await saveWishlist(updatedItem);
           setSelectedDetailItem(updatedItem);
-          toast.success('Photo added to wishlist item successfully!');
+          toast.success('Photo added to wishlist item successfully!', { id: 'wishlist-upload' });
         } catch (err) {
-          toast.error('Failed to upload photo');
+          toast.error('Failed to upload photo', { id: 'wishlist-upload' });
         }
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const handleUpdateStatus = async (id: string, newStatus: 'find' | 'found' | 'out of stock' | 'cancel' | 'hold') => {
-    const matchedItem = myWishlist.find(item => item.id === id);
-    if (!matchedItem) return;
+  const handleUpdateStatus = async (id: string, newStatus: 'pending' | 'found' | 'confirm' | 'out_of_stock' | 'cancelled') => {
+    // Prefer the currently edited item in the detail modal if it matches, to preserve unsaved price/qty changes
+    const baseItem = (selectedDetailItem && selectedDetailItem.id === id) 
+      ? selectedDetailItem 
+      : myWishlist.find(item => item.id === id);
+      
+    if (!baseItem) return;
     
-    const confirmed = await confirm(`Are you sure you want to change the status of "${matchedItem.name}" to ${newStatus.toUpperCase()}?`);
+    // If changing to 'found' from outside the detail modal (or before prices are set), 
+    // open the detail modal instead of saving instantly so the user can input the prices
+    if (newStatus === 'found' && (!selectedDetailItem || selectedDetailItem.id !== id)) {
+      toast.info('Please update the exact pricing details first.');
+      setSelectedDetailItem({ ...baseItem, status: 'found' });
+      return;
+    }
+
+    const confirmed = await confirm(`Are you sure you want to change the status of "${baseItem.name}" to ${newStatus.toUpperCase()}?`);
     if (!confirmed) return;
     
-    const updatedItem = { ...matchedItem, status: newStatus };
+    const updatedItem = { ...baseItem, status: newStatus };
 
     try {
       await saveWishlist(updatedItem);
+      if (selectedDetailItem && selectedDetailItem.id === id) {
+        setSelectedDetailItem(updatedItem);
+      }
       toast.info(`Status of ${updatedItem.name} set to ${newStatus.toUpperCase()}`);
     } catch (e) {
       toast.error('Failed to update status. Please try again.');
@@ -286,7 +368,10 @@ export function ExploreScreen() {
               sourceCategory: 'Wishlist'
             }]
           };
-          if (saveSale) await saveSale(newSale);
+          if (saveSale) {
+            await saveSale(newSale);
+            setInvoiceModalSale(newSale);
+          }
         } catch (e) {
           console.error("Failed to generate automatic sale", e);
         }
@@ -301,37 +386,34 @@ export function ExploreScreen() {
     toggleBoughtId(id);
   };
 
-  // Status Style badge coloring helper
   const getStatusStyle = (status: WishlistItem['status']) => {
     switch (status) {
       case 'found':
-        return 'bg-emerald-50 text-emerald-700 border-emerald-100 border text-center';
-      case 'out of stock':
-        return 'bg-rose-50 text-rose-700 border-rose-100 border text-center';
-      case 'cancel':
-        return 'bg-red-50 text-red-600 border-red-100 border text-center';
-      case 'hold':
-        return 'bg-amber-50 text-amber-700 border-amber-100 border text-center';
-      case 'find':
-      default:
         return 'bg-blue-50 text-blue-700 border-blue-100 border text-center';
+      case 'confirm':
+        return 'bg-emerald-50 text-emerald-700 border-emerald-100 border text-center';
+      case 'out_of_stock':
+        return 'bg-amber-50 text-amber-700 border-amber-100 border text-center';
+      case 'cancelled':
+        return 'bg-red-50 text-red-600 border-red-100 border text-center';
+      case 'pending':
+      default:
+        return 'bg-slate-50 text-slate-700 border-slate-200 border text-center';
     }
   };
 
-  // Convert status codes to beautiful readable tags
   const getStatusLabel = (status: WishlistItem['status']) => {
     switch (status) {
-      case 'found': return '✅ Found';
-      case 'out of stock': return '❌ Out of Stock';
-      case 'cancel': return '🚫 Cancelled';
-      case 'hold': return '⏸️ On Hold';
-      case 'find':
+      case 'found': return '🔍 Found';
+      case 'confirm': return '✅ Confirm';
+      case 'out_of_stock': return '❌ Out of Stock';
+      case 'cancelled': return '🚫 Cancelled';
+      case 'pending':
       default:
-        return '⏳ Find / Searching';
+        return '⏳ Pending';
     }
   };
 
-  // Helper method to render a consistent custom styled Wishlist card item
   const renderWishlistItem = (item: WishlistItem, i: number, opacityClass: string = "") => {
     return (
       <Card 
@@ -344,8 +426,6 @@ export function ExploreScreen() {
       >
         <CardContent className="p-4 flex items-center justify-between gap-4 overflow-visible">
           <div className="flex items-center gap-4 min-w-0 flex-1">
-            
-            {/* Image Thumbnail */}
             <div className="h-14 w-14 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-[#f2f5f7] border relative">
               {item.image ? (
                 <img src={item.image} className="h-full w-full object-cover" alt={item.name} referrerPolicy="no-referrer" />
@@ -353,8 +433,6 @@ export function ExploreScreen() {
                 <Package className="h-6 w-6 text-slate-400" />
               )}
             </div>
-
-            {/* Specifics */}
             <div className="space-y-1 min-w-0 flex-1">
               <h4 className="text-sm font-bold text-[#163300] truncate">
                 {item.name}
@@ -362,19 +440,17 @@ export function ExploreScreen() {
               <div className="flex flex-wrap items-center gap-1.5 text-xs font-semibold text-slate-500">
                 <span className="text-[#163300]">{item.requester}</span>
                 <span className="opacity-40">•</span>
-                <span className="font-bold text-[#163300]">Rp {item.price.toLocaleString()}</span>
+                <span className="font-bold text-[#163300]">Rp {(item.sellPrice || item.price).toLocaleString()}</span>
                 <span className="opacity-40">•</span>
                 <span className="flex items-center gap-0.5"><MapPinIcon className="h-3 w-3" />{item.location}</span>
               </div>
             </div>
           </div>
-
-          {/* Interactive Status Badges with custom dropdown overlay */}
           <div className="relative shrink-0 flex items-center gap-1">
             <button
               type="button"
               onClick={(e) => {
-                e.stopPropagation(); // Stop opening details dialog
+                e.stopPropagation();
                 setActiveDropdownId(activeDropdownId === item.id ? null : item.id);
               }}
               className={cn(
@@ -385,8 +461,6 @@ export function ExploreScreen() {
               <span>{item.status}</span>
               <span className="text-[7px] opacity-60">▼</span>
             </button>
-
-            {/* Inline Popop Dropdown */}
             {activeDropdownId === item.id && (
               <>
                 <div 
@@ -399,11 +473,11 @@ export function ExploreScreen() {
                 <div className="absolute right-0 top-10 mt-1 bg-white border border-slate-100 rounded-2xl shadow-xl p-2.5 z-50 min-w-[170px] space-y-1 text-left cursor-default" onClick={e => e.stopPropagation()}>
                   <p className="text-[8px] font-black uppercase text-muted-foreground tracking-widest px-1.5 pb-1.5 border-b">Set Status</p>
                   {[
-                    { code: 'find', label: '🔍 Find (Search)', color: 'text-blue-600 hover:bg-blue-50/70' },
-                    { code: 'found', label: '✅ Found (Acquired)', color: 'text-emerald-600 hover:bg-emerald-50/70' },
-                    { code: 'out of stock', label: '❌ Out of Stock', color: 'text-rose-600 hover:bg-rose-50/70' },
-                    { code: 'cancel', label: '🚫 Cancel / Revoked', color: 'text-slate-500 hover:bg-slate-50' },
-                    { code: 'hold', label: '⏸️ Hold / Postpone', color: 'text-amber-600 hover:bg-amber-50/70' },
+                    { code: 'pending', label: '⏳ Pending', color: 'text-slate-600 hover:bg-slate-50/70' },
+                    { code: 'found', label: '🔍 Found', color: 'text-blue-600 hover:bg-blue-50/70' },
+                    { code: 'confirm', label: '✅ Confirm', color: 'text-emerald-600 hover:bg-emerald-50/70' },
+                    { code: 'out_of_stock', label: '❌ Out of Stock', color: 'text-amber-600 hover:bg-amber-50/70' },
+                    { code: 'cancelled', label: '🚫 Cancelled', color: 'text-red-500 hover:bg-red-50' },
                   ].map((opt) => (
                     <button
                       key={opt.code}
@@ -427,17 +501,14 @@ export function ExploreScreen() {
               </>
             )}
           </div>
-
         </CardContent>
       </Card>
     );
   };
 
-  // Query and merge product list from (1) recorded sales, and (2) customer wishlist with found status
   const getMergedChecklistItems = () => {
-    // A. Sourced from Customer Wishlist with FOUND status
     const wishlistFound = myWishlist
-      .filter(item => item.status === 'found')
+      .filter(item => item.status === 'confirm')
       .map(item => ({
         id: `chk_wishlist_${item.id}`,
         name: item.name,
@@ -446,15 +517,13 @@ export function ExploreScreen() {
         requester: item.requester,
         location: item.location,
         type: 'wishlist' as const,
-        sourceLabel: 'Wishlist (Found Task)'
+        sourceLabel: 'Wishlist (Confirmed)'
       }));
 
-    // B. Sourced from recorded sales in OwnerDashboard
     const salesItems: any[] = [];
     sales.forEach(sale => {
       if (sale.items && Array.isArray(sale.items)) {
         sale.items.forEach((it: any, index: number) => {
-          // If a wishlist task with the same product name is already in the checklist, skip duplicating it as a sale item
           const isWishlistDuplicate = wishlistFound.some(w => w.name.toLowerCase() === it.name.toLowerCase());
           if (!isWishlistDuplicate) {
             salesItems.push({
@@ -498,12 +567,10 @@ export function ExploreScreen() {
     return Array.from(map.values()).sort((a, b) => b.qty - a.qty);
   }, [checklistItems, boughtIds]);
 
-  // Calculate stats for checklist completed items
   const checkedCount = checklistItems.filter(item => isItemChecked(item.id, item.type)).length;
   const totalChecklistCount = checklistItems.length;
   const completionPercentage = totalChecklistCount > 0 ? Math.round((checkedCount / totalChecklistCount) * 100) : 0;
 
-  // Filter the standard wishlist page
   const filteredMyWishlist = myWishlist.filter(item => {
     const matchesSearch = 
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -516,12 +583,11 @@ export function ExploreScreen() {
     return matchesSearch && item.status === selectedStatusFilter;
   });
 
-  const pendingWishlist = filteredMyWishlist.filter(item => item.status !== 'found');
-  const foundWishlist = filteredMyWishlist.filter(item => item.status === 'found');
+  const pendingWishlist = filteredMyWishlist.filter(item => item.status === 'pending');
+  const foundWishlist = filteredMyWishlist.filter(item => item.status === 'found' || item.status === 'confirm');
 
   return (
     <div className="min-h-screen bg-[#f2f5f7] pb-24">
-      {/* Sticky Header mimicking Inventory Screen */}
       <header className="sticky top-0 z-50 bg-[#f2f5f7]/80 backdrop-blur-md px-4 pt-8 pb-4 flex items-center justify-between gap-3">
         <Button variant="ghost" size="icon" className="rounded-full bg-white shadow-sm hover:bg-slate-50 shrink-0" onClick={() => navigate('/')}>
           <ArrowLeft className="h-5 w-5 text-[#163300]" />
@@ -543,7 +609,6 @@ export function ExploreScreen() {
               </DialogHeader>
               
               <div className="space-y-4 mt-2">
-                {/* Photo Upload Area */}
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Product Photo</label>
                   {formImage ? (
@@ -591,7 +656,6 @@ export function ExploreScreen() {
                   </div>
                 </div>
 
-
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Quantity</label>
                   <div className="relative">
@@ -635,7 +699,6 @@ export function ExploreScreen() {
       </header>
 
       <div className="p-4 space-y-4">
-        {/* SUB MENU: SLIDING PILL SWITCH */}
       <div className="bg-slate-100 p-1.5 rounded-2xl flex gap-1.5">
         <button
           type="button"
@@ -653,7 +716,6 @@ export function ExploreScreen() {
           type="button"
           onClick={() => {
             setViewMode('checklist');
-            // reset filters/search inside checklist
             setActiveDropdownId(null);
           }}
           className={cn(
@@ -667,10 +729,8 @@ export function ExploreScreen() {
         </button>
       </div>
 
-      {/* RENDER VIEW 1: STANDALONE WISHLIST BOARD */}
       {viewMode === 'board' && (
         <>
-          {/* Search Bar & Micro Filter Toolbar */}
           <div className="space-y-3">
             <div className="flex gap-2">
               <div className="relative flex-1">
@@ -692,7 +752,7 @@ export function ExploreScreen() {
                     <DialogDescription className="text-sm text-slate-500 font-medium">Narrow down tasks by state</DialogDescription>
                   </DialogHeader>
                   <div className="grid grid-cols-1 gap-2 py-2">
-                    {['all', 'find', 'found', 'out of stock', 'cancel', 'hold'].map(stat => (
+                    {['all', 'pending', 'found', 'confirm', 'out_of_stock', 'cancelled'].map(stat => (
                       <button
                         key={stat}
                         type="button"
@@ -1517,6 +1577,46 @@ export function ExploreScreen() {
         </DialogContent>
       </Dialog>
       </div>
+
+      {/* Checklist Automatic Invoice Success Pop-up */}
+      <Dialog open={invoiceModalSale !== null} onOpenChange={(open) => !open && setInvoiceModalSale(null)}>
+        <DialogContent className="max-w-sm text-center p-6 border-slate-100 rounded-[2rem] bg-white">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 mb-4">
+            <CheckCircle2 className="h-8 w-8 text-emerald-600" />
+          </div>
+          <DialogTitle className="text-xl font-black text-slate-800 mb-2">Item Acquired!</DialogTitle>
+          <DialogDescription className="text-sm font-medium text-slate-500 mb-6">
+            The item has been successfully checked off. A sale invoice has been generated for {invoiceModalSale?.customerName || 'Customer'}.
+          </DialogDescription>
+          <div className="bg-slate-50 rounded-2xl p-4 mb-6 text-left space-y-2 border border-slate-100">
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest border-b pb-2 mb-2">Sale Details</p>
+            <div className="flex justify-between items-center text-sm font-bold text-slate-700">
+              <span>{invoiceModalSale?.items?.[0]?.name || 'Item'}</span>
+              <span>x{invoiceModalSale?.items?.[0]?.qty || 1}</span>
+            </div>
+            <div className="flex justify-between items-center text-sm font-black text-primary pt-2 border-t mt-2">
+              <span>Total</span>
+              <span>Rp {invoiceModalSale?.total?.toLocaleString()}</span>
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <Button 
+              variant="outline"
+              className="flex-1 h-14 rounded-2xl font-bold text-sm border-slate-200"
+              onClick={() => setInvoiceModalSale(null)}
+            >
+              Close
+            </Button>
+            <Button 
+              className="flex-1 h-14 rounded-2xl font-black text-sm shadow-lg shadow-primary/20 bg-[#163300] hover:bg-[#1f4700] text-white"
+              onClick={() => navigate(`/invoice/${invoiceModalSale?.id}`)}
+            >
+              View Full Invoice
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 }

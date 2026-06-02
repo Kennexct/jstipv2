@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useMaster } from '../context/MasterContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ArrowLeft, 
@@ -17,7 +18,8 @@ import {
   Package,
   DollarSign,
   MapPin,
-  TrendingUp
+  TrendingUp,
+  ShieldCheck
 } from 'lucide-react';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
@@ -45,7 +47,7 @@ interface WishlistItem {
   cost: number;  // Foreign Cost
   currency: string;
   shippingCost: number;
-  status: 'pending' | 'found' | 'out_of_stock' | 'cancelled';
+  status: 'pending' | 'found' | 'confirm' | 'out_of_stock' | 'cancelled';
   logs?: string[];
 }
 
@@ -53,10 +55,12 @@ export function OwnerRequestDetailScreen() {
   const { id } = useParams();
   const navigate = useNavigate();
   const confirm = useConfirm();
+  const { saveSale } = useMaster();
   
   const isNew = id === 'new';
   
   const [items, setItems] = useState<WishlistItem[]>([]);
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [avatar, setAvatar] = useState<string | null>(null);
 
   useEffect(() => {
@@ -72,7 +76,16 @@ export function OwnerRequestDetailScreen() {
 
   const updateItemStatus = async (itemId: string, status: WishlistItem['status']) => {
     const item = items.find(i => i.id === itemId);
-    const itemName = item ? item.name : 'this item';
+    if (!item) return;
+
+    if (status === 'found' || status === 'confirm') {
+      if (!item.cost || item.cost <= 0 || !item.price || item.price <= 0) {
+        toast.error(`Please input exact Foreign Cost and Publish Price before updating status.`);
+        return;
+      }
+    }
+
+    const itemName = item.name || 'this item';
     const confirmed = await confirm({
       title: 'Update Status',
       description: `Are you sure you want to change the status of "${itemName}" to ${status.toUpperCase().replace('_', ' ')}?`
@@ -122,10 +135,29 @@ export function OwnerRequestDetailScreen() {
   const grandTotal = totalPublish + totalShipping;
   const totalProfit = totalPublish - totalCostIdr;
 
-  const handleShareInvoice = () => {
-    toast.success('Invoice link copied to clipboard!', {
-      description: 'Share this link with your customer via Chat.'
-    });
+  const handleGenerateInvoice = async () => {
+    if (selectedItems.length === 0) {
+      toast.error('Please select at least one item to generate an invoice.');
+      return;
+    }
+    
+    const itemsToBill = items.filter(i => selectedItems.includes(i.id));
+    const total = itemsToBill.reduce((sum, item) => sum + item.price + (item.shippingCost || 0), 0);
+    
+    const salePayload = {
+      id: `INV_${Date.now()}`,
+      customerName: "Jane Doe",
+      total: total,
+      items: itemsToBill.map(i => ({ productId: i.id, name: i.name, price: i.price + (i.shippingCost || 0), qty: 1 }))
+    };
+
+    try {
+      await saveSale(salePayload);
+      toast.success('Invoice generated successfully!');
+      navigate(`/invoice/${salePayload.id}`);
+    } catch (e) {
+      toast.error('Failed to generate invoice');
+    }
   };
 
   return (
@@ -275,7 +307,19 @@ export function OwnerRequestDetailScreen() {
                   <Card className={`border-none shadow-sm overflow-hidden ${item.status === 'cancelled' ? 'opacity-50' : ''}`}>
                     <CardContent className="p-4 space-y-4">
                       <div className="flex justify-between items-start gap-4">
-                        <div className="space-y-3 flex-1">
+                        <div className="pt-1">
+                          <input 
+                            type="checkbox"
+                            disabled={item.status !== 'confirm'}
+                            checked={selectedItems.includes(item.id)}
+                            onChange={(e) => {
+                              if (e.target.checked) setSelectedItems([...selectedItems, item.id]);
+                              else setSelectedItems(selectedItems.filter(id => id !== item.id));
+                            }}
+                            className="h-5 w-5 rounded-md border-slate-300 text-primary focus:ring-primary/20 transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                          />
+                        </div>
+                        <div className="space-y-3 flex-1 opacity-100 transition-opacity" style={{ opacity: item.status === 'cancelled' ? 0.5 : 1 }}>
                           <input 
                             className="text-sm font-black bg-transparent border-none focus:ring-0 w-full p-0 leading-tight uppercase tracking-tight"
                             defaultValue={item.name}
@@ -365,6 +409,13 @@ export function OwnerRequestDetailScreen() {
                           onClick={() => updateItemStatus(item.id, 'found')}
                           icon={CheckCircle2} 
                           label="Found" 
+                          color="blue" 
+                        />
+                        <StatusButton 
+                          active={item.status === 'confirm'} 
+                          onClick={() => updateItemStatus(item.id, 'confirm')}
+                          icon={ShieldCheck} 
+                          label="Confirm" 
                           color="green" 
                         />
                         <StatusButton 
@@ -480,9 +531,9 @@ export function OwnerRequestDetailScreen() {
                  <Button 
                    variant="ghost"
                    className="h-12 rounded-2xl bg-white/5 text-white font-black text-[9px] gap-1 border border-white/10 hover:bg-white/10"
-                   onClick={handleShareInvoice}
+                   onClick={handleGenerateInvoice}
                  >
-                   <Share2 className="h-3.5 w-3.5" /> SHARE INVOICE
+                   <Receipt className="h-3.5 w-3.5" /> INVOICE ({selectedItems.length})
                  </Button>
                  <Button 
                     variant="ghost"
@@ -523,6 +574,7 @@ export function OwnerRequestDetailScreen() {
 function StatusButton({ active, icon: Icon, label, color, onClick }: any) {
   const colors = {
     green: active ? 'bg-green-500 text-white' : 'bg-green-50 text-green-600',
+    blue: active ? 'bg-blue-500 text-white' : 'bg-blue-50 text-blue-600',
     yellow: active ? 'bg-yellow-500 text-white' : 'bg-yellow-50 text-yellow-600',
     red: active ? 'bg-red-500 text-white' : 'bg-red-50 text-red-600',
   };

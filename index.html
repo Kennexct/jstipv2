@@ -12,11 +12,22 @@
     <meta property="og:image" content="/logo.png" />
     
     <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="apple-touch-icon" href="/logo.png" />
+    <link rel="manifest" href="/manifest.json" />
     <title>JStip - Premium Personal Shopper</title>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch((error) => {
+            console.error('ServiceWorker registration failed:', error);
+          });
+        });
+      }
+    </script>
   </body>
 </html>
 
