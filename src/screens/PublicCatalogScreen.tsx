@@ -87,13 +87,13 @@ export function PublicCatalogScreen() {
     <div className="min-h-screen bg-[#f2f5f7] pb-24">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-[#f2f5f7]/80 backdrop-blur-md pt-8 pb-4 border-none h-auto flex items-center px-6 gap-4">
-        <h1 className="text-xl font-black tracking-tight text-[#163300] flex-1">Catalog</h1>
+        <h1 className="text-xl font-black tracking-tight text-[#0D1B2E] flex-1">Catalog</h1>
         <button 
           onClick={() => {
             navigator.clipboard.writeText(window.location.href);
             toast.success('Catalog link copied!', { description: 'Share this link with your customers to shop directly.' });
           }}
-          className="h-10 px-4 rounded-full bg-white flex items-center gap-2 shadow-sm relative hover:scale-105 transition-transform text-xs font-bold text-[#163300]"
+          className="h-10 px-4 rounded-full bg-white flex items-center gap-2 shadow-sm relative hover:scale-105 transition-transform text-xs font-bold text-[#0D1B2E]"
         >
           <Share2 className="h-4 w-4" /> Share Catalog
         </button>

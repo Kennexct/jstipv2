@@ -36,7 +36,7 @@ export function LoginScreen() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#0D1B2E] flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-2">
           <div className="h-20 w-20 mx-auto shadow-xl shadow-primary/20 rounded-[2rem] overflow-hidden bg-white flex items-center justify-center mb-2">

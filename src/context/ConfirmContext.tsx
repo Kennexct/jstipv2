@@ -58,7 +58,7 @@ export const ConfirmProvider = ({ children }: { children: ReactNode }) => {
               <div className={`h-10 w-10 rounded-full flex items-center justify-center ${options.isDestructive ? 'bg-red-50' : 'bg-amber-50'}`}>
                 <AlertCircle className={`h-5 w-5 ${options.isDestructive ? 'text-red-500' : 'text-amber-500'}`} />
               </div>
-              <DialogTitle className="text-xl font-black text-[#163300]">
+              <DialogTitle className="text-xl font-black text-[#0D1B2E]">
                 {options.title || 'Are you sure?'}
               </DialogTitle>
             </div>
@@ -76,7 +76,7 @@ export const ConfirmProvider = ({ children }: { children: ReactNode }) => {
             </Button>
             <Button 
               className={`flex-1 rounded-2xl h-12 font-bold text-white shadow-sm ${
-                options.isDestructive ? 'bg-red-500 hover:bg-red-600' : 'bg-[#163300] hover:bg-[#1f4700]'
+                options.isDestructive ? 'bg-red-500 hover:bg-red-600' : 'bg-[#0D1B2E] hover:bg-[#162847]'
               }`}
               onClick={handleConfirm}
             >

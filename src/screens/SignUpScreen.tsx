@@ -45,9 +45,9 @@ export function SignUpScreen() {
           to: [username],
           subject: 'Your JStip Verification Code',
           html: `<div style="font-family: sans-serif; text-align: center; padding: 20px; background-color: #f2f5f7; border-radius: 12px;">
-                  <h2 style="color: #163300; margin-bottom: 8px;">Welcome to JStip!</h2>
+                  <h2 style="color: #0D1B2E; margin-bottom: 8px;">Welcome to JStip!</h2>
                   <p style="color: #64748b; font-size: 14px;">Use the following code to verify your email address:</p>
-                  <h1 style="font-size: 36px; letter-spacing: 8px; color: #163300; margin: 24px 0;">${generatedOtp}</h1>
+                  <h1 style="font-size: 36px; letter-spacing: 8px; color: #0D1B2E; margin: 24px 0;">${generatedOtp}</h1>
                   <p style="color: #94a3b8; font-size: 12px;">If you didn't request this, you can safely ignore this email.</p>
                  </div>`
         })
@@ -93,10 +93,10 @@ export function SignUpScreen() {
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-2">
-          <div className="h-16 w-16 shadow-xl shadow-[#163300]/20 rounded-2xl overflow-hidden bg-white flex items-center justify-center">
+          <div className="h-16 w-16 shadow-xl shadow-[#0D1B2E]/20 rounded-2xl overflow-hidden bg-white flex items-center justify-center">
             <img src="/logo.png" alt="JStip Logo" className="h-full w-full object-cover" />
           </div>
-          <h2 className="text-2xl font-black tracking-tight text-[#163300]">Register Merchant</h2>
+          <h2 className="text-2xl font-black tracking-tight text-[#0D1B2E]">Register Merchant</h2>
           <p className="text-xs text-slate-500 uppercase font-bold tracking-widest">Join JStip Network</p>
         </div>
 
@@ -156,7 +156,7 @@ export function SignUpScreen() {
                   <Button 
                     type="submit" 
                     disabled={submitting}
-                    className="pill-button w-full h-14 bg-[#163300] text-white hover:bg-[#1f4700] gap-2 mt-4"
+                    className="pill-button w-full h-14 bg-[#0D1B2E] text-white hover:bg-[#162847] gap-2 mt-4"
                   >
                     {submitting ? 'Sending OTP...' : 'Send Verification OTP'}
                   </Button>
@@ -191,7 +191,7 @@ export function SignUpScreen() {
                   <Button 
                     type="submit" 
                     disabled={submitting || otp.length < 6}
-                    className="pill-button w-full h-14 bg-[#163300] text-white hover:bg-[#1f4700] gap-2 mt-4"
+                    className="pill-button w-full h-14 bg-[#0D1B2E] text-white hover:bg-[#162847] gap-2 mt-4"
                   >
                     {submitting ? 'Verifying...' : 'Verify & Create Account'}
                   </Button>

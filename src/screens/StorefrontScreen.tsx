@@ -117,9 +117,9 @@ export function StorefrontScreen() {
           to: [customerEmail],
           subject: 'Your Storefront Request Verification Code',
           html: `<div style="font-family: sans-serif; text-align: center; padding: 20px; background-color: #f2f5f7; border-radius: 12px;">
-                  <h2 style="color: #163300; margin-bottom: 8px;">Order Verification</h2>
+                  <h2 style="color: #0D1B2E; margin-bottom: 8px;">Order Verification</h2>
                   <p style="color: #64748b; font-size: 14px;">Use the following code to verify your request:</p>
-                  <h1 style="font-size: 36px; letter-spacing: 8px; color: #163300; margin: 24px 0;">${generatedOtp}</h1>
+                  <h1 style="font-size: 36px; letter-spacing: 8px; color: #0D1B2E; margin: 24px 0;">${generatedOtp}</h1>
                  </div>`
         })
       });
@@ -229,7 +229,7 @@ export function StorefrontScreen() {
       {/* Sticky Header */}
       <header className="sticky top-0 z-50 bg-[#f2f5f7]/80 backdrop-blur-md pt-8 pb-4 border-none h-auto flex items-center justify-between px-4">
         <Button variant="ghost" size="icon" className="rounded-full bg-white shadow-sm hover:bg-slate-50 shrink-0" onClick={() => navigate(-1)}>
-          <ArrowLeft className="h-5 w-5 text-[#163300]" />
+          <ArrowLeft className="h-5 w-5 text-[#0D1B2E]" />
         </Button>
         <span className="text-xs font-black uppercase tracking-[0.2em] opacity-60">Storefront Product</span>
         <div className="w-10 h-10" />

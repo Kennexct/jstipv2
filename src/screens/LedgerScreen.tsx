@@ -52,14 +52,14 @@ export function LedgerScreen() {
       <header className="sticky top-0 z-50 bg-[#f2f5f7]/80 backdrop-blur-md pt-8 pb-4 border-none h-auto flex flex-col px-4 gap-4">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" className="rounded-full bg-white shadow-sm hover:bg-slate-50 shrink-0" onClick={() => navigate(-1)}>
-            <ArrowLeft className="h-5 w-5 text-[#163300]" />
+            <ArrowLeft className="h-5 w-5 text-[#0D1B2E]" />
           </Button>
-          <h2 className="text-xl font-black tracking-tight text-[#163300]">Financial Ledger</h2>
+          <h2 className="text-xl font-black tracking-tight text-[#0D1B2E]">Financial Ledger</h2>
         </div>
         <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
           <Button
             onClick={() => setFilter('ALL')}
-            className={`h-8 px-4 rounded-full text-xs font-bold transition-all ${filter === 'ALL' ? 'bg-[#163300] text-white' : 'bg-white text-slate-500 shadow-sm hover:bg-slate-50'}`}
+            className={`h-8 px-4 rounded-full text-xs font-bold transition-all ${filter === 'ALL' ? 'bg-[#0D1B2E] text-white' : 'bg-white text-slate-500 shadow-sm hover:bg-slate-50'}`}
           >
             All Activity
           </Button>
@@ -87,7 +87,7 @@ export function LedgerScreen() {
             <p className="text-sm font-bold">No ledger entries found</p>
             <Button 
               onClick={() => navigate('/owner/inventory')}
-              className="mt-2 bg-[#163300] hover:bg-[#1f4700] text-white rounded-full px-6"
+              className="mt-2 bg-[#0D1B2E] hover:bg-[#162847] text-white rounded-full px-6"
             >
               Record First Sale
             </Button>
@@ -106,7 +106,7 @@ export function LedgerScreen() {
                    <ClipboardCheck className="h-5 w-5" />}
                 </div>
                 <div className="min-w-0">
-                  <h4 className="text-sm font-bold text-[#163300] truncate">{entry.description}</h4>
+                  <h4 className="text-sm font-bold text-[#0D1B2E] truncate">{entry.description}</h4>
                   <p className="text-xs font-semibold text-slate-400 mt-0.5">
                     {new Date(entry.created_at).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                   </p>
