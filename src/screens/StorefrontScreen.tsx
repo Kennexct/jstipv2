@@ -138,12 +138,12 @@ export function StorefrontScreen() {
     setStep('order');
   };
 
-  const handleSubmitOrder = async () => {
+  const handleSubmitOrder = async (paymentMethod: 'cash' | 'stripe') => {
     const qty = parseInt(orderQty) || 1;
     const finalPrice = qty * (item?.price || 0);
 
     const confirmed = await confirm({
-      title: 'Submit Request',
+      title: paymentMethod === 'stripe' ? 'Pay Now with Stripe' : 'Submit Request',
       description: `Submit sourcing request for ${qty}x "${item.name}"?`
     });
     if (!confirmed) return;
@@ -160,11 +160,43 @@ export function StorefrontScreen() {
       image: item.image,
       note: clientNotes.trim() || undefined,
       merchantId: merchantId,
-      merchant_id: merchantId
+      merchant_id: merchantId,
+      paymentMethod,
+      paymentStatus: 'unpaid'
     };
 
     try {
       await db.saveWishlist(newRequest, merchantId);
+
+      if (paymentMethod === 'stripe') {
+        const stripeRes = await fetch('/api/create-stripe-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            orderDetails: {
+              name: newRequest.name,
+              price: finalPrice,
+              quantity: 1,
+              image: newRequest.image,
+              notes: newRequest.note,
+              customerEmail,
+              customerId: customerEmail,
+              merchantId: merchantId
+            },
+            successUrl: window.location.href,
+            cancelUrl: window.location.href
+          })
+        });
+        
+        const stripeData = await stripeRes.json();
+        if (stripeData.url) {
+          window.location.href = stripeData.url;
+          return;
+        } else {
+          throw new Error(stripeData.error || 'Failed to create Stripe session');
+        }
+      }
+
       toast.success('Sourcing request submitted successfully!', {
         description: `Your request has been routed to the traveler's pending checklist.`
       });
@@ -179,8 +211,8 @@ export function StorefrontScreen() {
         setOrderQty('1');
         setOtp('');
       }, 500);
-    } catch (e) {
-      toast.error('Failed to submit request. Please try again.');
+    } catch (err: any) {
+      toast.error('Failed to submit request', { description: err.message });
     } finally {
       setSubmitting(false);
     }
@@ -489,13 +521,21 @@ export function StorefrontScreen() {
                   />
                 </div>
 
-                <div className="pt-2">
+                <div className="pt-4 space-y-2">
+                  <Button 
+                    disabled={submitting}
+                    variant="outline"
+                    className="w-full h-12 rounded-2xl font-black uppercase italic gap-2 text-slate-500 hover:text-slate-700"
+                    onClick={() => handleSubmitOrder('cash')}
+                  >
+                    <Send className="h-4 w-4" /> {submitting ? 'Submitting...' : 'Pay with Cash'}
+                  </Button>
                   <Button 
                     disabled={submitting}
                     className="w-full h-12 rounded-2xl font-black uppercase italic shadow-lg shadow-primary/10 gap-2"
-                    onClick={handleSubmitOrder}
+                    onClick={() => handleSubmitOrder('stripe')}
                   >
-                    <Send className="h-4 w-4" /> {submitting ? 'Submitting...' : 'Submit Final Order'}
+                    <DollarSign className="h-4 w-4" /> {submitting ? 'Redirecting...' : 'Pay Now (Stripe)'}
                   </Button>
                 </div>
               </motion.div>

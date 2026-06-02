@@ -368,7 +368,9 @@ export const db = {
           status: item.status || 'find',
           note: item.note || '',
           qty: item.qty || 1,
-          merchant_id: merchantId || null
+          merchant_id: merchantId || null,
+          payment_method: item.paymentMethod || 'cash',
+          payment_status: item.paymentStatus || 'unpaid'
         };
         await postgrestRequest('jstip_wishlist', {
           method: 'POST',
