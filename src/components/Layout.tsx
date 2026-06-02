@@ -8,14 +8,14 @@ export function Layout() {
   const isInvoiceRoute = location.pathname.startsWith('/invoice');
 
   return (
-    <div className="flex min-h-screen flex-col md:flex-row bg-background">
+    <div className="flex min-h-screen flex-col md:flex-row bg-[#f2f5f7]">
       {/* Desktop Sidebar */}
       {!isInvoiceRoute && <Sidebar />}
 
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col min-h-screen overflow-x-hidden md:pl-64">
-        {/* On mobile: max-w-md. On desktop: expand nicely but cap at 3xl to prevent ultra-wide stretching */}
-        <div className="mx-auto w-full max-w-md md:max-w-3xl pb-24 md:pb-8 pt-0 md:pt-4">
+        {/* Tightened desktop width to max-w-2xl so lists don't look awkwardly wide */}
+        <div className="mx-auto w-full max-w-md md:max-w-2xl pb-24 md:pb-12 pt-0 md:pt-10">
           <Outlet />
         </div>
       </main>
@@ -28,7 +28,7 @@ export function Layout() {
         </div>
       )}
 
-      {/* Desktop FAB (Visible only on desktop, floats over content) */}
+      {/* Desktop FAB */}
       {!isInvoiceRoute && (
         <div className="hidden md:block print:hidden">
           <GlobalActionFab />
