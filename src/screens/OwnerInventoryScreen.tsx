@@ -36,8 +36,8 @@ export function OwnerInventoryScreen() {
   const { catalogItems: inventory, removeItem, sales, tripSettings } = useMaster();
   const confirm = useConfirm();
 
-  const conversionRate = tripSettings?.manualRate || 1;
-  const shoppingCurrency = tripSettings?.shoppingCurrency || 'Yen';
+  const conversionRate = tripSettings?.currency?.manualRate || 13500;
+  const shoppingCurrency = tripSettings?.currency?.code || 'SGD';
 
   // 1. Enrich inventory data with sales and margin insights
   const enrichedInventory = useMemo(() => {
