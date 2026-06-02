@@ -183,7 +183,7 @@ export function StorefrontScreen() {
       name: `[${qty}x] ${item.name}`,
       requester: `${clientName.trim()} (${customerEmail})`,
       status: 'pending',
-      price: item.price, 
+      price: item.cost || 0, 
       sellPrice: item.price,
       qty: qty,
       location: tripSettings?.trip?.origin || 'Seoul',
