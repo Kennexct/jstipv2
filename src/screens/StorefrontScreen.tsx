@@ -106,22 +106,10 @@ export function StorefrontScreen() {
       const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
       setExpectedOtp(generatedOtp);
       
-      const response = await fetch('/api/resend/emails', {
+      const response = await fetch('/api/sendOtp', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer re_ZuqXFC69_9FnA4hZJqKA3eUNJkMnQvz9n`
-        },
-        body: JSON.stringify({
-          from: 'JStip <onboarding@resend.dev>',
-          to: [customerEmail],
-          subject: 'Your Storefront Request Verification Code',
-          html: `<div style="font-family: sans-serif; text-align: center; padding: 20px; background-color: #f2f5f7; border-radius: 12px;">
-                  <h2 style="color: #0D1B2E; margin-bottom: 8px;">Order Verification</h2>
-                  <p style="color: #64748b; font-size: 14px;">Use the following code to verify your request:</p>
-                  <h1 style="font-size: 36px; letter-spacing: 8px; color: #0D1B2E; margin: 24px 0;">${generatedOtp}</h1>
-                 </div>`
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: customerEmail, otp: generatedOtp })
       });
 
       if (!response.ok) {
