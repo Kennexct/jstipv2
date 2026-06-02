@@ -17,8 +17,8 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing order details' });
     }
     
-    // IDR adalah zero-decimal currency di Stripe, jadi 55000 IDR ditulis langsung 55000
-    const unitAmount = Math.round(orderDetails.price);
+    // Stripe mewajibkan nominal dikali 100 untuk mata uang IDR (karena dianggap memiliki 2 desimal di Stripe)
+    const unitAmount = Math.round(orderDetails.price * 100);
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
