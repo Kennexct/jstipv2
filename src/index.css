@@ -75,18 +75,18 @@
 
 /* JStip FinTech Utility Classes */
 .fintech-card {
-  @apply bg-white rounded-3xl border border-slate-100 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] transition-shadow hover:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.05)];
+  @apply bg-card rounded-[1.5rem] border border-border/50 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_12px_40px_-8px_rgba(0,0,0,0.08)];
 }
 
 .pill-button {
-  @apply rounded-full font-bold transition-transform active:scale-95 flex items-center justify-center gap-2;
+  @apply rounded-full font-bold transition-all duration-300 ease-out active:scale-[0.97] flex items-center justify-center gap-2;
 }
 
 /* Gold shimmer utility */
 .gold-text {
-  @apply text-[#C9A84C];
+  @apply text-primary;
 }
 
 .navy-bg {
-  @apply bg-[#0D1B2E];
+  @apply bg-secondary text-secondary-foreground;
 }
