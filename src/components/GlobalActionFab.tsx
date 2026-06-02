@@ -220,7 +220,7 @@ export function GlobalActionFab() {
 
   return (
     <>
-      <div className="fixed bottom-[80px] right-4 z-50 flex flex-col items-end gap-3">
+      <div className="fixed bottom-[80px] md:bottom-8 right-4 md:right-8 z-50 flex flex-col items-end gap-3">
         <AnimatePresence>
           {isOpen && (
             <motion.div
