@@ -114,7 +114,7 @@ export function PublicCatalogScreen() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-[100dvh] bg-slate-50 flex items-center justify-center">
         <Loader2 className="h-10 w-10 text-foreground animate-spin" />
       </div>
     );
@@ -122,7 +122,7 @@ export function PublicCatalogScreen() {
 
   if (!merchant) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center px-6">
+      <div className="min-h-[100dvh] bg-slate-50 flex flex-col items-center justify-center px-6">
         <Store className="h-16 w-16 text-slate-300 mb-4" />
         <h2 className="text-2xl font-black text-foreground">Store Not Found</h2>
         <p className="text-slate-500 text-center mt-2">The store you are looking for does not exist or has been removed.</p>
@@ -131,7 +131,7 @@ export function PublicCatalogScreen() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-[100dvh] bg-slate-50">
       {/* ─── DESKTOP TOP NAVBAR ─── */}
       <nav className="hidden md:flex sticky top-0 z-50 bg-white border-b border-slate-200 h-20 items-center justify-between px-8 shadow-sm">
         <div className="flex items-center gap-3">

@@ -101,26 +101,25 @@ export function StorefrontScreen() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-28">
+    <div className="min-h-[100dvh] bg-background pb-[10dvh]">
       {/* Sticky Header */}
-      <header className="sticky top-0 z-50 bg-slate-50/80 backdrop-blur-md pt-8 pb-4 border-none h-auto flex items-center justify-between px-4">
-        <Button variant="ghost" size="icon" className="rounded-full bg-white shadow-sm hover:bg-slate-50 shrink-0" onClick={() => navigate(-1)}>
+      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-2xl pt-8 pb-4 border-none h-auto flex items-center justify-between px-4 shadow-sm">
+        <Button variant="ghost" size="icon" className="rounded-full bg-card shadow-sm hover:bg-muted shrink-0" onClick={() => navigate(-1)}>
           <ArrowLeft className="h-5 w-5 text-foreground" />
         </Button>
-        <span className="text-xs font-black uppercase tracking-[0.2em] opacity-60">Storefront Product</span>
+        <span className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">Storefront Product</span>
         <div className="w-10 h-10" />
       </header>
 
       <div className="max-w-5xl mx-auto md:py-8 px-0 md:px-6 flex flex-col md:flex-row gap-0 md:gap-12">
-        {/* Hero Image Section */}
-        <div className="w-full md:w-1/3 xl:w-1/2 relative aspect-square bg-white md:rounded-[2rem] overflow-hidden shrink-0 border-b md:border border-slate-100 shadow-sm">
+        {/* Hero Image Section - Fixed for Mobile Height */}
+        <div className="w-full md:w-1/3 xl:w-1/2 relative h-[35dvh] md:h-auto md:aspect-square bg-card md:rounded-[2rem] overflow-hidden shrink-0 border-b md:border border-border/50 shadow-sm">
           <WatermarkOverlay />
           <img 
             src={item.image} 
             alt={item.name} 
             className="w-full h-full object-cover"
           />
-
         </div>
 
         <div className="w-full md:w-2/3 xl:w-1/2 p-6 md:p-0 flex flex-col gap-6">
@@ -129,19 +128,19 @@ export function StorefrontScreen() {
               {/* Title & Price Card */}
               <section className="space-y-3 animate-in slide-in-from-left-4 fade-in duration-300">
           <div className="space-y-1 text-left">
-            <span className="text-[10px] font-black uppercase tracking-widest text-primary bg-primary/5 px-2.5 py-1 rounded-full inline-block">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-primary bg-primary/10 px-2.5 py-1 rounded-full inline-block">
               Product Details
             </span>
-            <h2 className="text-2xl font-black uppercase italic tracking-tighter text-slate-800 leading-tight">
+            <h2 className="text-2xl font-bold uppercase italic tracking-tighter text-foreground leading-tight">
               {item.name}
             </h2>
           </div>
 
-          <Card className="border-none shadow-sm bg-white overflow-hidden">
+          <Card className="border border-border/50 shadow-sm bg-card overflow-hidden rounded-3xl">
             <CardContent className="p-4 flex items-center justify-between">
               <div className="space-y-0.5 text-left">
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Price</p>
-                <p className="text-2xl font-black text-primary font-mono">Rp {item.price.toLocaleString()}</p>
+                <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Price</p>
+                <p className="text-2xl font-bold text-primary tracking-tight">Rp {item.price.toLocaleString()}</p>
               </div>
               <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-100/60 font-bold px-3 py-1.5 rounded-xl text-[10px] leading-none uppercase shrink-0">
                 100% Genuine Guarantee
