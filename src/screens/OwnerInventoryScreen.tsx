@@ -15,7 +15,7 @@ import { WatermarkOverlay } from '../components/WatermarkOverlay';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
 import { FileText, Image as ImageIcon, DownloadCloud } from 'lucide-react';
-import { exportProductImage } from '@/lib/exportImage';
+import { exportProductImage } from '../lib/exportImage';
 import {
   Dialog,
   DialogContent,
