@@ -865,7 +865,21 @@ export function ExploreScreen() {
 
                     {/* Sell Price */}
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-500 uppercase">Sell Price (IDR)</label>
+                      {(() => {
+                        const sellNum = parseInt(editSellAmount.replace(/[^0-9]/g, '')) || 0;
+                        const margin = sellNum - computedPriceInIdr;
+                        const marginPercentage = computedPriceInIdr > 0 ? (margin / computedPriceInIdr) * 100 : 0;
+                        return (
+                          <div className="flex items-center justify-between">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase">Sell Price (IDR)</label>
+                            {sellNum > 0 && (
+                              <span className={`text-[10px] font-bold uppercase ${margin > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                Est. Margin: {margin > 0 ? '+' : ''}Rp {margin.toLocaleString('id-ID')} ({marginPercentage > 0 ? '+' : ''}{marginPercentage.toFixed(1)}%)
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })()}
                       <div className="relative">
                         <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#0D1B2E] font-bold">Rp</div>
                         <Input 
@@ -873,7 +887,7 @@ export function ExploreScreen() {
                           inputMode="numeric"
                           pattern="[0-9]*"
                           placeholder="Selling Price to Customer" 
-                          value={editSellAmount}
+                          value={editSellAmount ? Number(editSellAmount).toLocaleString('id-ID') : ''}
                           onChange={(e) => {
                             const val = e.target.value.replace(/[^0-9]/g, '');
                             setEditSellAmount(val);
@@ -885,31 +899,6 @@ export function ExploreScreen() {
                         />
                       </div>
                     </div>
-                    
-                    {/* Margin Card */}
-                    {(() => {
-                      const sellNum = parseInt(editSellAmount.replace(/[^0-9]/g, '')) || 0;
-                      if (sellNum > 0) {
-                        const margin = sellNum - computedPriceInIdr;
-                        const marginPercentage = computedPriceInIdr > 0 ? (margin / computedPriceInIdr) * 100 : 0;
-                        return (
-                          <div className={`p-4 rounded-2xl border flex items-center justify-between transition-colors ${margin > 0 ? 'bg-green-50 border-green-100' : 'bg-red-50 border-red-100'}`}>
-                            <div className="space-y-0.5">
-                              <p className={`text-[10px] font-bold uppercase ${margin > 0 ? 'text-green-700' : 'text-red-700'}`}>
-                                Expected Gross Margin
-                              </p>
-                              <p className={`text-xl font-black ${margin > 0 ? 'text-green-900' : 'text-red-900'}`}>
-                                Rp {margin.toLocaleString()}
-                              </p>
-                            </div>
-                            <div className={`px-3 py-1 rounded-full text-xs font-bold ${margin > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                              {marginPercentage > 0 ? '+' : ''}{marginPercentage.toFixed(1)}%
-                            </div>
-                          </div>
-                        );
-                      }
-                      return null;
-                    })()}
                   </CardContent>
                 </Card>
               </div>

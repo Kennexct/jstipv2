@@ -531,37 +531,27 @@ export function UploadItemScreen() {
                   </div>
 
                   {/* Publish Price */}
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold text-primary uppercase px-1">Sell Price (IDR)</label>
-                <div className="relative">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-primary font-bold">Rp</div>
-                  <Input 
-                    type="text"
-                    placeholder="Selling Price to Customer" 
-                    className="h-14 pl-10 rounded-2xl bg-background border-2 border-primary/20 text-lg font-bold text-primary focus:border-primary"
-                    value={publishPrice}
-                    onChange={(e) => setPublishPrice(e.target.value.replace(/[^0-9]/g, ''))}
-                    inputMode="numeric"
-                  />
-                </div>
-              </div>
-              
-              {/* Margin Card */}
-              {Number(publishPrice) > 0 && (
-                <div className={`p-4 rounded-2xl border flex items-center justify-between transition-colors ${margin > 0 ? 'bg-green-50 border-green-100' : 'bg-red-50 border-red-100'}`}>
-                  <div className="space-y-0.5">
-                    <p className={`text-[10px] font-bold uppercase ${margin > 0 ? 'text-green-700' : 'text-red-700'}`}>
-                      Expected Gross Margin
-                    </p>
-                    <p className={`text-xl font-black ${margin > 0 ? 'text-green-900' : 'text-red-900'}`}>
-                      Rp {margin.toLocaleString()}
-                    </p>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between px-1">
+                      <label className="text-[10px] font-bold text-primary uppercase">Sell Price (IDR)</label>
+                      {Number(publishPrice) > 0 && (
+                        <span className={`text-[10px] font-bold uppercase ${margin > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          Est. Margin: {margin > 0 ? '+' : ''}Rp {margin.toLocaleString('id-ID')} ({marginPercentage > 0 ? '+' : ''}{marginPercentage.toFixed(1)}%)
+                        </span>
+                      )}
+                    </div>
+                    <div className="relative">
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-primary font-bold">Rp</div>
+                      <Input 
+                        type="text"
+                        placeholder="Selling Price to Customer" 
+                        className="h-14 pl-10 rounded-2xl bg-background border-2 border-primary/20 text-lg font-bold text-primary focus:border-primary"
+                        value={publishPrice ? Number(publishPrice).toLocaleString('id-ID') : ''}
+                        onChange={(e) => setPublishPrice(e.target.value.replace(/[^0-9]/g, ''))}
+                        inputMode="numeric"
+                      />
+                    </div>
                   </div>
-                  <div className={`px-3 py-1 rounded-full text-xs font-bold ${margin > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                    {marginPercentage > 0 ? '+' : ''}{marginPercentage.toFixed(1)}%
-                  </div>
-                </div>
-              )}
             </CardContent>
           </Card>
           );
