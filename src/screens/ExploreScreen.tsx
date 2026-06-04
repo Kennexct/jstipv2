@@ -603,6 +603,51 @@ export function ExploreScreen() {
             )}
           </div>
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
           {/* Fulfillment List */}
           <div className="space-y-6">
             <div className="flex items-center justify-between px-1">
@@ -667,39 +712,14 @@ export function ExploreScreen() {
                         >
                           {renderWishlistItem(item, i, "opacity-75 hover:opacity-100 bg-slate-50/20 border-emerald-100/50")}
                         </motion.div>
-            </div>
-
-            {/* Selected category pill indicator */}
-            {selectedStatusFilter !== 'all' && (
-              <div className="flex items-center gap-2 px-1">
-                <span className="text-[9px] font-black uppercase tracking-wider text-muted-foreground">Active Filter:</span>
-                <Badge className={cn("text-[9px] font-black h-5 uppercase tracking-wider rounded-full", getStatusStyle(selectedStatusFilter as any))}>
-                  {selectedStatusFilter}
-                </Badge>
-                <button 
-                  onClick={() => setSelectedStatusFilter('all')} 
-                  className="text-[9px] text-primary hover:underline font-black uppercase tracking-wider"
-                >
-                  Clear
-                </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
-
-          {/* Fulfillment List */}
-          <div className="space-y-6">
-            <div className="flex items-center justify-between px-1">
-              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Traveler Taskboard</p>
-              <Badge variant="outline" className="text-[10px] h-5 border-dashed font-bold">{filteredMyWishlist.length} ITEMS</Badge>
-            </div>
-
-            {filteredMyWishlist.length === 0 ? (
-              <div className="text-center p-10 bg-muted/20 rounded-3xl border border-dashed text-muted-foreground flex flex-col items-center gap-2">
-                <Package className="h-8 w-8 opacity-40" />
-                <p className="text-xs font-bold uppercase tracking-widest">No matching requests</p>
-                <p className="text-[10px] max-w-xs leading-normal">Adjust search filters or use "Record Request" above to log manual entries.</p>
-              </div>
-            ) : (
+      
       {/* DETAIL PRODUCT MODAL SCREEN */}
       <Dialog open={selectedDetailItem !== null} onOpenChange={async (open) => { 
         if (!open) {
