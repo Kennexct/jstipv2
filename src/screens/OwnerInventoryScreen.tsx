@@ -506,32 +506,48 @@ export function OwnerInventoryScreen() {
 
       {/* Catalog Product Detail Enhanced Modal */}
       <Dialog open={selectedItem !== null} onOpenChange={(open) => { if (!open) setSelectedItem(null); }}>
-        <DialogContent className="max-w-md w-[95%] p-0 overflow-hidden border-none rounded-[2rem]">
+        <DialogContent className="max-w-md w-[95%] border-none rounded-[2rem] max-h-[85dvh] overflow-y-auto">
           {selectedItem && (
-            <div className="flex flex-col">
-              {/* Cover Image Header */}
-              <div className="relative h-56 w-full bg-[#f2f5f7]">
-                <WatermarkOverlay />
+            <div className="space-y-5 text-left">
+              <DialogHeader className="text-left pb-2">
+                <div className="flex items-center justify-between">
+                  <Badge className="bg-slate-100 text-slate-600 border-none font-bold uppercase tracking-widest text-[10px]">
+                    Catalog Item
+                  </Badge>
+                  <Badge className="bg-[#C9A84C] text-[#0D1B2E] border-none font-bold uppercase tracking-widest text-[10px]">
+                    LIVE
+                  </Badge>
+                </div>
+                <DialogTitle className="text-2xl font-black text-[#0D1B2E] mt-3 leading-tight tracking-tight">
+                  {selectedItem.name}
+                </DialogTitle>
+                <DialogDescription className="text-sm font-medium text-slate-500 flex items-center gap-1.5 mt-1">
+                  Item ID <span className="text-[#0D1B2E] font-bold">#00{selectedItem.id.replace(/\D/g, '').slice(0,3) || '1'}</span>
+                </DialogDescription>
+              </DialogHeader>
+
+              {/* Product picture rendering */}
+              <div className="space-y-1">
                 {selectedItem.image ? (
-                  <img src={selectedItem.image} alt={selectedItem.name} className="h-full w-full object-cover" />
+                  <div className="relative w-full h-48 rounded-2xl overflow-hidden bg-[#f2f5f7]">
+                    <WatermarkOverlay />
+                    <img src={selectedItem.image} className="h-full w-full object-cover" alt={selectedItem.name} referrerPolicy="no-referrer" />
+                  </div>
                 ) : (
-                  <Package className="h-12 w-12 text-slate-300 absolute inset-0 m-auto" />
+                  <div className="w-full h-32 rounded-2xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center p-4 bg-[#f2f5f7] text-slate-500 gap-2 text-center">
+                    <Package className="h-8 w-8 text-slate-300" />
+                  </div>
                 )}
-                <Badge className="absolute top-4 left-4 bg-[#C9A84C] text-[#0D1B2E] border-none font-black shadow-lg">LIVE IN CATALOG</Badge>
               </div>
 
-              {/* Content Body */}
-              <div className="p-5 space-y-6">
-                <div>
-                  <div className="flex items-center justify-between gap-2">
-                    <h3 className="text-xl font-black text-[#0D1B2E] leading-tight">{selectedItem.name}</h3>
-                    <span className="text-xs font-bold text-slate-400 shrink-0">#00{selectedItem.id.replace(/\D/g, '').slice(0,3) || '1'}</span>
-                  </div>
-                  <p className="text-2xl font-black text-[#0D1B2E] tracking-tight mt-1">Rp {selectedItem.price.toLocaleString()}</p>
-                </div>
+              {/* Price */}
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Selling Price</p>
+                <p className="text-2xl font-black text-[#0D1B2E] tracking-tight mt-1">Rp {selectedItem.price.toLocaleString()}</p>
+              </div>
 
-                {/* Margins & Sales Analytics */}
-                <div className="space-y-4">
+              {/* Margins & Sales Analytics */}
+              <div className="space-y-4">
                   <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Financial Insights</p>
                   
                   <div className="grid grid-cols-2 gap-3">
@@ -620,7 +636,6 @@ export function OwnerInventoryScreen() {
                     <Trash2 className="h-3.5 w-3.5 mr-1.5" /> Remove from Catalog
                   </Button>
                 </div>
-              </div>
             </div>
           )}
         </DialogContent>

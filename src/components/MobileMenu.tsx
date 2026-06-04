@@ -47,7 +47,7 @@ export function MobileMenu() {
         Using DialogContent from Shadcn but customizing it to act like a slide-out drawer from the right.
         Since we might not have the Sheet component, we'll style DialogContent directly.
       */}
-      <DialogContent className="md:hidden fixed top-0 right-0 left-auto bottom-0 translate-x-0 translate-y-0 z-50 h-full w-[80%] max-w-sm flex flex-col p-0 gap-0 border-l border-none bg-white shadow-2xl rounded-l-3xl data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right duration-300 transition-transform">
+      <DialogContent className="md:hidden fixed top-0 left-0 right-auto bottom-0 translate-x-0 translate-y-0 z-50 h-full w-[80%] max-w-sm flex flex-col p-0 gap-0 border-r border-none bg-white shadow-2xl rounded-r-3xl data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left duration-300 transition-transform">
         <DialogHeader className="p-6 text-left border-b border-slate-100 shrink-0">
           <DialogTitle className="text-xl font-black uppercase italic tracking-tighter text-primary">JStip</DialogTitle>
         </DialogHeader>
@@ -73,7 +73,7 @@ export function MobileMenu() {
           ))}
         </div>
 
-        <div className="p-4 border-t border-slate-100 bg-slate-50 shrink-0 rounded-bl-3xl">
+        <div className="p-4 border-t border-slate-100 bg-slate-50 shrink-0 rounded-br-3xl">
           <div className="flex items-center gap-3 mb-4">
             <Avatar className="h-10 w-10 border-2 border-white shadow-sm">
               <AvatarFallback className="font-black bg-[#0D1B2E] text-white">
