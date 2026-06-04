@@ -26,7 +26,7 @@ import {
 import { useMaster } from '../context/MasterContext';
 import { useConfirm } from '../context/ConfirmContext';
 import { cn } from '@/lib/utils';
-import { MobileMenu } from '@/components/MobileMenu';
+import { MobileMenu } from '../components/MobileMenu';
 
 export function OwnerInventoryScreen() {
   const navigate = useNavigate();

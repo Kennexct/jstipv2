@@ -18,7 +18,7 @@ import { useMaster } from '../context/MasterContext';
 import { useConfirm } from '../context/ConfirmContext';
 import { fetchLiveExchangeRate } from '../lib/currency';
 import { cn } from '@/lib/utils';
-import { MobileMenu } from '@/components/MobileMenu';
+import { MobileMenu } from '../components/MobileMenu';
 import { 
   Dialog,
   DialogContent,
