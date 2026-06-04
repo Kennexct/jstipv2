@@ -18,10 +18,6 @@ import {
   Check,
   Ban,
   AlertCircle,
-  CheckSquare,
-  Square,
-  ShoppingBag,
-  ListTodo,
   Info,
   Calendar,
   Edit2,
@@ -44,52 +40,7 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useMaster } from '../context/MasterContext';
 import { useConfirm } from '../context/ConfirmContext';
-import { useState, ChangeEvent, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { motion } from 'motion/react';
-import { 
-  Search, 
-  Filter, 
-  Plus, 
-  Package, 
-  ArrowLeft,
-  DollarSign, 
-  MapPin as MapPinIcon, 
-  Clock, 
-  MoreVertical, 
-  CheckCircle2, 
-  Users,
-  Camera,
-  X,
-  Check,
-  Ban,
-  AlertCircle,
-  CheckSquare,
-  Square,
-  ShoppingBag,
-  ListTodo,
-  Info,
-  Calendar,
-  Edit2,
-  Trash2,
-  Minus
-} from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button, buttonVariants } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { 
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogDescription,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
-import { useMaster } from '../context/MasterContext';
-import { useConfirm } from '../context/ConfirmContext';
+
 
 export interface WishlistItem {
   id: string;
@@ -108,12 +59,8 @@ export function ExploreScreen() {
   const navigate = useNavigate();
   const {
     loading,
-    sales,
     wishlistItems: myWishlist,
     saveWishlist,
-    saveSale,
-    boughtIds,
-    toggleBoughtId,
     tripSettings
   } = useMaster();
 
@@ -126,8 +73,6 @@ export function ExploreScreen() {
 
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedStatusFilter, setSelectedStatusFilter] = useState<string>('all');
-  const [isBulkMode, setIsBulkMode] = useState(false);
-  const [selectedBulkIds, setSelectedBulkIds] = useState<string[]>([]);
 
   // Track active popup elements
   const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
@@ -335,50 +280,7 @@ export function ExploreScreen() {
     }
   };
 
-  const handleToggleCustomChecklist = async (id: string, type: 'wishlist' | 'sale') => {
-    const isCurrentlyBought = boughtIds.includes(id);
-    const action = isCurrentlyBought ? 'uncheck this item' : 'confirm this item as bought';
-    
-    const confirmed = await confirm(`Are you sure you want to ${action}?`);
-    if (!confirmed) return;
 
-    // Auto generate sales record when a wishlist item is checked
-    if (!isCurrentlyBought && type === 'wishlist') {
-      const matchedWishlist = myWishlist.find(w => `chk_wishlist_${w.id}` === id);
-      if (matchedWishlist) {
-        try {
-          const sellPrice = matchedWishlist.sellPrice || matchedWishlist.price;
-          const newSale = {
-            id: 'sale_' + Date.now(),
-            customerName: matchedWishlist.requester,
-            total: sellPrice,
-            date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            items: [{
-              productId: matchedWishlist.id,
-              name: matchedWishlist.name,
-              price: sellPrice,
-              qty: 1,
-              cost: matchedWishlist.price,
-              sourceCategory: 'Wishlist'
-            }]
-          };
-          if (saveSale) {
-            await saveSale(newSale);
-            setInvoiceModalSale(newSale);
-          }
-        } catch (e) {
-          console.error("Failed to generate automatic sale", e);
-        }
-      }
-    }
-
-    if (isCurrentlyBought) {
-      toast.info('Marked item as pending purchase');
-    } else {
-      toast.success('Confirmed item as acquired');
-    }
-    toggleBoughtId(id);
-  };
 
   const getStatusStyle = (status: WishlistItem['status']) => {
     switch (status) {
@@ -765,339 +667,39 @@ export function ExploreScreen() {
                         >
                           {renderWishlistItem(item, i, "opacity-75 hover:opacity-100 bg-slate-50/20 border-emerald-100/50")}
                         </motion.div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+            </div>
+
+            {/* Selected category pill indicator */}
+            {selectedStatusFilter !== 'all' && (
+              <div className="flex items-center gap-2 px-1">
+                <span className="text-[9px] font-black uppercase tracking-wider text-muted-foreground">Active Filter:</span>
+                <Badge className={cn("text-[9px] font-black h-5 uppercase tracking-wider rounded-full", getStatusStyle(selectedStatusFilter as any))}>
+                  {selectedStatusFilter}
+                </Badge>
+                <button 
+                  onClick={() => setSelectedStatusFilter('all')} 
+                  className="text-[9px] text-primary hover:underline font-black uppercase tracking-wider"
+                >
+                  Clear
+                </button>
               </div>
             )}
           </div>
-        </>
-      )}
 
-      {/* RENDER VIEW 2: SYSTEMATIC ITEM CHECKLIST */}
-      {viewMode === 'checklist' && (
-        <div className="space-y-6">
-          {/* Checklist header state */}
-          <Card className="border-none bg-[#0D1B2E] text-white shadow-md rounded-2xl overflow-hidden relative">
-            <CardContent className="p-4 relative z-10 flex flex-col gap-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div className="bg-[#C9A84C]/20 p-2 rounded-xl">
-                    <ListTodo className="h-5 w-5 text-[#C9A84C]" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-black tracking-tight">Checkout Audit</h3>
-                    <p className="text-[10px] text-slate-300 font-medium">Verify all items</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <span className="text-xl font-black text-[#C9A84C] leading-none">{checkedCount} <span className="text-xs text-slate-400">/ {totalChecklistCount}</span></span>
-                </div>
-              </div>
-
-              {/* Progress visual section */}
-              <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-[#C9A84C] transition-all duration-500 rounded-full"
-                  style={{ width: `${completionPercentage}%` }}
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Checklist queries list */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between px-1 gap-2">
-              <div className="flex-1">
-                <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground leading-tight">Checkout Checklist Items</p>
-              </div>
-              
-              <div className="flex shrink-0 bg-slate-200/50 p-1 rounded-xl">
-                <button
-                  onClick={() => setChecklistViewMode('transaction')}
-                  className={cn(
-                    "px-3 py-1 rounded-lg text-[10px] font-bold transition-all",
-                    checklistViewMode === 'transaction' ? "bg-white text-[#0D1B2E] shadow-sm" : "text-slate-500 hover:text-slate-800"
-                  )}
-                >
-                  By Transaction
-                </button>
-                <button
-                  onClick={() => setChecklistViewMode('summary')}
-                  className={cn(
-                    "px-3 py-1 rounded-lg text-[10px] font-bold transition-all",
-                    checklistViewMode === 'summary' ? "bg-white text-[#0D1B2E] shadow-sm" : "text-slate-500 hover:text-slate-800"
-                  )}
-                >
-                  By Item Summary
-                </button>
-              </div>
-
-              <div className="flex-1 flex justify-end">
-                {checklistViewMode === 'transaction' && (
-                  <div className="flex items-center gap-2">
-                    {isBulkMode ? (
-                      <>
-                        <Button 
-                          size="sm" 
-                          variant="ghost" 
-                          onClick={() => {
-                            setIsBulkMode(false);
-                            setSelectedBulkIds([]);
-                          }}
-                          className="text-xs text-slate-500 h-7 px-2"
-                        >
-                          Cancel
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="destructive"
-                          disabled={selectedBulkIds.length === 0}
-                          onClick={async () => {
-                            const confirmed = await confirm(`Are you sure you want to delete ${selectedBulkIds.length} items?`);
-                            if (!confirmed) return;
-                            
-                            for (const fullId of selectedBulkIds) {
-                              if (fullId.startsWith('chk_wishlist_')) {
-                                const wId = fullId.replace('chk_wishlist_', '');
-                                const matched = myWishlist.find(w => w.id === wId);
-                                if (matched) await saveWishlist({ ...matched, status: 'cancel' });
-                              } else if (fullId.startsWith('chk_sale_')) {
-                                const stripped = fullId.replace('chk_sale_', '');
-                                const lastUnderscore = stripped.lastIndexOf('_');
-                                const saleId = stripped.substring(0, lastUnderscore);
-                                const productIndex = parseInt(stripped.substring(lastUnderscore + 1));
-                                const matchedSale = sales.find(s => s.id === saleId);
-                                if (matchedSale) {
-                                  const newItems = [...matchedSale.items];
-                                  newItems.splice(productIndex, 1);
-                                  await saveSale({ ...matchedSale, items: newItems });
-                                }
-                              }
-                            }
-                            setSelectedBulkIds([]);
-                            setIsBulkMode(false);
-                            toast.success('Items deleted successfully');
-                          }}
-                          className="text-[10px] font-bold h-7 gap-1 uppercase px-2"
-                        >
-                          <Trash2 className="h-3 w-3" /> Del ({selectedBulkIds.length})
-                        </Button>
-                      </>
-                    ) : (
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        onClick={() => setIsBulkMode(true)}
-                        className="text-[9px] font-bold h-7 uppercase tracking-widest text-slate-500 border-slate-200 px-2"
-                      >
-                        Bulk Delete
-                      </Button>
-                    )}
-                  </div>
-                )}
-              </div>
+          {/* Fulfillment List */}
+          <div className="space-y-6">
+            <div className="flex items-center justify-between px-1">
+              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Traveler Taskboard</p>
+              <Badge variant="outline" className="text-[10px] h-5 border-dashed font-bold">{filteredMyWishlist.length} ITEMS</Badge>
             </div>
 
-            {checklistItems.length === 0 ? (
-              <div className="text-center p-12 bg-muted/20 rounded-3xl border border-dashed text-muted-foreground flex flex-col items-center gap-2.5">
-                <Info className="h-7 w-7 opacity-35" />
-                <p className="text-xs font-bold uppercase tracking-widest">No items found for auditing</p>
-                <p className="text-[10px] max-w-xs leading-normal">
-                  Checklist matches "Found" wishlist tasks + "Record Sale" invoice entries. Update wishlist tasks to "Found" or record sales to populate.
-                </p>
+            {filteredMyWishlist.length === 0 ? (
+              <div className="text-center p-10 bg-muted/20 rounded-3xl border border-dashed text-muted-foreground flex flex-col items-center gap-2">
+                <Package className="h-8 w-8 opacity-40" />
+                <p className="text-xs font-bold uppercase tracking-widest">No matching requests</p>
+                <p className="text-[10px] max-w-xs leading-normal">Adjust search filters or use "Record Request" above to log manual entries.</p>
               </div>
             ) : (
-              <div className="space-y-2.5">
-                {checklistViewMode === 'transaction' ? (
-                  checklistItems.map((item, idx) => {
-                    const checked = isItemChecked(item.id, item.type);
-                    return (
-                      <motion.div
-                        key={item.id}
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: idx * 0.03 }}
-                      >
-                        <Card 
-                          onClick={() => {
-                            if (isBulkMode) {
-                              if (selectedBulkIds.includes(item.id)) {
-                                setSelectedBulkIds(selectedBulkIds.filter(id => id !== item.id));
-                              } else {
-                                setSelectedBulkIds([...selectedBulkIds, item.id]);
-                              }
-                            } else {
-                              handleToggleCustomChecklist(item.id, item.type);
-                            }
-                          }}
-                          className={cn(
-                            "fintech-card cursor-pointer hover:border-[#C9A84C] transition-all select-none p-4",
-                            isBulkMode && selectedBulkIds.includes(item.id) ? "border-red-500 bg-red-50/50" : (checked && !isBulkMode ? "bg-slate-50 opacity-60 border-transparent shadow-none" : "")
-                          )}
-                        >
-                          <div className="flex items-center justify-between gap-4">
-                            <div className="flex items-center gap-4 min-w-0 flex-1">
-                              
-                              {/* Visual toggle checkbox */}
-                              <div className="shrink-0 transition-transform active:scale-90">
-                                {isBulkMode ? (
-                                  selectedBulkIds.includes(item.id) ? (
-                                    <CheckSquare className="h-8 w-8 text-red-500 fill-red-100" />
-                                  ) : (
-                                    <Square className="h-8 w-8 text-slate-300" />
-                                  )
-                                ) : (
-                                  checked ? (
-                                    <CheckSquare className="h-8 w-8 text-[#0D1B2E] fill-[#C9A84C]" />
-                                  ) : (
-                                    <Square className="h-8 w-8 text-slate-300" />
-                                  )
-                                )}
-                              </div>
-
-                              {/* Item name and descriptors */}
-                              <div className="space-y-1 min-w-0 flex-1">
-                                <h4 className={cn(
-                                  "text-sm font-bold text-[#0D1B2E] truncate",
-                                  checked && !isBulkMode ? "line-through text-slate-400" : ""
-                                )}>
-                                  {item.name}
-                                </h4>
-                                <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
-                                  <span className={cn(
-                                    "px-2 py-0.5 rounded text-[10px] font-bold uppercase",
-                                    item.type === 'sale' ? "bg-blue-50 text-blue-700" : "bg-purple-50 text-purple-700"
-                                  )}>
-                                    {item.type === 'sale' ? 'Invoice' : 'Wishlist'}
-                                  </span>
-                                  <span className="opacity-40">•</span>
-                                  <span className="font-black text-[#0D1B2E] text-sm bg-slate-100 px-1.5 py-0.5 rounded">Qty {item.qty}</span>
-                                  <span className="opacity-40">•</span>
-                                  <span>Client: {item.requester}</span>
-                                </div>
-                              </div>
-
-                            </div>
-
-                            {/* Sourced status Tag */}
-                            <div className="shrink-0 text-right">
-                              {checked ? (
-                                <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100 border-none px-2 h-5.5 rounded text-[8px] font-black uppercase tracking-widest leading-none">
-                                  ALREADY BOUGHT
-                                </Badge>
-                              ) : (
-                                <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100 border-none px-2 h-5.5 rounded text-[8px] font-black uppercase tracking-widest leading-none">
-                                  NOT BUY YET
-                                </Badge>
-                              )}
-                              <p className="text-[8px] text-slate-400 font-bold uppercase mt-0.5">Sourced: {item.location}</p>
-                              {!checked && (
-                                <div className="mt-2 flex justify-end">
-                                  <Button 
-                                    variant="ghost" 
-                                    size="sm" 
-                                    className="h-6 px-2 text-[10px] text-slate-500 hover:text-[#0D1B2E] hover:bg-slate-200/50"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setEditingChecklistItem(item);
-                                      setEditChecklistForm({
-                                        name: item.name,
-                                        qty: item.qty,
-                                        price: item.price,
-                                        customerName: item.requester || ''
-                                      });
-                                    }}
-                                  >
-                                    <Edit2 className="h-3 w-3 mr-1" /> Edit
-                                  </Button>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </Card>
-                      </motion.div>
-                    );
-                  })
-                ) : (
-                  groupedChecklistItems.map((group, idx) => {
-                    const fullyChecked = group.checkedQty === group.qty;
-                    return (
-                      <motion.div
-                        key={group.name}
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: idx * 0.03 }}
-                      >
-                        <Card className={cn(
-                          "fintech-card p-4 transition-all select-none",
-                          fullyChecked ? "bg-slate-50 opacity-60 border-transparent shadow-none" : ""
-                        )}>
-                          <div className="flex items-center justify-between gap-4">
-                            <div className="flex items-center gap-4 min-w-0 flex-1">
-                              
-                              <div className="shrink-0 flex flex-col items-center justify-center bg-slate-100 h-10 w-10 rounded-xl">
-                                <span className="text-[10px] font-black text-slate-400 uppercase leading-none">Total</span>
-                                <span className={cn("text-lg font-black leading-none", fullyChecked ? "text-slate-400" : "text-[#0D1B2E]")}>{group.qty}</span>
-                              </div>
-
-                              <div className="space-y-1 min-w-0 flex-1">
-                                <h4 className={cn(
-                                  "text-sm font-bold text-[#0D1B2E] truncate",
-                                  fullyChecked ? "line-through text-slate-400" : ""
-                                )}>
-                                  {group.name}
-                                </h4>
-                                <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
-                                  <span className="font-bold text-[#0D1B2E]">{group.checkedQty}</span> / {group.qty} already bought
-                                </div>
-                              </div>
-
-                            </div>
-
-                            <div className="shrink-0 text-right">
-                              {fullyChecked ? (
-                                <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100 border-none px-2 h-5.5 rounded text-[8px] font-black uppercase tracking-widest leading-none">
-                                  COMPLETED
-                                </Badge>
-                              ) : (
-                                <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100 border-none px-2 h-5.5 rounded text-[8px] font-black uppercase tracking-widest leading-none">
-                                  {group.qty - group.checkedQty} REMAINING
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
-                    </Card>
-                      </motion.div>
-                    );
-                  })
-                )}
-              </div>
-            )}
-            
-            {/* Sticky Progress Bar for Checklist */}
-            <div className="fixed bottom-16 md:bottom-6 left-0 md:left-64 right-0 p-4 pb-6 bg-gradient-to-t from-slate-50 via-slate-50/90 to-transparent pointer-events-none z-30">
-              <div className="max-w-3xl mx-auto md:px-8">
-                <Card className="fintech-card p-4 pointer-events-auto shadow-xl shadow-slate-200/50 border-t-4 border-t-primary">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Shopping Progress</span>
-                    <span className="text-sm font-black text-foreground">{checkedCount} / {totalChecklistCount} Items</span>
-                  </div>
-                  <div className="h-2.5 w-full bg-slate-200 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-primary transition-all duration-500 ease-out" 
-                      style={{ width: `${completionPercentage}%` }}
-                    />
-                  </div>
-                </Card>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      )}
-
       {/* DETAIL PRODUCT MODAL SCREEN */}
       <Dialog open={selectedDetailItem !== null} onOpenChange={async (open) => { 
         if (!open) {
