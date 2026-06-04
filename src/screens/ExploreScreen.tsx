@@ -542,7 +542,6 @@ export function ExploreScreen() {
       </header>
 
       <div className="p-4 space-y-4">
-      <div className="p-4 space-y-4">
         <div className="space-y-3">
             <div className="flex gap-2">
               <div className="relative flex-1">
@@ -719,6 +718,7 @@ export function ExploreScreen() {
               </div>
             )}
           </div>
+        </div>
       
       {/* DETAIL PRODUCT MODAL SCREEN */}
       <Dialog open={selectedDetailItem !== null} onOpenChange={async (open) => { 
