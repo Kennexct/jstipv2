@@ -47,16 +47,15 @@ export const exportProductImage = async (config: ExportConfig): Promise<string> 
               ctx.save();
               ctx.globalAlpha = config.watermark.opacity;
               
-              // Scale watermark to be ~30% of canvas width or max 200px
-              const maxWmWidth = Math.min(canvas.width * 0.3, 300);
+              // Scale watermark to be ~50% of canvas width or max 400px for center display
+              const maxWmWidth = Math.min(canvas.width * 0.5, 400);
               const scale = maxWmWidth / wmImg.width;
               const wmWidth = wmImg.width * scale;
               const wmHeight = wmImg.height * scale;
 
-              // Draw at bottom right with padding
-              const padding = canvas.width * 0.05;
-              const x = canvas.width - wmWidth - padding;
-              const y = canvas.height - wmHeight - padding;
+              // Draw at center
+              const x = (canvas.width - wmWidth) / 2;
+              const y = (canvas.height - wmHeight) / 2;
 
               ctx.drawImage(wmImg, x, y, wmWidth, wmHeight);
               ctx.restore();
