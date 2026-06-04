@@ -196,7 +196,7 @@ export function ChecklistScreen() {
               checklistViewMode === 'summary' ? "bg-white shadow-sm text-primary" : "text-slate-500 hover:text-slate-700"
             )}
           >
-            Aggregated Summary
+            By Item Summary
           </button>
         </div>
 
