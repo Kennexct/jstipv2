@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { EmptyState } from '../components/EmptyState';
 import { WatermarkOverlay } from '../components/WatermarkOverlay';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
@@ -384,11 +385,20 @@ export function OwnerInventoryScreen() {
 
         {/* Inventory List/Grid */}
         {processedInventory.length === 0 ? (
-          <div className="py-20 flex flex-col items-center justify-center text-center px-4">
-            <Package className="h-12 w-12 text-slate-300 mb-4" />
-            <h3 className="text-lg font-black text-[#0D1B2E]">No products found</h3>
-            <p className="text-sm text-slate-500 mt-1 max-w-xs">Adjust your search or filters, or add new items to your catalog.</p>
-          </div>
+          <EmptyState 
+            type="catalog"
+            title="No products found"
+            description="Adjust your search or filters, or add new items to your catalog."
+            actionLabel={filterBy !== 'all' || searchQuery ? 'Clear Filters' : 'Add First Item'}
+            onAction={() => {
+              if (filterBy !== 'all' || searchQuery) {
+                setFilterBy('all');
+                setSearchQuery('');
+              } else {
+                navigate('/owner/list-item');
+              }
+            }}
+          />
         ) : (
           <div className={cn("pb-24", viewMode === 'grid' ? "grid grid-cols-2 gap-3" : "grid grid-cols-1 gap-3")}>
             <AnimatePresence mode="popLayout">

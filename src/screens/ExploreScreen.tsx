@@ -37,6 +37,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { compressImageToBase64 } from '../lib/imageCompression';
 import { toast } from 'sonner';
 import { useMaster } from '../context/MasterContext';
 import { useConfirm } from '../context/ConfirmContext';
@@ -151,15 +152,16 @@ export function ExploreScreen() {
     setSelectedDetailItem(null);
   };
 
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormImage(reader.result as string);
+      try {
+        const compressedBase64 = await compressImageToBase64(file);
+        setFormImage(compressedBase64);
         toast.success('Chat attachment reference added!');
-      };
-      reader.readAsDataURL(file);
+      } catch (err) {
+        // Error handled in utility
+      }
     }
   };
 
@@ -219,15 +221,14 @@ export function ExploreScreen() {
     if (!selectedDetailItem) return;
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        toast.loading('Uploading photo...', { id: 'wishlist-upload' });
-        const base64Image = reader.result as string;
-        let uploadedImage = base64Image;
-
+      toast.loading('Uploading photo...', { id: 'wishlist-upload' });
+      try {
+        const compressedBase64 = await compressImageToBase64(file);
+        let uploadedImage = compressedBase64;
+        
         try {
           const { db } = await import('../lib/supabase');
-          uploadedImage = await db.uploadImage(base64Image, 'catalog');
+          uploadedImage = await db.uploadImage(compressedBase64, 'catalog');
         } catch (e) {
           console.error("Failed to upload wishlist detail image:", e);
         }
@@ -237,15 +238,12 @@ export function ExploreScreen() {
           image: uploadedImage
         };
         
-        try {
-          await saveWishlist(updatedItem);
-          setSelectedDetailItem(updatedItem);
-          toast.success('Photo added to wishlist item successfully!', { id: 'wishlist-upload' });
-        } catch (err) {
-          toast.error('Failed to upload photo', { id: 'wishlist-upload' });
-        }
-      };
-      reader.readAsDataURL(file);
+        await saveWishlist(updatedItem);
+        setSelectedDetailItem(updatedItem);
+        toast.success('Photo added to wishlist item successfully!', { id: 'wishlist-upload' });
+      } catch (err) {
+        toast.error('Failed to upload photo', { id: 'wishlist-upload' });
+      }
     }
   };
 
