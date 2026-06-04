@@ -107,11 +107,15 @@ export function TripSettingsScreen() {
   const [watermarkImage, setWatermarkImage] = useState<string | null>(null);
   const [watermarkOpacity, setWatermarkOpacity] = useState<number>(0.5);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [editingField, setEditingField] = useState<string | null>(null);
+  
+  // Track initial state to detect unsaved changes
+  const [initialState, setInitialState] = useState<any>(null);
 
   // Sync inputs with master context once loaded
   useEffect(() => {
     if (!loading && tripSettings) {
+      let curCode = 'SGD';
+      
       if (tripSettings.trip) {
         setOrigin(tripSettings.trip.origin || 'Seoul');
         setDestination(tripSettings.trip.destination || 'Jakarta');
@@ -119,7 +123,7 @@ export function TripSettingsScreen() {
         setLimit((tripSettings.trip.weightLimit || 15).toString());
       }
       if (tripSettings.currency) {
-        const curCode = tripSettings.currency.code || 'SGD';
+        curCode = tripSettings.currency.code || 'SGD';
         setSettings({
           code: curCode,
           symbol: tripSettings.currency.symbol || 'S$',
@@ -142,8 +146,46 @@ export function TripSettingsScreen() {
         setWatermarkImage(tripSettings.watermark.image || null);
         setWatermarkOpacity(tripSettings.watermark.opacity !== undefined ? tripSettings.watermark.opacity : 0.5);
       }
+
+      // Save initial state for dirtiness tracking
+      setInitialState({
+        origin: tripSettings.trip?.origin || 'Seoul',
+        destination: tripSettings.trip?.destination || 'Jakarta',
+        readyAt: tripSettings.trip?.date || '',
+        limit: (tripSettings.trip?.weightLimit || 15).toString(),
+        settings: {
+          code: curCode,
+          manualRate: tripSettings.currency?.manualRate || 13500,
+        },
+        payoutCurrency: tripSettings.currency?.payout || 'IDR',
+        watermarkEnabled: !!tripSettings.watermark?.enabled,
+        watermarkImage: tripSettings.watermark?.image || null,
+        watermarkOpacity: tripSettings.watermark?.opacity !== undefined ? tripSettings.watermark?.opacity : 0.5
+      });
     }
   }, [loading, tripSettings]);
+
+  const isDirty = initialState && (
+    origin !== initialState.origin ||
+    destination !== initialState.destination ||
+    readyAt !== initialState.readyAt ||
+    limit !== initialState.limit ||
+    settings.code !== initialState.settings.code ||
+    settings.manualRate !== initialState.settings.manualRate ||
+    payoutCurrency !== initialState.payoutCurrency ||
+    watermarkEnabled !== initialState.watermarkEnabled ||
+    watermarkImage !== initialState.watermarkImage ||
+    watermarkOpacity !== initialState.watermarkOpacity
+  );
+
+  const handleBack = async () => {
+    if (isDirty) {
+      const confirmed = await confirm("You have unsaved changes. Are you sure you want to discard them?");
+      if (confirmed) navigate('/');
+    } else {
+      navigate('/');
+    }
+  };
 
   const handleSave = async () => {
     if (isSubmitting) return;
@@ -185,30 +227,24 @@ export function TripSettingsScreen() {
   const getCurrencyName = (code: string) => CURRENCIES.find(c => c.code === code)?.name || code;
 
   return (
-    <div className="min-h-screen bg-background pb-28">
-      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-2xl pt-8 pb-4 border-none h-auto flex items-center px-4 gap-4">
-        <Button variant="ghost" size="icon" className="rounded-full bg-card shadow-sm hover:bg-muted shrink-0" onClick={() => navigate('/')}>
-          <ArrowLeft className="h-5 w-5 text-foreground" />
+    <div className="min-h-screen bg-white pb-28">
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-2xl pt-8 pb-4 border-none h-auto flex items-center px-4 gap-4">
+        <Button variant="ghost" size="icon" className="rounded-full bg-[#f2f5f7] shadow-sm hover:bg-slate-200 shrink-0" onClick={handleBack}>
+          <ArrowLeft className="h-5 w-5 text-[#0D1B2E]" />
         </Button>
-        <h2 className="text-xl font-bold tracking-tight text-foreground">Trip Settings</h2>
+        <h2 className="text-xl font-bold tracking-tight text-[#0D1B2E]">Trip Settings</h2>
       </header>
 
       <div className="p-6 space-y-8">
         {/* Route Details */}
         <section className="space-y-4">
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">
-             <MapPin className="h-3 w-3" /> Route Details
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">
+             <MapPin className="h-4 w-4" /> Route Details
           </div>
-          <div className="space-y-4 text-left">
+          <div className="space-y-4 text-left p-4 rounded-3xl bg-white shadow-[0_2px_10px_-3px_rgba(6,81,237,0.05)] border border-slate-100/60">
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="text-[10px] font-bold text-muted-foreground ml-1">FROM (Origin Country)</label>
-                <button type="button" onClick={() => setEditingField(editingField === 'origin' ? null : 'origin')} className="p-1.5 bg-white shadow-sm rounded-lg text-primary hover:bg-slate-50 transition-colors">
-                  <Edit2 className="h-3 w-3" />
-                </button>
-              </div>
+              <label className="text-[10px] font-bold text-slate-400 ml-1 uppercase tracking-widest">From (Origin Country)</label>
               <select 
-                disabled={editingField !== 'origin'}
                 value={origin} 
                 onChange={async (e) => {
                   const newOrigin = e.target.value;
@@ -238,7 +274,7 @@ export function TripSettingsScreen() {
                     }
                   }
                 }}
-                className="w-full h-12 rounded-xl bg-muted/30 border-none px-4 font-bold text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full h-14 rounded-2xl bg-[#f2f5f7] border-none px-4 font-bold text-sm text-[#0D1B2E] focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 <option value="">Select Origin Country</option>
                 {COUNTRIES.map(c => (
@@ -246,15 +282,10 @@ export function TripSettingsScreen() {
                 ))}
               </select>
             </div>
+            
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="text-[10px] font-bold text-muted-foreground ml-1">TO (Destination Country)</label>
-                <button type="button" onClick={() => setEditingField(editingField === 'destination' ? null : 'destination')} className="p-1.5 bg-white shadow-sm rounded-lg text-primary hover:bg-slate-50 transition-colors">
-                  <Edit2 className="h-3 w-3" />
-                </button>
-              </div>
+              <label className="text-[10px] font-bold text-slate-400 ml-1 uppercase tracking-widest">To (Destination Country)</label>
               <select 
-                disabled={editingField !== 'destination'}
                 value={destination} 
                 onChange={(e) => {
                   const newDest = e.target.value;
@@ -264,7 +295,7 @@ export function TripSettingsScreen() {
                     setPayoutCurrency(matched.currencyCode);
                   }
                 }}
-                className="w-full h-12 rounded-xl bg-muted/30 border-none px-4 font-bold text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full h-14 rounded-2xl bg-[#f2f5f7] border-none px-4 font-bold text-sm text-[#0D1B2E] focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 <option value="">Select Destination Country</option>
                 {COUNTRIES.map(c => (
@@ -272,58 +303,56 @@ export function TripSettingsScreen() {
                 ))}
               </select>
             </div>
+            
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="text-[10px] font-bold text-muted-foreground ml-1">READY AT DESTINATION (DEPARTURE DATE) *</label>
-                <button type="button" onClick={() => setEditingField(editingField === 'readyAt' ? null : 'readyAt')} className="p-1.5 bg-white shadow-sm rounded-lg text-primary hover:bg-slate-50 transition-colors">
-                  <Edit2 className="h-3 w-3" />
-                </button>
-              </div>
+              <label className="text-[10px] font-bold text-slate-400 ml-1 uppercase tracking-widest">Ready at Destination (Departure Date)</label>
               <Input 
-                disabled={editingField !== 'readyAt'}
                 type="date"
                 value={readyAt}
                 onChange={(e) => setReadyAt(e.target.value)}
-                className="w-full h-12 rounded-xl bg-muted/30 border-none px-4 font-bold text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full h-14 rounded-2xl bg-[#f2f5f7] border-none px-4 font-bold text-sm text-[#0D1B2E] focus:outline-none focus:ring-2 focus:ring-primary"
                 required
               />
             </div>
           </div>
         </section>
 
-        <Separator />
+        <Separator className="opacity-50" />
         
         {/* Currency & Finance */}
         <section className="space-y-4">
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">
-             <Globe className="h-3 w-3" /> Currency & Exchange Rate
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">
+             <Globe className="h-4 w-4" /> Currency & Exchange Rate
           </div>
           <div className="space-y-4">
-             <div className="p-4 rounded-2xl bg-muted/30 space-y-4">
+             <div className="p-4 rounded-3xl bg-white shadow-[0_2px_10px_-3px_rgba(6,81,237,0.05)] border border-slate-100/60 space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-background flex items-center justify-center font-bold text-xs ring-4 ring-primary/5 shadow-sm">{settings.code}</div>
+                    <div className="h-12 w-12 rounded-[1rem] bg-[#f2f5f7] flex items-center justify-center font-black text-sm text-[#0D1B2E] shadow-sm">{settings.code}</div>
                     <div className="text-left">
-                      <p className="text-sm font-bold">Shopping Currency</p>
-                      <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-tighter">
+                      <p className="text-sm font-bold text-[#0D1B2E]">Shopping Currency</p>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">
                         {getCurrencyName(settings.code)}
                       </p>
                     </div>
                   </div>
                   <Dialog>
-                    <DialogTrigger render={<Button variant="ghost" size="sm" className="text-primary font-bold text-xs h-8 px-3 rounded-lg hover:bg-primary/10" />}>
+                    <DialogTrigger render={<Button variant="outline" size="sm" className="font-bold text-[10px] uppercase tracking-widest h-8 px-4 rounded-xl border-dashed hover:bg-slate-50" />}>
                       Change
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-md rounded-[2rem] p-6 border-none bg-background shadow-2xl">
+                    <DialogContent className="sm:max-w-md rounded-[2rem] p-6 border-none bg-white shadow-2xl">
                       <DialogHeader>
-                        <DialogTitle className="text-left font-bold text-xl text-foreground">Select Shopping Currency</DialogTitle>
+                        <DialogTitle className="text-left font-black text-xl text-[#0D1B2E]">Select Shopping Currency</DialogTitle>
                       </DialogHeader>
-                      <div className="grid grid-cols-1 gap-2 mt-4">
+                      <div className="grid grid-cols-1 gap-2 mt-4 max-h-[60vh] overflow-y-auto pr-2">
                         {CURRENCIES.filter(c => c.code !== 'IDR').map(curr => (
                           <Button 
                             key={curr.code}
                             variant={settings.code === curr.code ? 'default' : 'ghost'}
-                            className="justify-between h-12 px-4 rounded-xl font-bold"
+                            className={cn(
+                              "justify-between h-14 px-4 rounded-2xl font-bold transition-all",
+                              settings.code === curr.code ? "bg-[#0D1B2E] text-white hover:bg-[#162847]" : "hover:bg-[#f2f5f7] text-slate-600"
+                            )}
                             onClick={async () => {
                               const confirmed = await confirm(`Are you sure you want to change the shopping currency to ${curr.code}? This will fetch and calculate a new exchange rate.`);
                               if (!confirmed) {
@@ -342,10 +371,10 @@ export function TripSettingsScreen() {
                             }}
                           >
                             <span className="flex items-center gap-3">
-                               <span className="opacity-40">{curr.code}</span>
+                               <span className={cn("text-[10px] uppercase tracking-widest w-8 text-left", settings.code === curr.code ? "text-white/70" : "text-slate-400")}>{curr.code}</span>
                                {curr.name}
                             </span>
-                            {settings.code === curr.code && <Check className="h-4 w-4" />}
+                            {settings.code === curr.code && <Check className="h-5 w-5" />}
                           </Button>
                         ))}
                       </div>
@@ -353,16 +382,16 @@ export function TripSettingsScreen() {
                   </Dialog>
                 </div>
                 
-                <Separator className="bg-background" />
+                <Separator className="opacity-50" />
 
                 <div className="space-y-3 text-left">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-tight">Manual Rate (1 {settings.code} to IDR)</label>
-                    <Badge variant="outline" className="text-[10px] bg-green-50 text-green-700 border-none px-2">Realtime: {settings.realtimeRate.toLocaleString()}</Badge>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Manual Rate (1 {settings.code} to IDR)</label>
+                    <Badge variant="outline" className="text-[9px] bg-emerald-50 text-emerald-600 border-none px-2 uppercase tracking-widest font-black">Realtime: {settings.realtimeRate.toLocaleString()}</Badge>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="relative flex-1">
-                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-sm">Rp</div>
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">Rp</div>
                       <Input 
                         type="text" 
                         value={settings.manualRate === 0 ? '' : settings.manualRate.toLocaleString()} 
@@ -371,39 +400,42 @@ export function TripSettingsScreen() {
                           setSettings({...settings, manualRate: Number(cleaned) || 0});
                         }}
                         inputMode="numeric"
-                        className="h-12 pl-10 rounded-xl bg-background border-none font-bold text-lg"
+                        className="h-14 pl-12 rounded-2xl bg-[#f2f5f7] border-none font-black text-lg text-[#0D1B2E] focus:ring-2 focus:ring-primary"
                       />
                     </div>
-                    <div className="text-xs font-bold text-primary px-3 py-1 bg-primary/10 rounded-full">
+                    <div className="text-[10px] font-black uppercase tracking-widest text-primary px-4 py-2 h-14 flex items-center justify-center bg-primary/10 rounded-2xl shrink-0">
                       +{((settings.manualRate / settings.realtimeRate - 1) * 100).toFixed(1)}%
                     </div>
                   </div>
-                  <p className="text-[10px] text-muted-foreground italic px-1">Tip: Set a higher rate to cover bank conversion fees and rounding.</p>
+                  <p className="text-[10px] text-slate-400 font-medium px-1">Tip: Set a higher rate to cover bank conversion fees and rounding.</p>
                 </div>
              </div>
 
-             <div className="flex items-center justify-between p-4 rounded-2xl bg-muted/30">
+             <div className="flex items-center justify-between p-4 rounded-3xl bg-white shadow-[0_2px_10px_-3px_rgba(6,81,237,0.05)] border border-slate-100/60">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-background flex items-center justify-center font-bold text-xs ring-4 ring-primary/5">{payoutCurrency}</div>
+                  <div className="h-12 w-12 rounded-[1rem] bg-[#f2f5f7] flex items-center justify-center font-black text-sm text-[#0D1B2E] shadow-sm">{payoutCurrency}</div>
                   <div className="text-left">
-                    <p className="text-sm font-bold">Payout Currency</p>
-                    <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-tighter">{getCurrencyName(payoutCurrency)}</p>
+                    <p className="text-sm font-bold text-[#0D1B2E]">Payout Currency</p>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">{getCurrencyName(payoutCurrency)}</p>
                   </div>
                 </div>
                   <Dialog>
-                    <DialogTrigger render={<Button variant="ghost" size="sm" className="text-primary font-bold text-xs h-8 px-3 rounded-lg hover:bg-primary/10" />}>
+                    <DialogTrigger render={<Button variant="outline" size="sm" className="font-bold text-[10px] uppercase tracking-widest h-8 px-4 rounded-xl border-dashed hover:bg-slate-50" />}>
                       Change
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-md rounded-[2rem] p-6 border-none bg-background shadow-2xl">
+                    <DialogContent className="sm:max-w-md rounded-[2rem] p-6 border-none bg-white shadow-2xl">
                       <DialogHeader>
-                        <DialogTitle className="text-left font-bold text-xl text-foreground">Select Payout Currency</DialogTitle>
+                        <DialogTitle className="text-left font-black text-xl text-[#0D1B2E]">Select Payout Currency</DialogTitle>
                       </DialogHeader>
-                      <div className="grid grid-cols-1 gap-2 mt-4">
+                      <div className="grid grid-cols-1 gap-2 mt-4 max-h-[60vh] overflow-y-auto pr-2">
                         {CURRENCIES.map(curr => (
                           <Button 
                             key={curr.code}
                             variant={payoutCurrency === curr.code ? 'default' : 'ghost'}
-                            className="justify-between h-12 px-4 rounded-xl font-bold"
+                            className={cn(
+                              "justify-between h-14 px-4 rounded-2xl font-bold transition-all",
+                              payoutCurrency === curr.code ? "bg-[#0D1B2E] text-white hover:bg-[#162847]" : "hover:bg-[#f2f5f7] text-slate-600"
+                            )}
                             onClick={async () => {
                               const confirmed = await confirm(`Are you sure you want to set the settlement payout currency to ${curr.code}?`);
                               if (!confirmed) {
@@ -413,10 +445,10 @@ export function TripSettingsScreen() {
                             }}
                           >
                             <span className="flex items-center gap-3">
-                               <span className="opacity-40">{curr.code}</span>
+                               <span className={cn("text-[10px] uppercase tracking-widest w-8 text-left", payoutCurrency === curr.code ? "text-white/70" : "text-slate-400")}>{curr.code}</span>
                                {curr.name}
                             </span>
-                            {payoutCurrency === curr.code && <Check className="h-4 w-4" />}
+                            {payoutCurrency === curr.code && <Check className="h-5 w-5" />}
                           </Button>
                         ))}
                       </div>
@@ -426,91 +458,93 @@ export function TripSettingsScreen() {
           </div>
         </section>
 
-        <Separator />
+        <Separator className="opacity-50" />
 
         {/* Photo Watermark Settings */}
         <section className="space-y-4 text-left">
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">
-             <Settings2 className="h-3 w-3" /> Photo Watermark
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">
+             <Settings2 className="h-4 w-4" /> Photo Watermark
           </div>
-          <div className="p-4 rounded-2xl bg-muted/30 space-y-4">
+          <div className="p-4 rounded-3xl bg-white shadow-[0_2px_10px_-3px_rgba(6,81,237,0.05)] border border-slate-100/60 space-y-4">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5 text-left">
-                <p className="text-sm font-bold">Enable Photo Watermark</p>
-                <p className="text-[10px] text-muted-foreground font-medium">Overlay watermark logo on catalog product photos</p>
+                <p className="text-sm font-bold text-[#0D1B2E]">Enable Photo Watermark</p>
+                <p className="text-[10px] text-slate-400 font-medium leading-snug pr-4">Overlay watermark logo on catalog product photos</p>
               </div>
               <button
                 type="button"
                 onClick={() => setWatermarkEnabled(!watermarkEnabled)}
                 className={cn(
-                  "h-6 w-11 rounded-full relative p-1 cursor-pointer transition-colors shrink-0",
-                  watermarkEnabled ? "bg-primary" : "bg-slate-300"
+                  "h-8 w-14 rounded-full relative p-1.5 cursor-pointer transition-colors shrink-0 shadow-inner",
+                  watermarkEnabled ? "bg-[#0D1B2E]" : "bg-[#f2f5f7] border border-slate-200"
                 )}
               >
                 <div className={cn(
-                  "h-4 w-4 bg-white rounded-full transition-all",
+                  "h-5 w-5 bg-white rounded-full transition-all shadow-sm",
                   watermarkEnabled ? "ml-auto" : "ml-0"
                 )} />
               </button>
             </div>
 
             {watermarkEnabled && (
-              <div className="space-y-3 pt-2 border-t border-background">
-                <label className="text-[10px] font-bold text-muted-foreground uppercase">Upload Watermark Image</label>
-                <div className="flex items-center gap-4">
-                  {watermarkImage ? (
-                    <div className="relative h-16 w-16 rounded-xl border overflow-hidden shrink-0 bg-white shadow-sm flex items-center justify-center p-1">
-                      <img src={watermarkImage} alt="Watermark Preview" className="h-full w-full object-contain" />
-                      <button
-                        type="button"
-                        onClick={() => setWatermarkImage(null)}
-                        className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white flex items-center justify-center text-[10px] shadow-md border border-white"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ) : (
-                    <label className="h-16 w-16 rounded-xl border border-dashed flex flex-col items-center justify-center cursor-pointer hover:bg-slate-50 transition-colors shrink-0 bg-background">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            const reader = new FileReader();
-                            reader.onloadend = async () => {
-                              toast.loading('Uploading watermark...', { id: 'watermark-upload' });
-                              const base64Image = reader.result as string;
-                              let uploadedImage = base64Image;
+              <div className="space-y-4 pt-4 border-t border-slate-100">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Upload Watermark Image</label>
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center gap-4">
+                    {watermarkImage ? (
+                      <div className="relative h-20 w-20 rounded-[1.25rem] border border-slate-100 overflow-hidden shrink-0 bg-[#f2f5f7] flex items-center justify-center p-2">
+                        <img src={watermarkImage} alt="Watermark Preview" className="h-full w-full object-contain mix-blend-multiply" />
+                        <button
+                          type="button"
+                          onClick={() => setWatermarkImage(null)}
+                          className="absolute top-1 right-1 h-6 w-6 rounded-full bg-red-500 text-white flex items-center justify-center text-xs shadow-md border-2 border-white transition-transform hover:scale-110 active:scale-95"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="h-20 w-20 rounded-[1.25rem] border-2 border-dashed border-slate-200 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-50 hover:border-slate-300 transition-all shrink-0 bg-[#f2f5f7]/50">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onloadend = async () => {
+                                toast.loading('Uploading watermark...', { id: 'watermark-upload' });
+                                const base64Image = reader.result as string;
+                                let uploadedImage = base64Image;
 
-                              try {
-                                const { db } = await import('../lib/supabase');
-                                uploadedImage = await db.uploadImage(base64Image, 'catalog');
-                              } catch (e) {
-                                console.error("Failed to upload watermark image:", e);
-                              }
+                                try {
+                                  const { db } = await import('../lib/supabase');
+                                  uploadedImage = await db.uploadImage(base64Image, 'catalog');
+                                } catch (e) {
+                                  console.error("Failed to upload watermark image:", e);
+                                }
 
-                              setWatermarkImage(uploadedImage);
-                              toast.success('Watermark uploaded!', { id: 'watermark-upload' });
-                            };
-                            reader.readAsDataURL(file);
-                          }
-                        }}
-                      />
-                      <span className="text-[10px] font-bold text-muted-foreground">Upload</span>
-                    </label>
-                  )}
-                  <p className="text-[10px] text-muted-foreground leading-normal font-medium text-left">
-                    Upload a transparent PNG logo. When toggle is ON, this logo will be automatically overlaid on the bottom right corner of product photos.
-                  </p>
+                                setWatermarkImage(uploadedImage);
+                                toast.success('Watermark uploaded!', { id: 'watermark-upload' });
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                        />
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Upload</span>
+                      </label>
+                    )}
+                    <p className="text-[10px] text-slate-400 leading-normal font-medium text-left flex-1">
+                      Upload a transparent PNG logo. When toggle is ON, this logo will be automatically overlaid on the bottom right corner of product photos.
+                    </p>
+                  </div>
                 </div>
                 
                 {/* Opacity Slider */}
-                <div className="space-y-3 pt-4 mt-2 border-t border-slate-100">
+                <div className="space-y-4 pt-4 mt-2 border-t border-slate-100">
                   <div className="flex items-center justify-between">
-                    <label className="text-[10px] font-bold text-muted-foreground uppercase">Watermark Opacity</label>
-                    <span className="text-xs font-bold text-primary">{Math.round(watermarkOpacity * 100)}%</span>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Watermark Opacity</label>
+                    <span className="text-xs font-black text-[#0D1B2E] bg-[#f2f5f7] px-3 py-1 rounded-lg">{Math.round(watermarkOpacity * 100)}%</span>
                   </div>
                   <input
                     type="range"
@@ -519,9 +553,9 @@ export function TripSettingsScreen() {
                     step="0.05"
                     value={watermarkOpacity}
                     onChange={(e) => setWatermarkOpacity(parseFloat(e.target.value))}
-                    className="w-full accent-primary"
+                    className="w-full accent-[#0D1B2E] h-2 bg-[#f2f5f7] rounded-full appearance-none cursor-pointer"
                   />
-                  <p className="text-[10px] text-muted-foreground font-medium">
+                  <p className="text-[10px] text-slate-400 font-medium">
                     Adjust how transparent the watermark appears on your photos.
                   </p>
                 </div>
@@ -530,32 +564,46 @@ export function TripSettingsScreen() {
           </div>
         </section>
 
-        <Separator />
+        <Separator className="opacity-50" />
 
         {/* Operational Status */}
         <section className="space-y-4">
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">
-             <Settings2 className="h-3 w-3" /> Operational Status
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">
+             <Settings2 className="h-4 w-4" /> Operational Status
           </div>
-          <div className="flex items-center justify-between p-4 rounded-2xl bg-primary/5 border border-primary/10">
+          <div className="flex items-center justify-between p-5 rounded-3xl bg-amber-50/50 border border-amber-100/50">
             <div className="space-y-1 text-left">
-              <p className="text-sm font-bold text-primary">Accepting Requests</p>
-              <p className="text-[10px] text-primary/60 font-medium">Toggle this if you're no longer taking orders</p>
+              <p className="text-sm font-bold text-amber-700">Accepting Requests</p>
+              <p className="text-[10px] text-amber-700/60 font-medium pr-4">Toggle this if you're no longer taking orders for this trip</p>
             </div>
-            <div className="h-6 w-11 bg-primary rounded-full relative p-1 cursor-pointer">
-              <div className="h-4 w-4 bg-white rounded-full ml-auto" />
+            <div className="h-8 w-14 bg-amber-500 rounded-full relative p-1.5 cursor-pointer shadow-inner">
+              <div className="h-5 w-5 bg-white rounded-full ml-auto shadow-sm" />
             </div>
           </div>
         </section>
 
-        <Button 
-          className="w-full h-14 rounded-2xl font-bold gap-3 shadow-lg shadow-primary/20" 
-          onClick={handleSave}
-          disabled={isSubmitting}
-        >
-          <Check className="h-5 w-5" />
-          {isSubmitting ? 'Saving...' : 'Save Settings'}
-        </Button>
+        <div className="pt-4 pb-8 space-y-3">
+          {isDirty && (
+            <div className="flex items-center justify-center gap-2 text-[10px] font-black text-amber-600 uppercase tracking-widest">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+              </span>
+              Unsaved Changes
+            </div>
+          )}
+          <Button 
+            className={cn(
+              "w-full h-16 rounded-2xl font-black text-sm uppercase tracking-widest gap-3 shadow-xl transition-all",
+              isDirty ? "bg-[#C9A84C] text-[#0D1B2E] hover:bg-[#b09341] shadow-[#C9A84C]/20" : "bg-[#0D1B2E] text-white hover:bg-[#162847] shadow-[#0D1B2E]/10"
+            )}
+            onClick={handleSave}
+            disabled={isSubmitting}
+          >
+            <Check className="h-5 w-5" />
+            {isSubmitting ? 'Saving...' : 'Save Settings'}
+          </Button>
+        </div>
       </div>
     </div>
   );
