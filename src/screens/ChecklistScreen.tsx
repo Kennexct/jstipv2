@@ -119,17 +119,17 @@ export function ChecklistScreen() {
   };
 
   const groupedChecklistItems = useMemo(() => {
-    const map = new Map<string, { name: string; qty: number; checkedQty: number; ids: string[] }>();
+    const map = new Map<string, { name: string; qty: number }>();
     checklistItems.forEach(item => {
-      const key = (item.name || 'Unknown').toLowerCase().trim();
       const checked = isItemChecked(item.id, item.type);
+      if (!checked) return; // Only show items that have been acquired
+      
+      const key = (item.name || 'Unknown').toLowerCase().trim();
       if (!map.has(key)) {
-        map.set(key, { name: item.name, qty: item.qty, checkedQty: checked ? item.qty : 0, ids: [item.id] });
+        map.set(key, { name: item.name, qty: item.qty });
       } else {
         const existing = map.get(key)!;
         existing.qty += item.qty;
-        if (checked) existing.checkedQty += item.qty;
-        existing.ids.push(item.id);
       }
     });
     return Array.from(map.values()).sort((a, b) => b.qty - a.qty);
@@ -247,47 +247,29 @@ export function ChecklistScreen() {
           </div>
         ) : (
           <div className="space-y-3">
-            {groupedChecklistItems.map(group => {
-              const isFullyChecked = group.checkedQty === group.qty;
-              return (
+            {groupedChecklistItems.length === 0 ? (
+              <div className="text-center py-8 text-slate-500 font-medium text-xs">
+                No items have been marked as acquired yet.
+              </div>
+            ) : (
+              groupedChecklistItems.map(group => (
                 <div 
                   key={group.name}
-                  className={cn(
-                    "flex items-center justify-between p-4 rounded-2xl border transition-all",
-                    isFullyChecked ? "bg-emerald-50/50 border-emerald-100 opacity-70" : "bg-white shadow-sm border-slate-100"
-                  )}
+                  className="flex items-center justify-between p-4 rounded-2xl bg-white shadow-sm border border-slate-100"
                 >
                   <div className="flex-1 min-w-0">
-                    <h4 className={cn("text-sm font-bold truncate", isFullyChecked ? "line-through text-slate-500" : "text-[#0D1B2E]")}>
+                    <h4 className="text-sm font-bold truncate text-[#0D1B2E]">
                       {group.name}
                     </h4>
-                    <p className="text-[10px] font-bold tracking-widest uppercase text-slate-500 mt-1">
-                      {group.checkedQty} of {group.qty} Acquired
-                    </p>
                   </div>
-                  <div className="flex items-center gap-1.5 shrink-0 ml-3">
-                    {group.ids.map((id, i) => {
-                      const itemObj = checklistItems.find(c => c.id === id);
-                      const isChecked = isItemChecked(id, itemObj?.type || 'sale');
-                      return (
-                        <button
-                          key={id}
-                          type="button"
-                          onClick={() => handleToggleCustomChecklist(id, itemObj?.type || 'sale')}
-                          className="p-0.5 transition-transform active:scale-90 hover:scale-110"
-                        >
-                          {isChecked ? (
-                            <CheckSquare className="h-6 w-6 text-emerald-500" />
-                          ) : (
-                            <Square className="h-6 w-6 text-slate-300" />
-                          )}
-                        </button>
-                      );
-                    })}
+                  <div className="shrink-0 ml-3">
+                    <span className="text-[10px] font-black text-slate-500 bg-[#f2f5f7] px-3 py-1.5 rounded-lg uppercase tracking-wider">
+                      Total: {group.qty}
+                    </span>
                   </div>
                 </div>
-              );
-            })}
+              ))
+            )}
           </div>
         )}
       </div>
