@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { useMaster } from '../context/MasterContext';
 import { cn } from '@/lib/utils';
+import { MobileMenu } from '../components/MobileMenu';
 
 type ReportTab = 'overview' | 'sales' | 'expenses' | 'products' | 'history';
 
@@ -225,6 +226,7 @@ export function ReportsScreen() {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-[#F4F6F9]/90 backdrop-blur-md pt-8 pb-4 px-4 flex items-center justify-between gap-4 no-print">
         <div className="flex items-center gap-3">
+          <MobileMenu />
           <Button variant="ghost" size="icon" className="rounded-full bg-white shadow-sm hover:bg-slate-50 shrink-0" onClick={() => navigate(-1)}>
             <ArrowLeft className="h-5 w-5" style={{ color: NAVY }} />
           </Button>

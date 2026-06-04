@@ -357,7 +357,7 @@ export function UploadItemScreen() {
             onChange={handleFileChange}
           />
           {image ? (
-            <div className="relative aspect-square bg-slate-50 w-full overflow-hidden border-b border-slate-100">
+            <div className="relative h-56 bg-slate-50 w-full rounded-2xl overflow-hidden shadow-sm border border-slate-100">
               <WatermarkOverlay />
               <img src={image} alt="Preview" className={`w-full h-full object-cover transition-all ${isAnalyzing ? 'blur-sm scale-105 brightness-50' : ''}`} />
               
@@ -468,6 +468,22 @@ export function UploadItemScreen() {
           )}
         </section>
 
+        {/* Product Details */}
+        <section className="space-y-4">
+          <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Product Details</label>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold text-muted-foreground uppercase px-1">Product Name</label>
+              <Input 
+                placeholder="What are you selling?" 
+                className="h-12 rounded-xl bg-muted/30 border-none px-4"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+          </div>
+        </section>
+
         {/* Pricing Information */}
         <section className="space-y-4">
           <div className="flex items-center justify-between ml-1">
@@ -552,21 +568,6 @@ export function UploadItemScreen() {
           })()}
         </section>
 
-        {/* Product Details */}
-        <section className="space-y-4">
-          <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Product Details</label>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold text-muted-foreground uppercase px-1">Product Name</label>
-              <Input 
-                placeholder="What are you selling?" 
-                className="h-12 rounded-xl bg-muted/30 border-none px-4"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </div>
-          </div>
-        </section>
 
         <Button 
           className="w-full h-14 rounded-2xl font-bold text-lg gap-3 shadow-xl shadow-primary/20"

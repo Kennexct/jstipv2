@@ -257,9 +257,12 @@ export function OwnerInventoryScreen() {
     <div className="min-h-screen bg-[#F4F6F9] pb-24">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-[#F4F6F9]/80 backdrop-blur-md px-4 pt-8 pb-4 flex items-center justify-between gap-3 border-b border-slate-200/50">
-        <Button variant="ghost" size="icon" className="rounded-full bg-white shadow-sm hover:bg-slate-50 shrink-0" onClick={() => navigate('/owner')}>
-          <ArrowLeft className="h-5 w-5 text-[#0D1B2E]" />
-        </Button>
+        <div className="flex items-center gap-2">
+          <MobileMenu />
+          <Button variant="ghost" size="icon" className="rounded-full bg-white shadow-sm hover:bg-slate-50 shrink-0" onClick={() => navigate('/owner')}>
+            <ArrowLeft className="h-5 w-5 text-[#0D1B2E]" />
+          </Button>
+        </div>
         <h2 className="text-xl font-black text-[#0D1B2E] tracking-tight flex-1">Catalog</h2>
         <div className="flex items-center gap-2 shrink-0">
           <Button 
@@ -272,7 +275,6 @@ export function OwnerInventoryScreen() {
           <Button size="icon" className="rounded-full h-10 w-10 bg-[#0D1B2E] text-white hover:bg-[#162847]" onClick={() => navigate('/owner/list-item')}>
             <Plus className="h-5 w-5" />
           </Button>
-          <MobileMenu />
         </div>
       </header>
 

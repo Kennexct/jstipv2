@@ -125,20 +125,23 @@ export function OwnerDashboard() {
       
       {/* 1. Header & Profile (Glassmorphism) */}
       <header className="px-6 pt-8 pb-4 flex items-center justify-between sticky top-0 z-50 bg-background/80 backdrop-blur-2xl border-b border-border/30">
+        {/* Mobile Hamburger Menu */}
+        <MobileMenu />
+
         <Dialog>
           <DialogTrigger asChild>
-            <div className="flex items-center gap-3 cursor-pointer group">
-              <Avatar className="h-11 w-11 border-2 border-transparent ring-2 ring-primary/20 transition-all group-hover:ring-primary/50 shadow-sm">
-                <AvatarFallback className="font-bold bg-muted text-foreground">
-                  {(currentUser?.businessName || currentUser?.username || 'JF').substring(0, 2).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
+            <div className="flex items-center gap-3 cursor-pointer group text-right">
               <div className="flex flex-col">
                 <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Account</span>
                 <span className="text-sm font-semibold text-foreground leading-none">
                   {currentUser?.businessName || currentUser?.username}
                 </span>
               </div>
+              <Avatar className="h-11 w-11 border-2 border-transparent ring-2 ring-primary/20 transition-all group-hover:ring-primary/50 shadow-sm">
+                <AvatarFallback className="font-bold bg-muted text-foreground">
+                  {(currentUser?.businessName || currentUser?.username || 'JF').substring(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
             </div>
           </DialogTrigger>
           <DialogContent>
@@ -189,9 +192,6 @@ export function OwnerDashboard() {
               </div>
           </DialogContent>
         </Dialog>
-
-        {/* Mobile Hamburger Menu */}
-        <MobileMenu />
       </header>
 
       {/* 2. Massive Balance Section */}

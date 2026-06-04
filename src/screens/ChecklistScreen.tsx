@@ -11,6 +11,7 @@ import {
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { MobileMenu } from '../components/MobileMenu';
 import { toast } from 'sonner';
 import { useMaster } from '../context/MasterContext';
 import { useConfirm } from '../context/ConfirmContext';
@@ -142,9 +143,12 @@ export function ChecklistScreen() {
   return (
     <div className="min-h-screen bg-[#f2f5f7] pb-24">
       <header className="sticky top-0 z-50 bg-[#f2f5f7]/80 backdrop-blur-md px-4 pt-8 pb-4 flex items-center justify-between gap-3">
-        <Button variant="ghost" size="icon" className="rounded-full bg-white shadow-sm hover:bg-slate-50 shrink-0" onClick={() => navigate('/')}>
-          <ArrowLeft className="h-5 w-5 text-[#0D1B2E]" />
-        </Button>
+        <div className="flex items-center gap-2">
+          <MobileMenu />
+          <Button variant="ghost" size="icon" className="rounded-full bg-white shadow-sm hover:bg-slate-50 shrink-0" onClick={() => navigate('/')}>
+            <ArrowLeft className="h-5 w-5 text-[#0D1B2E]" />
+          </Button>
+        </div>
         <h2 className="text-xl font-black text-[#0D1B2E] tracking-tight flex-1">Item Checklist</h2>
       </header>
 

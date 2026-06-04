@@ -235,11 +235,11 @@ export function TripSettingsScreen() {
   return (
     <div className="min-h-screen bg-white pb-28">
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-2xl pt-8 pb-4 border-none h-auto flex items-center px-4 gap-4">
+        <MobileMenu />
         <Button variant="ghost" size="icon" className="rounded-full bg-[#f2f5f7] shadow-sm hover:bg-slate-200 shrink-0" onClick={handleBack}>
           <ArrowLeft className="h-5 w-5 text-[#0D1B2E]" />
         </Button>
         <h2 className="text-xl font-bold tracking-tight text-[#0D1B2E] flex-1">Trip Settings</h2>
-        <MobileMenu />
       </header>
 
       <div className="p-6 space-y-8">
