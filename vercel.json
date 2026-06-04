@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/resend/:match*",
+      "destination": "https://api.resend.com/:match*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

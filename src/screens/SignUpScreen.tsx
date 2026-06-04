@@ -38,7 +38,7 @@ export function SignUpScreen() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer re_ZuqXFC69_9FnA4hZJqKA3eUNJkMnQvz9n`
+          'Authorization': `Bearer re_N7HfBNXN_DvwtMr5CqfVxBJ4yRYhfUm93`
         },
         body: JSON.stringify({
           from: 'JStip <onboarding@resend.dev>',
