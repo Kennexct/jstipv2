@@ -54,6 +54,7 @@ const LoadingFallback = () => (
 );
 
 import { ConfirmProvider } from './context/ConfirmContext';
+import { ChecklistScreen } from './screens/ChecklistScreen';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
 export default function App() {
@@ -85,6 +86,7 @@ export default function App() {
                   <Route path="trip-settings" element={<TripSettingsScreen />} />
                   <Route path="reports" element={<ReportsScreen />} />
                   <Route path="ledger" element={<LedgerScreen />} />
+                  <Route path="checklist" element={<ChecklistScreen />} />
                   <Route path="invoice/:id" element={<InvoiceScreen />} />
                 </Route>
               </Route>

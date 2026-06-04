@@ -125,8 +125,6 @@ export function ExploreScreen() {
 
 
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [viewMode, setViewMode] = useState<'board' | 'checklist'>('board');
-  const [checklistViewMode, setChecklistViewMode] = useState<'transaction' | 'summary'>('transaction');
   const [selectedStatusFilter, setSelectedStatusFilter] = useState<string>('all');
   const [isBulkMode, setIsBulkMode] = useState(false);
   const [selectedBulkIds, setSelectedBulkIds] = useState<string[]>([]);
@@ -181,11 +179,7 @@ export function ExploreScreen() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [editingChecklistItem, setEditingChecklistItem] = useState<any>(null);
-  const [editChecklistForm, setEditChecklistForm] = useState({ name: '', qty: 1, price: 0, customerName: '' });
 
-  // Invoice Modal state
-  const [invoiceModalSale, setInvoiceModalSale] = useState<any | null>(null);
 
   const handleCloseDetail = async (explicitSave: boolean = false) => {
     if (selectedDetailItem) {
@@ -516,70 +510,7 @@ export function ExploreScreen() {
     );
   };
 
-  const getMergedChecklistItems = () => {
-    const wishlistFound = myWishlist
-      .filter(item => item.status === 'confirm')
-      .map(item => ({
-        id: `chk_wishlist_${item.id}`,
-        name: item.name,
-        qty: item.qty || 1,
-        price: item.sellPrice || item.price,
-        requester: item.requester,
-        location: item.location,
-        type: 'wishlist' as const,
-        sourceLabel: 'Wishlist (Confirmed)'
-      }));
 
-    const salesItems: any[] = [];
-    sales.forEach(sale => {
-      if (sale.items && Array.isArray(sale.items)) {
-        sale.items.forEach((it: any, index: number) => {
-          const isWishlistDuplicate = wishlistFound.some(w => w.name.toLowerCase() === it.name.toLowerCase());
-          if (!isWishlistDuplicate) {
-            salesItems.push({
-              id: `chk_sale_${sale.id}_${index}`,
-              name: it.name,
-              qty: it.qty || 1,
-              price: it.price,
-              requester: sale.customerName,
-              location: 'Checkout Desk',
-              type: 'sale' as const,
-              sourceLabel: 'Logged Invoice Sale'
-            });
-          }
-        });
-      }
-    });
-
-    return [...wishlistFound, ...salesItems];
-  };
-
-  const checklistItems = getMergedChecklistItems();
-
-  const isItemChecked = (itemId: string, itemType: 'wishlist' | 'sale') => {
-    return boughtIds.includes(itemId);
-  };
-
-  const groupedChecklistItems = useMemo(() => {
-    const map = new Map<string, { name: string; qty: number; checkedQty: number; ids: string[] }>();
-    checklistItems.forEach(item => {
-      const key = (item.name || 'Unknown').toLowerCase().trim();
-      const checked = isItemChecked(item.id, item.type);
-      if (!map.has(key)) {
-        map.set(key, { name: item.name, qty: item.qty, checkedQty: checked ? item.qty : 0, ids: [item.id] });
-      } else {
-        const existing = map.get(key)!;
-        existing.qty += item.qty;
-        if (checked) existing.checkedQty += item.qty;
-        existing.ids.push(item.id);
-      }
-    });
-    return Array.from(map.values()).sort((a, b) => b.qty - a.qty);
-  }, [checklistItems, boughtIds]);
-
-  const checkedCount = checklistItems.filter(item => isItemChecked(item.id, item.type)).length;
-  const totalChecklistCount = checklistItems.length;
-  const completionPercentage = totalChecklistCount > 0 ? Math.round((checkedCount / totalChecklistCount) * 100) : 0;
 
   const filteredMyWishlist = myWishlist.filter(item => {
     const matchesSearch = 
@@ -709,39 +640,8 @@ export function ExploreScreen() {
       </header>
 
       <div className="p-4 space-y-4">
-      <div className="bg-slate-100 p-1.5 rounded-2xl flex gap-1.5">
-        <button
-          type="button"
-          onClick={() => setViewMode('board')}
-          className={cn(
-            "flex-1 py-3 text-xs font-black uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2",
-            viewMode === 'board'
-              ? "bg-white text-primary shadow-md shadow-slate-200/50 scale-[1.01]"
-              : "text-slate-500 hover:text-slate-800 hover:bg-slate-200/40"
-          )}
-        >
-          <ShoppingBag className="h-4 w-4" /> Wishlist Board
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            setViewMode('checklist');
-            setActiveDropdownId(null);
-          }}
-          className={cn(
-            "flex-1 py-3 text-xs font-black uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2",
-            viewMode === 'checklist'
-              ? "bg-white text-primary shadow-md shadow-slate-200/50 scale-[1.01]"
-              : "text-slate-500 hover:text-slate-800 hover:bg-slate-200/40"
-          )}
-        >
-          <ListTodo className="h-4 w-4" /> Item Checklist
-        </button>
-      </div>
-
-      {viewMode === 'board' && (
-        <>
-          <div className="space-y-3">
+      <div className="p-4 space-y-4">
+        <div className="space-y-3">
             <div className="flex gap-2">
               <div className="relative flex-1">
                 <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -1432,200 +1332,8 @@ export function ExploreScreen() {
         </DialogContent>
       </Dialog>
 
-      {/* EDIT CHECKLIST ITEM MODAL */}
-      <Dialog open={editingChecklistItem !== null} onOpenChange={(open) => { if (!open) setEditingChecklistItem(null); }}>
-        <DialogContent>
-          {editingChecklistItem && (
-            <div className="space-y-4">
-              <DialogHeader>
-                <DialogTitle className="text-xl font-black text-[#0D1B2E]">Edit Transaction Item</DialogTitle>
-                <DialogDescription className="text-xs font-medium text-slate-500">
-                  Modifying {editingChecklistItem.type === 'wishlist' ? 'a wishlist request' : 'a logged sale invoice'}.
-                </DialogDescription>
-              </DialogHeader>
 
-              <div className="space-y-3 mt-4">
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Product Name</label>
-                  <Input 
-                    value={editChecklistForm.name}
-                    onChange={e => setEditChecklistForm({ ...editChecklistForm, name: e.target.value })}
-                    className="h-12 rounded-xl bg-[#f2f5f7] border-none font-bold text-sm" 
-                  />
-                </div>
-                
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Quantity</label>
-                    <div className="flex items-center gap-3 h-12 bg-[#f2f5f7] rounded-xl px-2">
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        className="h-8 w-8 rounded-lg hover:bg-white shrink-0"
-                        onClick={() => {
-                          const newQty = Math.max(1, editChecklistForm.qty - 1);
-                          setEditChecklistForm({ ...editChecklistForm, qty: newQty });
-                        }}
-                      >
-                        <Minus className="h-4 w-4" />
-                      </Button>
-                      <div className="flex-1 text-center font-black text-lg text-[#0D1B2E]">
-                        {editChecklistForm.qty}
-                      </div>
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        className="h-8 w-8 rounded-lg hover:bg-white shrink-0"
-                        onClick={() => {
-                          const newQty = editChecklistForm.qty + 1;
-                          setEditChecklistForm({ ...editChecklistForm, qty: newQty });
-                        }}
-                      >
-                        <Plus className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Customer Name</label>
-                    <Input 
-                      value={editChecklistForm.customerName}
-                      onChange={e => setEditChecklistForm({ ...editChecklistForm, customerName: e.target.value })}
-                      className="h-12 rounded-xl bg-[#f2f5f7] border-none font-bold text-sm" 
-                    />
-                  </div>
-                </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Total Price (IDR)</label>
-                  <Input 
-                    type="text"
-                    inputMode="numeric"
-                    value={'Rp ' + (editChecklistForm.price * editChecklistForm.qty).toLocaleString()}
-                    disabled
-                    className="h-12 rounded-xl bg-[#f2f5f7] border-none font-bold text-sm opacity-80" 
-                  />
-                </div>
-              </div>
-
-              <div className="pt-4 flex items-center justify-between gap-3">
-                <Button 
-                  variant="outline" 
-                  className="h-12 rounded-xl border-red-200 bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 flex-1"
-                  onClick={async () => {
-                    const confirmed = await confirm(`Are you sure you want to completely cancel and remove this item?`);
-                    if (!confirmed) return;
-                    
-                    if (editingChecklistItem.type === 'wishlist') {
-                      const matched = myWishlist.find(w => w.id === editingChecklistItem.id.replace('chk_wishlist_', ''));
-                      if (matched) {
-                        await saveWishlist({ ...matched, status: 'cancel' });
-                      }
-                    } else {
-                      const stripped = editingChecklistItem.id.replace('chk_sale_', '');
-                      const lastUnderscore = stripped.lastIndexOf('_');
-                      const saleId = stripped.substring(0, lastUnderscore);
-                      const productIndex = parseInt(stripped.substring(lastUnderscore + 1));
-                      const matchedSale = sales.find(s => s.id === saleId);
-                      if (matchedSale) {
-                        const newItems = [...matchedSale.items];
-                        newItems.splice(productIndex, 1);
-                        await saveSale({ ...matchedSale, items: newItems });
-                      }
-                    }
-                    toast.success("Item removed successfully");
-                    setEditingChecklistItem(null);
-                  }}
-                >
-                  <Trash2 className="h-4 w-4 mr-2" /> Remove Item
-                </Button>
-                
-                <Button 
-                  className="h-12 rounded-xl bg-[#0D1B2E] text-white hover:bg-[#162847] flex-1"
-                  onClick={async () => {
-                    const isConfirmed = await confirm("Are you sure you want to save these changes?");
-                    if (!isConfirmed) return;
-
-                    if (editingChecklistItem.type === 'wishlist') {
-                      const matched = myWishlist.find(w => w.id === editingChecklistItem.id.replace('chk_wishlist_', ''));
-                      if (matched) {
-                        await saveWishlist({ 
-                          ...matched, 
-                          name: editChecklistForm.name,
-                          qty: editChecklistForm.qty,
-                          requester: editChecklistForm.customerName
-                        });
-                      }
-                    } else {
-                      const stripped = editingChecklistItem.id.replace('chk_sale_', '');
-                      const lastUnderscore = stripped.lastIndexOf('_');
-                      const saleId = stripped.substring(0, lastUnderscore);
-                      const productIndex = parseInt(stripped.substring(lastUnderscore + 1));
-                      const matchedSale = sales.find(s => s.id === saleId);
-                      if (matchedSale) {
-                        const newItems = [...matchedSale.items];
-                        newItems[productIndex] = {
-                          ...newItems[productIndex],
-                          name: editChecklistForm.name,
-                          qty: editChecklistForm.qty
-                        };
-                        await saveSale({ 
-                          ...matchedSale, 
-                          customerName: editChecklistForm.customerName,
-                          items: newItems 
-                        });
-                      }
-                    }
-                    toast.success("Changes saved!");
-                    setEditingChecklistItem(null);
-                  }}
-                >
-                  Save Changes
-                </Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-      </div>
-
-      {/* Checklist Automatic Invoice Success Pop-up */}
-      <Dialog open={invoiceModalSale !== null} onOpenChange={(open) => !open && setInvoiceModalSale(null)}>
-        <DialogContent className="max-w-sm text-center p-6 border-slate-100 rounded-[2rem] bg-white">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 mb-4">
-            <CheckCircle2 className="h-8 w-8 text-emerald-600" />
-          </div>
-          <DialogTitle className="text-xl font-black text-slate-800 mb-2">Item Acquired!</DialogTitle>
-          <DialogDescription className="text-sm font-medium text-slate-500 mb-6">
-            The item has been successfully checked off. A sale invoice has been generated for {invoiceModalSale?.customerName || 'Customer'}.
-          </DialogDescription>
-          <div className="bg-slate-50 rounded-2xl p-4 mb-6 text-left space-y-2 border border-slate-100">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest border-b pb-2 mb-2">Sale Details</p>
-            <div className="flex justify-between items-center text-sm font-bold text-slate-700">
-              <span>{invoiceModalSale?.items?.[0]?.name || 'Item'}</span>
-              <span>x{invoiceModalSale?.items?.[0]?.qty || 1}</span>
-            </div>
-            <div className="flex justify-between items-center text-sm font-black text-primary pt-2 border-t mt-2">
-              <span>Total</span>
-              <span>Rp {invoiceModalSale?.total?.toLocaleString()}</span>
-            </div>
-          </div>
-          <div className="flex gap-3">
-            <Button 
-              variant="outline"
-              className="flex-1 h-14 rounded-2xl font-bold text-sm border-slate-200"
-              onClick={() => setInvoiceModalSale(null)}
-            >
-              Close
-            </Button>
-            <Button 
-              className="flex-1 h-14 rounded-2xl font-black text-sm shadow-lg shadow-primary/20 bg-[#0D1B2E] hover:bg-[#162847] text-white"
-              onClick={() => navigate(`/invoice/${invoiceModalSale?.id}`)}
-            >
-              View Full Invoice
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
 
     </div>
   );

@@ -11,7 +11,8 @@ export function WatermarkOverlay() {
       <img 
         src={wm.image} 
         alt="watermark" 
-        className="w-1/2 max-w-[200px] h-auto object-contain opacity-50 drop-shadow-lg mix-blend-overlay"
+        style={{ opacity: wm.opacity !== undefined ? wm.opacity : 0.5 }}
+        className="w-1/2 max-w-[200px] h-auto object-contain drop-shadow-lg mix-blend-overlay"
       />
     </div>
   );

@@ -105,6 +105,7 @@ export function TripSettingsScreen() {
   const [payoutCurrency, setPayoutCurrency] = useState('IDR');
   const [watermarkEnabled, setWatermarkEnabled] = useState(false);
   const [watermarkImage, setWatermarkImage] = useState<string | null>(null);
+  const [watermarkOpacity, setWatermarkOpacity] = useState<number>(0.5);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingField, setEditingField] = useState<string | null>(null);
 
@@ -139,6 +140,7 @@ export function TripSettingsScreen() {
       if (tripSettings.watermark) {
         setWatermarkEnabled(!!tripSettings.watermark.enabled);
         setWatermarkImage(tripSettings.watermark.image || null);
+        setWatermarkOpacity(tripSettings.watermark.opacity !== undefined ? tripSettings.watermark.opacity : 0.5);
       }
     }
   }, [loading, tripSettings]);
@@ -165,7 +167,8 @@ export function TripSettingsScreen() {
       notifs: { push: true, email: false, orders: true, chat: true },
       watermark: {
         enabled: watermarkEnabled,
-        image: watermarkImage || ''
+        image: watermarkImage || '',
+        opacity: watermarkOpacity
       }
     };
     try {
@@ -500,6 +503,26 @@ export function TripSettingsScreen() {
                   )}
                   <p className="text-[10px] text-muted-foreground leading-normal font-medium text-left">
                     Upload a transparent PNG logo. When toggle is ON, this logo will be automatically overlaid on the bottom right corner of product photos.
+                  </p>
+                </div>
+                
+                {/* Opacity Slider */}
+                <div className="space-y-3 pt-4 mt-2 border-t border-slate-100">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[10px] font-bold text-muted-foreground uppercase">Watermark Opacity</label>
+                    <span className="text-xs font-bold text-primary">{Math.round(watermarkOpacity * 100)}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0.1"
+                    max="1"
+                    step="0.05"
+                    value={watermarkOpacity}
+                    onChange={(e) => setWatermarkOpacity(parseFloat(e.target.value))}
+                    className="w-full accent-primary"
+                  />
+                  <p className="text-[10px] text-muted-foreground font-medium">
+                    Adjust how transparent the watermark appears on your photos.
                   </p>
                 </div>
               </div>
