@@ -211,39 +211,7 @@ export function OwnerDashboard() {
         </div>
       </section>
 
-      {/* 3. Quick Action Pills (Horizontal Scroll) */}
-      <section className="px-6 py-4">
-        <div className="flex items-center gap-3 overflow-x-auto pb-4 scrollbar-hide -mx-6 px-6">
-          <Button 
-            onClick={() => navigate('/owner/inventory')}
-            className="pill-button h-14 px-6 bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm shrink-0"
-          >
-            <Package className="h-5 w-5" />
-            Catalog
-          </Button>
-          <Button 
-            onClick={() => navigate('/explore')}
-            className="pill-button h-14 px-6 bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-sm shrink-0"
-          >
-            <Sparkles className="h-5 w-5" />
-            Wishlist Requests
-          </Button>
-          <Button 
-            onClick={() => navigate('/reports')}
-            className="pill-button h-14 px-6 bg-card text-foreground hover:bg-muted border border-border shadow-sm shrink-0"
-          >
-            <Receipt className="h-5 w-5" />
-            Analytics
-          </Button>
-          <Button 
-            onClick={() => navigate('/ledger')}
-            className="pill-button h-14 px-6 bg-card text-foreground hover:bg-muted border border-border shadow-sm shrink-0"
-          >
-            <ClipboardCheck className="h-5 w-5" />
-            Ledger
-          </Button>
-        </div>
-      </section>
+
 
       {/* 4. Combined Activity Feed */}
       <main className="px-6 pt-2 space-y-6">

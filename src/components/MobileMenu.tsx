@@ -47,7 +47,7 @@ export function MobileMenu() {
         Using DialogContent from Shadcn but customizing it to act like a slide-out drawer from the right.
         Since we might not have the Sheet component, we'll style DialogContent directly.
       */}
-      <DialogContent className="md:hidden fixed inset-y-0 right-0 z-50 h-full w-[80%] max-w-sm flex flex-col p-0 gap-0 border-l border-none bg-white shadow-2xl rounded-l-3xl data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right duration-300 sm:max-w-sm transition-transform">
+      <DialogContent className="md:hidden fixed top-0 right-0 left-auto bottom-0 translate-x-0 translate-y-0 z-50 h-full w-[80%] max-w-sm flex flex-col p-0 gap-0 border-l border-none bg-white shadow-2xl rounded-l-3xl data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right duration-300 transition-transform">
         <DialogHeader className="p-6 text-left border-b border-slate-100 shrink-0">
           <DialogTitle className="text-xl font-black uppercase italic tracking-tighter text-primary">JStip</DialogTitle>
         </DialogHeader>

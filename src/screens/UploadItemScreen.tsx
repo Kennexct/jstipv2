@@ -288,16 +288,10 @@ export function UploadItemScreen() {
     }
 
     setIsSubmitting(true);
-    let finalImage = image || '';
     const baseImage = rawImage || image || '';
-    if (baseImage) {
-      try {
-        const formattedPrice = `Rp ${Number(publishPrice).toLocaleString()}`;
-        finalImage = await drawPriceLabelOnImage(baseImage, formattedPrice);
-      } catch (e) {
-        console.error('Failed to draw price badge:', e);
-      }
-    }
+    let finalImage = baseImage;
+    // We no longer burn the price label into the image during upload.
+    // This is now handled dynamically during export via exportProductImage.
 
     let uploadedFinalImage = finalImage;
     let uploadedBaseImage = baseImage;
