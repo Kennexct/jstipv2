@@ -119,17 +119,17 @@ export function ChecklistScreen() {
   };
 
   const groupedChecklistItems = useMemo(() => {
-    const map = new Map<string, { name: string; qty: number }>();
+    const map = new Map<string, { name: string; qty: number; checkedQty: number; ids: string[] }>();
     checklistItems.forEach(item => {
-      const checked = isItemChecked(item.id, item.type);
-      if (!checked) return; // Only show items that have been acquired
-      
       const key = (item.name || 'Unknown').toLowerCase().trim();
+      const checked = isItemChecked(item.id, item.type);
       if (!map.has(key)) {
-        map.set(key, { name: item.name, qty: item.qty });
+        map.set(key, { name: item.name, qty: item.qty, checkedQty: checked ? item.qty : 0, ids: [item.id] });
       } else {
         const existing = map.get(key)!;
         existing.qty += item.qty;
+        if (checked) existing.checkedQty += item.qty;
+        existing.ids.push(item.id);
       }
     });
     return Array.from(map.values()).sort((a, b) => b.qty - a.qty);
@@ -249,26 +249,52 @@ export function ChecklistScreen() {
           <div className="space-y-3">
             {groupedChecklistItems.length === 0 ? (
               <div className="text-center py-8 text-slate-500 font-medium text-xs">
-                No items have been marked as acquired yet.
+                No items found in your active lists.
               </div>
             ) : (
-              groupedChecklistItems.map(group => (
-                <div 
-                  key={group.name}
-                  className="flex items-center justify-between p-4 rounded-2xl bg-white shadow-sm border border-slate-100"
-                >
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-sm font-bold truncate text-[#0D1B2E]">
-                      {group.name}
-                    </h4>
+              groupedChecklistItems.map(group => {
+                const isFullyChecked = group.checkedQty === group.qty;
+                const remaining = group.qty - group.checkedQty;
+                
+                return (
+                  <div 
+                    key={group.name}
+                    className="flex items-center gap-4 p-4 rounded-[2rem] bg-white shadow-[0_2px_10px_-3px_rgba(6,81,237,0.05)] border border-slate-100/60"
+                  >
+                    <div className="flex flex-col items-center justify-center shrink-0 h-[3.5rem] w-[3.5rem] rounded-full bg-[#f2f5f7]/70 text-[#0D1B2E]">
+                      <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 leading-none mb-0.5">Total</span>
+                      <span className="text-xl font-black leading-none text-slate-300">{group.qty}</span>
+                    </div>
+
+                    <div className="flex-1 min-w-0 flex flex-col justify-center">
+                      <h4 className={cn("text-base font-black truncate", isFullyChecked ? "line-through text-slate-300" : "text-[#0D1B2E]")}>
+                        {group.name}
+                      </h4>
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <span className="text-[11px] font-bold text-slate-400">
+                          <span className={isFullyChecked ? "text-emerald-500" : "text-[#0D1B2E]"}>{group.checkedQty}</span> / {group.qty} already bought
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="shrink-0 ml-2">
+                      {isFullyChecked ? (
+                        <div className="bg-emerald-100/50 px-3 py-1.5 rounded-lg border border-emerald-100">
+                          <span className="text-[9px] font-black text-emerald-600 uppercase tracking-widest">
+                            Completed
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="bg-[#fdf3c7] px-3 py-1.5 rounded-lg border border-[#fcebb0]">
+                          <span className="text-[9px] font-black text-[#a66a12] uppercase tracking-widest">
+                            {remaining} Remaining
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div className="shrink-0 ml-3">
-                    <span className="text-[10px] font-black text-slate-500 bg-[#f2f5f7] px-3 py-1.5 rounded-lg uppercase tracking-wider">
-                      Total: {group.qty}
-                    </span>
-                  </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         )}
