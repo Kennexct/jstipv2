@@ -13,9 +13,16 @@ export function Layout() {
       {!isInvoiceRoute && <Sidebar />}
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col min-h-screen overflow-x-hidden md:pl-64">
+      <main className="flex-1 flex flex-col min-h-screen overflow-x-hidden md:pl-64 relative">
+        {/* Desktop Header Top Bar */}
+        {!isInvoiceRoute && (
+          <header className="hidden md:flex h-20 w-full items-center justify-end px-8 sticky top-0 z-30 bg-[#F4F6F9]/80 backdrop-blur-md">
+            <GlobalActionFab variant="desktop" />
+          </header>
+        )}
+
         {/* Tightened desktop width to max-w-2xl so lists don't look awkwardly wide */}
-        <div className="mx-auto w-full max-w-md md:max-w-2xl pb-24 md:pb-12 pt-0 md:pt-10">
+        <div className="mx-auto w-full max-w-md md:max-w-2xl pb-24 md:pb-12 pt-0 md:pt-6">
           <Outlet />
         </div>
       </main>
@@ -24,14 +31,7 @@ export function Layout() {
       {!isInvoiceRoute && (
         <div className="print:hidden md:hidden">
           <BottomNav />
-          <GlobalActionFab />
-        </div>
-      )}
-
-      {/* Desktop FAB */}
-      {!isInvoiceRoute && (
-        <div className="hidden md:block print:hidden">
-          <GlobalActionFab />
+          <GlobalActionFab variant="mobile" />
         </div>
       )}
     </div>

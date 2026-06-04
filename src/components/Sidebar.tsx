@@ -13,8 +13,8 @@ export function Sidebar() {
 
   const navItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
-    { icon: TrendingUp, label: 'Wishlist', path: '/explore' },
     { icon: PackageSearch, label: 'Catalog', path: '/owner/inventory' },
+    { icon: TrendingUp, label: 'Wishlist', path: '/explore' },
     { icon: BarChart2, label: 'Reports', path: '/reports' },
     { icon: Settings2, label: 'Settings', path: '/trip-settings' },
   ];
@@ -40,16 +40,7 @@ export function Sidebar() {
         <h2 className="text-xl font-black uppercase italic tracking-tighter text-primary">JStip</h2>
       </div>
 
-      {/* Primary Action Button - MOVED TO TOP */}
-      <div className="p-4 shrink-0">
-        <NavLink
-          to="/owner/list-item"
-          className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl bg-primary text-primary-foreground font-black uppercase tracking-widest shadow-lg hover:scale-[1.02] active:scale-95 transition-all"
-        >
-          <PackagePlus className="h-5 w-5" />
-          <span>Add Product</span>
-        </NavLink>
-      </div>
+
 
       {/* Main Navigation */}
       <nav className="flex-1 px-4 pb-4 space-y-2 overflow-y-auto scrollbar-hide">

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Banknote, Wallet, Zap, Plus, Search, Trash2, X, PlusCircle, PackageCheck, Package, CheckCircle2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Banknote, Wallet, Zap, Plus, Search, Trash2, X, PlusCircle, PackageCheck, Package, CheckCircle2, PackagePlus } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,7 +9,8 @@ import { toast } from 'sonner';
 import { useMaster } from '../context/MasterContext';
 import { motion, AnimatePresence } from 'motion/react';
 
-export function GlobalActionFab() {
+export function GlobalActionFab({ variant = 'mobile' }: { variant?: 'mobile' | 'desktop' }) {
+  const navigate = useNavigate();
   const {
     catalogItems,
     tripSettings,
@@ -218,6 +220,37 @@ export function GlobalActionFab() {
     }
   };
 
+  if (variant === 'desktop') {
+    return (
+      <>
+        <div className="flex items-center gap-3">
+          <Button 
+            variant="outline"
+            className="h-11 rounded-xl gap-2 font-bold bg-white text-slate-600 hover:text-slate-900 border border-slate-200 shadow-sm"
+            onClick={() => setIsExpenseOpen(true)}
+          >
+            <Wallet className="h-4 w-4 text-blue-500" /> Record Expense
+          </Button>
+          <Button 
+            className="h-11 rounded-xl gap-2 font-bold bg-white text-slate-600 hover:text-slate-900 border border-slate-200 shadow-sm"
+            onClick={() => setIsSaleOpen(true)}
+          >
+            <Banknote className="h-4 w-4 text-emerald-500" /> Record Sale
+          </Button>
+          <div className="w-px h-6 bg-slate-200 mx-1" />
+          <Button 
+            className="h-11 px-5 rounded-xl gap-2 font-black uppercase tracking-wide bg-[#0D1B2E] text-white hover:bg-[#162847] shadow-lg hover:shadow-xl transition-all"
+            onClick={() => navigate('/owner/list-item')}
+          >
+            <PackagePlus className="h-4 w-4 text-[#C9A84C]" /> Add Product
+          </Button>
+        </div>
+        {/* Modals placed here for desktop so they don't break when variant changes */}
+        {renderModals()}
+      </>
+    );
+  }
+
   return (
     <>
       <div className="fixed bottom-[80px] md:bottom-8 right-4 md:right-8 z-50 flex flex-col items-end gap-3">
@@ -268,6 +301,14 @@ export function GlobalActionFab() {
           <Zap className={cn("h-6 w-6 transition-all", isOpen ? "rotate-45" : "")} />
         </Button>
       </div>
+
+      {renderModals()}
+    </>
+  );
+
+  function renderModals() {
+    return (
+      <>
 
       {/* Expenses Dialog */}
       <Dialog open={isExpenseOpen} onOpenChange={setIsExpenseOpen}>
@@ -470,6 +511,7 @@ export function GlobalActionFab() {
           </div>
         </DialogContent>
       </Dialog>
-    </>
-  );
+      </>
+    );
+  }
 }
