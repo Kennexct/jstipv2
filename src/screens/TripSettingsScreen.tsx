@@ -18,6 +18,7 @@ import { useMaster } from '../context/MasterContext';
 import { useConfirm } from '../context/ConfirmContext';
 import { fetchLiveExchangeRate } from '../lib/currency';
 import { cn } from '@/lib/utils';
+import { MobileMenu } from '@/components/MobileMenu';
 import { 
   Dialog,
   DialogContent,
@@ -106,6 +107,7 @@ export function TripSettingsScreen() {
   const [watermarkEnabled, setWatermarkEnabled] = useState(false);
   const [watermarkImage, setWatermarkImage] = useState<string | null>(null);
   const [watermarkOpacity, setWatermarkOpacity] = useState<number>(0.5);
+  const [badgePosition, setBadgePosition] = useState<'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'none'>('bottom-right');
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Track initial state to detect unsaved changes
@@ -145,6 +147,7 @@ export function TripSettingsScreen() {
         setWatermarkEnabled(!!tripSettings.watermark.enabled);
         setWatermarkImage(tripSettings.watermark.image || null);
         setWatermarkOpacity(tripSettings.watermark.opacity !== undefined ? tripSettings.watermark.opacity : 0.5);
+        setBadgePosition(tripSettings.watermark.badgePosition || 'bottom-right');
       }
 
       // Save initial state for dirtiness tracking
@@ -160,7 +163,8 @@ export function TripSettingsScreen() {
         payoutCurrency: tripSettings.currency?.payout || 'IDR',
         watermarkEnabled: !!tripSettings.watermark?.enabled,
         watermarkImage: tripSettings.watermark?.image || null,
-        watermarkOpacity: tripSettings.watermark?.opacity !== undefined ? tripSettings.watermark?.opacity : 0.5
+        watermarkOpacity: tripSettings.watermark?.opacity !== undefined ? tripSettings.watermark?.opacity : 0.5,
+        badgePosition: tripSettings.watermark?.badgePosition || 'bottom-right'
       });
     }
   }, [loading, tripSettings]);
@@ -175,7 +179,8 @@ export function TripSettingsScreen() {
     payoutCurrency !== initialState.payoutCurrency ||
     watermarkEnabled !== initialState.watermarkEnabled ||
     watermarkImage !== initialState.watermarkImage ||
-    watermarkOpacity !== initialState.watermarkOpacity
+    watermarkOpacity !== initialState.watermarkOpacity ||
+    badgePosition !== initialState.badgePosition
   );
 
   const handleBack = async () => {
@@ -210,7 +215,8 @@ export function TripSettingsScreen() {
       watermark: {
         enabled: watermarkEnabled,
         image: watermarkImage || '',
-        opacity: watermarkOpacity
+        opacity: watermarkOpacity,
+        badgePosition: badgePosition
       }
     };
     try {
@@ -232,7 +238,8 @@ export function TripSettingsScreen() {
         <Button variant="ghost" size="icon" className="rounded-full bg-[#f2f5f7] shadow-sm hover:bg-slate-200 shrink-0" onClick={handleBack}>
           <ArrowLeft className="h-5 w-5 text-[#0D1B2E]" />
         </Button>
-        <h2 className="text-xl font-bold tracking-tight text-[#0D1B2E]">Trip Settings</h2>
+        <h2 className="text-xl font-bold tracking-tight text-[#0D1B2E] flex-1">Trip Settings</h2>
+        <MobileMenu />
       </header>
 
       <div className="p-6 space-y-8">
@@ -460,12 +467,12 @@ export function TripSettingsScreen() {
 
         <Separator className="opacity-50" />
 
-        {/* Photo Watermark Settings */}
-        <section className="space-y-4 text-left">
+        {/* Photo Export & Watermark */}
+        <section className="space-y-4">
           <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">
-             <Settings2 className="h-4 w-4" /> Photo Watermark
+             <Settings2 className="h-4 w-4" /> Photo Export & Watermark
           </div>
-          <div className="p-4 rounded-3xl bg-white shadow-[0_2px_10px_-3px_rgba(6,81,237,0.05)] border border-slate-100/60 space-y-4">
+          <div className="space-y-6 text-left p-4 rounded-3xl bg-white shadow-[0_2px_10px_-3px_rgba(6,81,237,0.05)] border border-slate-100/60">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5 text-left">
                 <p className="text-sm font-bold text-[#0D1B2E]">Enable Photo Watermark</p>
@@ -561,6 +568,23 @@ export function TripSettingsScreen() {
                 </div>
               </div>
             )}
+            
+            <div className="pt-4 border-t border-slate-100 space-y-3">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block ml-1">Sell Price Badge Position</label>
+              <select 
+                value={badgePosition} 
+                onChange={(e) => setBadgePosition(e.target.value as any)}
+                className="w-full h-14 bg-[#f2f5f7] border-none rounded-2xl px-4 text-sm font-bold text-[#0D1B2E] appearance-none cursor-pointer outline-none ring-0"
+                style={{ WebkitAppearance: 'none' }}
+              >
+                <option value="bottom-right">Bottom Right</option>
+                <option value="bottom-left">Bottom Left</option>
+                <option value="top-right">Top Right</option>
+                <option value="top-left">Top Left</option>
+                <option value="none">Hide Badge</option>
+              </select>
+              <p className="text-[10px] text-slate-400 font-medium px-2">Position of the price badge when exporting photos.</p>
+            </div>
           </div>
         </section>
 

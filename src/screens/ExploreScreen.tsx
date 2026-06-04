@@ -40,6 +40,7 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useMaster } from '../context/MasterContext';
 import { useConfirm } from '../context/ConfirmContext';
+import { MobileMenu } from '@/components/MobileMenu';
 
 
 export interface WishlistItem {
@@ -538,6 +539,7 @@ export function ExploreScreen() {
               </div>
             </DialogContent>
           </Dialog>
+          <MobileMenu />
         </div>
       </header>
 

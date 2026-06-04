@@ -44,6 +44,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { useMaster } from '../context/MasterContext';
 import { useConfirm } from '../context/ConfirmContext';
+import { MobileMenu } from '@/components/MobileMenu';
 
 const EXPENSE_CURRENCIES = [
   { code: 'KRW', symbol: '₩', rate: 11.7 },
@@ -189,6 +190,8 @@ export function OwnerDashboard() {
           </DialogContent>
         </Dialog>
 
+        {/* Mobile Hamburger Menu */}
+        <MobileMenu />
       </header>
 
       {/* 2. Massive Balance Section */}

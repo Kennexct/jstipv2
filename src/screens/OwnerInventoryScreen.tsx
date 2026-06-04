@@ -14,6 +14,8 @@ import { Badge } from '@/components/ui/badge';
 import { WatermarkOverlay } from '../components/WatermarkOverlay';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
+import { FileText, Image as ImageIcon, DownloadCloud } from 'lucide-react';
+import { exportProductImage } from '@/lib/exportImage';
 import {
   Dialog,
   DialogContent,
@@ -24,6 +26,7 @@ import {
 import { useMaster } from '../context/MasterContext';
 import { useConfirm } from '../context/ConfirmContext';
 import { cn } from '@/lib/utils';
+import { MobileMenu } from '@/components/MobileMenu';
 
 export function OwnerInventoryScreen() {
   const navigate = useNavigate();
@@ -129,7 +132,7 @@ export function OwnerInventoryScreen() {
     }
   };
 
-  const handleDownloadCatalog = () => {
+  const handleDownloadCatalogText = () => {
     try {
       const heading = `=========================================\n`;
       const title   = `        JS-TIP PRODUCT CATALOG           \n`;
@@ -164,6 +167,80 @@ export function OwnerInventoryScreen() {
     }
   };
 
+  const handleBatchExportPhotos = async () => {
+    const itemsWithImages = processedInventory.filter(item => item.image);
+    if (itemsWithImages.length === 0) {
+      toast.error("No items with photos to export.");
+      return;
+    }
+    
+    toast.loading(`Exporting ${itemsWithImages.length} photos...`, { id: 'batch-export' });
+    
+    let successCount = 0;
+    for (const item of itemsWithImages) {
+      try {
+        const dataUrl = await exportProductImage({
+          item: { name: item.name, price: item.price, image: item.image },
+          watermark: {
+            enabled: tripSettings?.watermark?.enabled || false,
+            image: tripSettings?.watermark?.image || '',
+            opacity: tripSettings?.watermark?.opacity !== undefined ? tripSettings?.watermark?.opacity : 0.5,
+            badgePosition: tripSettings?.watermark?.badgePosition || 'bottom-right'
+          }
+        });
+        
+        const link = document.createElement('a');
+        link.href = dataUrl;
+        link.download = `Catalog_${item.name.replace(/\s+/g, '_')}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        successCount++;
+        
+        // Small delay to prevent browser crash/blocking
+        await new Promise(r => setTimeout(r, 500));
+      } catch (e) {
+        console.error("Export failed for", item.name, e);
+      }
+    }
+    
+    if (successCount > 0) {
+      toast.success(`Successfully exported ${successCount} photos!`, { id: 'batch-export' });
+    } else {
+      toast.error("Failed to export photos.", { id: 'batch-export' });
+    }
+  };
+
+  const handleSingleExportPhoto = async (item: any) => {
+    if (!item.image) {
+      toast.error("This item doesn't have a photo.");
+      return;
+    }
+    toast.loading("Exporting photo...", { id: 'single-export' });
+    try {
+      const dataUrl = await exportProductImage({
+        item: { name: item.name, price: item.price, image: item.image },
+        watermark: {
+          enabled: tripSettings?.watermark?.enabled || false,
+          image: tripSettings?.watermark?.image || '',
+          opacity: tripSettings?.watermark?.opacity !== undefined ? tripSettings?.watermark?.opacity : 0.5,
+          badgePosition: tripSettings?.watermark?.badgePosition || 'bottom-right'
+        }
+      });
+      
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = `Product_${item.name.replace(/\s+/g, '_')}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast.success("Photo exported!", { id: 'single-export' });
+    } catch (e) {
+      toast.error("Failed to export photo.", { id: 'single-export' });
+    }
+  };
+
   const getMarginColor = (margin: number) => {
     if (margin >= 30) return "text-emerald-600 bg-emerald-50";
     if (margin >= 15) return "text-[#C9A84C] bg-[#C9A84C]/10";
@@ -195,6 +272,7 @@ export function OwnerInventoryScreen() {
           <Button size="icon" className="rounded-full h-10 w-10 bg-[#0D1B2E] text-white hover:bg-[#162847]" onClick={() => navigate('/owner/list-item')}>
             <Plus className="h-5 w-5" />
           </Button>
+          <MobileMenu />
         </div>
       </header>
 
@@ -228,13 +306,24 @@ export function OwnerInventoryScreen() {
               className="pl-11 h-12 bg-white border-none shadow-sm rounded-full font-semibold" 
             />
           </div>
-          <Button 
-            variant="outline" 
-            className="h-12 rounded-full bg-white border-none shadow-sm font-bold text-xs gap-2 px-4 flex items-center justify-center text-[#0D1B2E] hover:bg-slate-50 shrink-0"
-            onClick={handleDownloadCatalog}
-          >
-            <Download className="h-4 w-4" /> Export
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="outline" 
+                className="h-12 rounded-full bg-white border-none shadow-sm font-bold text-xs gap-2 px-4 flex items-center justify-center text-[#0D1B2E] hover:bg-slate-50 shrink-0"
+              >
+                <Download className="h-4 w-4" /> Export
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="rounded-2xl shadow-xl border-slate-100 p-2 min-w-[200px]">
+              <DropdownMenuItem className="gap-3 text-sm font-bold text-[#0D1B2E] p-3 rounded-xl cursor-pointer" onClick={handleDownloadCatalogText}>
+                <FileText className="h-4 w-4 text-slate-400" /> Export Text Catalog
+              </DropdownMenuItem>
+              <DropdownMenuItem className="gap-3 text-sm font-bold text-[#0D1B2E] p-3 rounded-xl cursor-pointer" onClick={handleBatchExportPhotos}>
+                <ImageIcon className="h-4 w-4 text-slate-400" /> Export All Photos
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Filters & View Toggle */}
@@ -495,23 +584,29 @@ export function OwnerInventoryScreen() {
                 {/* Action Buttons */}
                 <div className="grid grid-cols-2 gap-2 pt-2">
                   <Button 
-                    className="pill-button h-14 bg-[#0D1B2E] text-white hover:bg-[#162847]"
+                    className="pill-button h-14 bg-white border-2 border-[#0D1B2E] text-[#0D1B2E] hover:bg-slate-50"
+                    onClick={() => handleSingleExportPhoto(selectedItem)}
+                  >
+                    <DownloadCloud className="h-4 w-4 mr-2" /> Export Photo
+                  </Button>
+                  <Button 
+                    className="pill-button h-14 bg-white border border-slate-200 text-[#0D1B2E] hover:bg-slate-50 shadow-sm"
+                    onClick={() => {
+                      toast.success('Product link copied!');
+                      navigator.clipboard.writeText(`${window.location.origin}/items/${selectedItem.id}`);
+                    }}
+                  >
+                    <Share2 className="h-4 w-4 mr-2" /> Share Link
+                  </Button>
+                  <Button 
+                    className="pill-button h-14 col-span-2 bg-[#0D1B2E] text-white hover:bg-[#162847]"
                     onClick={() => {
                       const id = selectedItem.id;
                       setSelectedItem(null);
                       navigate(`/owner/edit-item/${id}`);
                     }}
                   >
-                    <Edit2 className="h-4 w-4 mr-2" /> Edit
-                  </Button>
-                  <Button 
-                    className="pill-button h-14 bg-white border border-slate-200 text-[#0D1B2E] hover:bg-slate-50"
-                    onClick={() => {
-                      toast.success('Product link copied!');
-                      navigator.clipboard.writeText(`${window.location.origin}/items/${selectedItem.id}`);
-                    }}
-                  >
-                    <Share2 className="h-4 w-4 mr-2" /> Share
+                    <Edit2 className="h-4 w-4 mr-2" /> Edit Details
                   </Button>
                   <Button 
                     variant="ghost"
