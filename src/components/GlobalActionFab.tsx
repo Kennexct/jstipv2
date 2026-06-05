@@ -412,8 +412,16 @@ export function GlobalActionFab({ variant = 'mobile' }: { variant?: 'mobile' | '
               )}
               
               <div className={cn("relative", showSuggestions ? "px-4 md:px-0" : "")}>
-                {!showSuggestions && <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-3">Select Catalog Product</p>}
-                <Search className={cn("absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400", showSuggestions ? "left-8 md:left-4" : "")} />
+                {!showSuggestions && (
+                  <>
+                    <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-3">Select Catalog Product</p>
+                    <div 
+                      className="absolute inset-0 z-10 cursor-pointer" 
+                      onClick={() => setShowSuggestions(true)}
+                    />
+                  </>
+                )}
+                <Search className={cn("absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400", showSuggestions ? "left-8 md:left-4" : "mt-3")} />
                 <Input 
                   placeholder="Search product by name..." 
                   value={productSearchText}
