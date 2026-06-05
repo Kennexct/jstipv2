@@ -401,10 +401,10 @@ export function GlobalActionFab({ variant = 'mobile' }: { variant?: 'mobile' | '
               </div>
             )}
 
-            <div className={cn("rounded-3xl bg-[#f2f5f7] border-none flex flex-col transition-all", showSuggestions ? "p-0 h-[65vh] fixed inset-0 z-50 rounded-none bg-background md:relative md:h-auto md:p-4 md:rounded-3xl" : "p-4 space-y-3")}>
+            <div className={cn("rounded-3xl bg-[#f2f5f7] border-none flex flex-col transition-all", showSuggestions ? "p-0 h-[65vh] bg-transparent md:h-auto md:p-4 md:rounded-3xl" : "p-4 space-y-3")}>
               {showSuggestions && (
-                <div className="flex items-center gap-2 p-4 pb-2 md:hidden">
-                  <Button variant="ghost" size="icon" onClick={() => setShowSuggestions(false)} className="rounded-full">
+                <div className="flex items-center gap-2 p-2 pb-2 md:hidden">
+                  <Button variant="ghost" size="icon" onClick={() => setShowSuggestions(false)} className="rounded-full shrink-0">
                     <X className="h-5 w-5" />
                   </Button>
                   <span className="font-bold text-foreground">Select Product</span>
@@ -491,7 +491,7 @@ export function GlobalActionFab({ variant = 'mobile' }: { variant?: 'mobile' | '
               )}
             </div>
 
-            {draftSaleItems.length > 0 && (
+            {!showSuggestions && draftSaleItems.length > 0 && (
               <div className="space-y-1.5 bg-slate-50 p-2.5 rounded-2xl border">
                 <div className="space-y-1.5 max-h-[140px] overflow-y-auto">
                   {draftSaleItems.map((draft, idx) => (
@@ -512,15 +512,17 @@ export function GlobalActionFab({ variant = 'mobile' }: { variant?: 'mobile' | '
               </div>
             )}
 
-            <div className="pt-1">
-              <Button 
-                className="w-full h-12 rounded-2xl font-black uppercase" 
-                onClick={handleSaveSale}
-                disabled={isSubmittingSale}
-              >
-                {isSubmittingSale ? 'Submitting...' : 'Submit Sale Record'}
-              </Button>
-            </div>
+            {!showSuggestions && (
+              <div className="pt-1">
+                <Button 
+                  className="w-full h-12 rounded-2xl font-black uppercase" 
+                  onClick={handleSaveSale}
+                  disabled={isSubmittingSale}
+                >
+                  {isSubmittingSale ? 'Submitting...' : 'Submit Sale Record'}
+                </Button>
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>
