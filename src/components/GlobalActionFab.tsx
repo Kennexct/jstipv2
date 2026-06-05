@@ -390,19 +390,30 @@ export function GlobalActionFab({ variant = 'mobile' }: { variant?: 'mobile' | '
           </DialogHeader>
 
           <div className="space-y-4">
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Customer Name *</label>
-              <Input 
-                value={customerName}
-                onChange={e => setCustomerName(e.target.value)}
-                className="h-11 rounded-xl bg-muted/30 border-none font-bold text-sm text-slate-800" 
-              />
-            </div>
+            {!showSuggestions && (
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Customer Name *</label>
+                <Input 
+                  value={customerName}
+                  onChange={e => setCustomerName(e.target.value)}
+                  className="h-11 rounded-xl bg-muted/30 border-none font-bold text-sm text-slate-800" 
+                />
+              </div>
+            )}
 
-            <div className="p-4 rounded-3xl bg-[#f2f5f7] border-none space-y-3">
-              <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Select Catalog Product</p>
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <div className={cn("rounded-3xl bg-[#f2f5f7] border-none flex flex-col transition-all", showSuggestions ? "p-0 h-[65vh] fixed inset-0 z-50 rounded-none bg-background md:relative md:h-auto md:p-4 md:rounded-3xl" : "p-4 space-y-3")}>
+              {showSuggestions && (
+                <div className="flex items-center gap-2 p-4 pb-2 md:hidden">
+                  <Button variant="ghost" size="icon" onClick={() => setShowSuggestions(false)} className="rounded-full">
+                    <X className="h-5 w-5" />
+                  </Button>
+                  <span className="font-bold text-foreground">Select Product</span>
+                </div>
+              )}
+              
+              <div className={cn("relative", showSuggestions ? "px-4 md:px-0" : "")}>
+                {!showSuggestions && <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-3">Select Catalog Product</p>}
+                <Search className={cn("absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400", showSuggestions ? "left-8 md:left-4" : "")} />
                 <Input 
                   placeholder="Search product by name..." 
                   value={productSearchText}
@@ -417,7 +428,7 @@ export function GlobalActionFab({ variant = 'mobile' }: { variant?: 'mobile' | '
               </div>
 
               {showSuggestions && (
-                <div className="max-h-56 overflow-y-auto rounded-2xl p-1.5 bg-white space-y-1 shadow-sm mt-1 border border-slate-100">
+                <div className="flex-1 overflow-y-auto px-4 pb-20 pt-4 md:p-0 md:max-h-64 space-y-1.5 mt-1">
                   {catalogItems.filter(i => i.name.toLowerCase().includes(productSearchText.toLowerCase())).map(item => (
                     <button
                       type="button"
@@ -428,54 +439,56 @@ export function GlobalActionFab({ variant = 'mobile' }: { variant?: 'mobile' | '
                         setShowSuggestions(false);
                       }}
                       className={cn(
-                        "w-full text-left p-2 rounded-xl flex items-center gap-3 transition-colors",
-                        selectedItemId === item.id ? "bg-[#163300] text-white" : "hover:bg-slate-50 bg-white border border-transparent"
+                        "w-full text-left p-3 rounded-2xl flex items-center gap-3 transition-colors border shadow-sm",
+                        selectedItemId === item.id ? "bg-[#163300] border-[#163300] text-white" : "hover:bg-slate-50 bg-white border-slate-100"
                       )}
                     >
-                      <div className="h-12 w-12 rounded-lg bg-[#f2f5f7] flex-shrink-0 overflow-hidden flex items-center justify-center">
+                      <div className="h-14 w-14 rounded-xl bg-[#f2f5f7] flex-shrink-0 overflow-hidden flex items-center justify-center">
                         {item.image ? (
                            <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
                         ) : (
-                           <Package className="h-5 w-5 text-slate-300" />
+                           <Package className="h-6 w-6 text-slate-300" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="text-xs font-bold truncate pr-2">{item.name}</div>
-                        <div className={cn("text-[10px] font-medium mt-0.5", selectedItemId === item.id ? "text-[#C9A84C]" : "text-slate-500")}>
+                        <div className="text-sm font-bold truncate pr-2">{item.name}</div>
+                        <div className={cn("text-[11px] font-black mt-0.5", selectedItemId === item.id ? "text-[#C9A84C]" : "text-slate-500")}>
                           Rp {item.price.toLocaleString()}
                         </div>
                       </div>
                       {selectedItemId === item.id && (
-                        <CheckCircle2 className="h-5 w-5 text-[#C9A84C] shrink-0 mr-1" />
+                        <CheckCircle2 className="h-6 w-6 text-[#C9A84C] shrink-0 mr-1" />
                       )}
                     </button>
                   ))}
                   {catalogItems.filter(i => i.name.toLowerCase().includes(productSearchText.toLowerCase())).length === 0 && (
-                     <div className="p-4 text-center text-xs font-medium text-slate-400">No matching products found</div>
+                     <div className="p-8 text-center text-sm font-bold text-slate-400">No matching products found</div>
                   )}
                 </div>
               )}
 
-              <div className="flex items-end justify-between gap-3 pt-2">
-                <div className="space-y-1.5 flex-[0.5]">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Quantity</label>
-                  <Input 
-                    type="number" 
-                    placeholder="e.g. 1" 
-                    value={selectedQty} 
-                    onChange={e => setSelectedQty(e.target.value === '' ? '' : Math.max(1, parseInt(e.target.value) || 1))} 
-                    className="h-12 w-full rounded-2xl bg-white border-none font-black text-sm shadow-sm px-4" 
-                  />
+              {!showSuggestions && (
+                <div className="flex items-end justify-between gap-3 pt-2">
+                  <div className="space-y-1.5 flex-[0.5]">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Quantity</label>
+                    <Input 
+                      type="number" 
+                      placeholder="e.g. 1" 
+                      value={selectedQty} 
+                      onChange={e => setSelectedQty(e.target.value === '' ? '' : Math.max(1, parseInt(e.target.value) || 1))} 
+                      className="h-12 w-full rounded-2xl bg-white border-none font-black text-sm shadow-sm px-4" 
+                    />
+                  </div>
+                  <Button 
+                    type="button" 
+                    onClick={handleAddDraftItem} 
+                    disabled={!selectedItemId}
+                    className="h-12 rounded-2xl font-black text-xs gap-2 shadow-xl bg-[#C9A84C] text-[#0D1B2E] hover:bg-[#b8943d] px-5"
+                  >
+                    <PlusCircle className="h-4 w-4" /> Add Item
+                  </Button>
                 </div>
-                <Button 
-                  type="button" 
-                  onClick={handleAddDraftItem} 
-                  disabled={!selectedItemId}
-                  className="h-12 rounded-2xl font-black text-xs gap-2 shadow-xl bg-[#C9A84C] text-[#0D1B2E] hover:bg-[#b8943d] px-5"
-                >
-                  <PlusCircle className="h-4 w-4" /> Add Item
-                </Button>
-              </div>
+              )}
             </div>
 
             {draftSaleItems.length > 0 && (
