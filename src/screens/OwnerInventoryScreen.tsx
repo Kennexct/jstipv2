@@ -260,7 +260,7 @@ export function OwnerInventoryScreen() {
       <header className="sticky top-0 z-50 bg-[#F4F6F9]/80 backdrop-blur-md px-4 pt-8 pb-4 flex items-center justify-between gap-3 border-b border-slate-200/50">
         <div className="flex items-center gap-2">
           <MobileMenu />
-          <Button variant="ghost" size="icon" className="rounded-full bg-white shadow-sm hover:bg-slate-50 shrink-0" onClick={() => navigate('/owner')}>
+          <Button variant="ghost" size="icon" className="hidden md:flex rounded-full bg-white shadow-sm hover:bg-slate-50 shrink-0" onClick={() => navigate('/owner')}>
             <ArrowLeft className="h-5 w-5 text-[#0D1B2E]" />
           </Button>
         </div>
