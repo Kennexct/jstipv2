@@ -42,6 +42,7 @@ export interface MasterState {
   removeSale: (id: string) => Promise<void>;
   removeExpense: (id: string) => Promise<void>;
   toggleBoughtId: (id: string) => void;
+  resetAllData: () => Promise<void>;
 }
 
 const getInitialUser = () => {
@@ -260,6 +261,36 @@ export const useStore = create<MasterState>((set, get) => ({
     localStorage.setItem('jastip_checklist_bought_states', JSON.stringify(updated));
     if (currentUser) {
       db.saveSettings({ ...tripSettings, boughtIds: updated }, currentUser.id).catch();
+    }
+  },
+
+  resetAllData: async () => {
+    const { currentUser } = get();
+    if (!currentUser) return;
+    
+    set({ loading: true });
+    try {
+      await db.deleteAllData(currentUser.id);
+      
+      // Reset local state but keep user logged in
+      set({
+        expenses: [],
+        sales: [],
+        catalogItems: [],
+        wishlistItems: [],
+        boughtIds: [],
+        tripSettings: {
+          trip: { origin: 'Seoul', destination: 'Jakarta', weightLimit: 15, date: '' },
+          currency: { code: 'SGD', symbol: 'S$', manualRate: 13500 }
+        }
+      });
+      
+      toast.success('All data has been successfully reset.');
+    } catch (e) {
+      toast.error('Failed to reset data. Please try again.');
+      throw e;
+    } finally {
+      set({ loading: false });
     }
   }
 }));

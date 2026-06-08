@@ -6,7 +6,8 @@ import {
   MapPin, 
   Globe,
   Settings2,
-  Edit2
+  Edit2,
+  AlertTriangle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -89,7 +90,7 @@ const COUNTRIES = [
 
 export function TripSettingsScreen() {
   const navigate = useNavigate();
-  const { loading, tripSettings, saveSettings } = useMaster();
+  const { loading, tripSettings, saveSettings, currentUser, resetAllData, logout } = useMaster();
   const confirm = useConfirm();
 
   const [origin, setOrigin] = useState('');
@@ -112,6 +113,33 @@ export function TripSettingsScreen() {
   
   // Track initial state to detect unsaved changes
   const [initialState, setInitialState] = useState<any>(null);
+
+  // Reset Dialog States
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
+  const [resetConfirmText, setResetConfirmText] = useState('');
+  const [resetPassword, setResetPassword] = useState('');
+  const [isResetting, setIsResetting] = useState(false);
+
+  const handleResetData = async () => {
+    if (!currentUser || resetPassword !== currentUser.password) {
+      toast.error('Incorrect password');
+      return;
+    }
+    
+    setIsResetting(true);
+    try {
+      await resetAllData();
+      setResetDialogOpen(false);
+      setResetPassword('');
+      setResetConfirmText('');
+      toast.success('All data has been wiped.');
+      navigate('/');
+    } catch (e) {
+      toast.error('Reset failed');
+    } finally {
+      setIsResetting(false);
+    }
+  };
 
   // Sync inputs with master context once loaded
   useEffect(() => {
@@ -603,6 +631,64 @@ export function TripSettingsScreen() {
             <div className="h-8 w-14 bg-amber-500 rounded-full relative p-1.5 cursor-pointer shadow-inner">
               <div className="h-5 w-5 bg-white rounded-full ml-auto shadow-sm" />
             </div>
+          </div>
+        </section>
+
+        {/* Danger Zone */}
+        <Separator className="opacity-50 mt-4" />
+        <section className="space-y-4 pt-4">
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-red-500 ml-1">
+             <AlertTriangle className="h-4 w-4" /> Danger Zone
+          </div>
+          <div className="p-5 rounded-3xl bg-red-50/50 border border-red-100/50 space-y-3">
+             <div className="space-y-1 text-left">
+                <p className="text-sm font-bold text-red-700">Factory Reset</p>
+                <p className="text-[10px] text-red-700/60 font-medium pr-4">Permanently delete all sales, expenses, catalogs, and wishlists. This action cannot be undone.</p>
+             </div>
+             <Dialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
+               <DialogTrigger asChild>
+                 <Button variant="outline" className="w-full bg-white text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 rounded-xl h-12 font-bold mt-2 shadow-sm">
+                   Reset All Data
+                 </Button>
+               </DialogTrigger>
+               <DialogContent className="sm:max-w-md rounded-[2rem] p-6 border-none bg-white shadow-2xl">
+                 <DialogHeader>
+                   <DialogTitle className="text-xl font-black text-red-600 flex items-center gap-2">
+                     <AlertTriangle className="h-5 w-5" /> Reset Data
+                   </DialogTitle>
+                 </DialogHeader>
+                 <div className="space-y-5 py-2">
+                   <div className="space-y-2">
+                     <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                       This will permanently delete all your records. To confirm, please type <strong className="text-slate-800 bg-slate-100 px-1 py-0.5 rounded select-all">delete my data</strong> below.
+                     </p>
+                     <Input 
+                       placeholder="delete my data" 
+                       value={resetConfirmText}
+                       onChange={e => setResetConfirmText(e.target.value)}
+                       className="bg-slate-50 border-slate-200 h-12 rounded-xl font-bold text-slate-800"
+                     />
+                   </div>
+                   <div className="space-y-2">
+                     <p className="text-xs text-slate-500 font-medium">Please enter your account password to verify.</p>
+                     <Input 
+                       type="password" 
+                       placeholder="Your password" 
+                       value={resetPassword}
+                       onChange={e => setResetPassword(e.target.value)}
+                       className="bg-slate-50 border-slate-200 h-12 rounded-xl font-bold text-slate-800"
+                     />
+                   </div>
+                   <Button 
+                     className="w-full bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-widest h-14 rounded-2xl shadow-xl shadow-red-600/20"
+                     disabled={resetConfirmText !== 'delete my data' || !resetPassword || isResetting}
+                     onClick={handleResetData}
+                   >
+                     {isResetting ? 'Resetting...' : 'Delete Everything'}
+                   </Button>
+                 </div>
+               </DialogContent>
+             </Dialog>
           </div>
         </section>
 

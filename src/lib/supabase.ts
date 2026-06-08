@@ -638,5 +638,36 @@ export const db = {
     if (!username) return null;
     const merchants = await this.getMerchants();
     return merchants.find((m: any) => m && m.username && m.username.toLowerCase() === username.toLowerCase()) || null;
+  },
+
+  async deleteAllData(merchantId: string) {
+    if (!merchantId) return;
+    
+    // Clear local storage for this merchant
+    const keys = [
+      'jastip_items', 'jastip_wishlist', 'jastip_sales', 'jastip_expenses',
+      'jastip_checklist_bought_states', 'jastip_trip_settings', 'jastip_currency_settings', 'jastip_notification_settings'
+    ];
+    
+    keys.forEach(k => {
+      localStorage.removeItem(k);
+      localStorage.removeItem(`${k}_${merchantId}`);
+    });
+
+    if (isSupabaseConfigured()) {
+      try {
+        await Promise.all([
+          postgrestRequest('jstip_items', { method: 'DELETE', query: `merchant_id=eq.${merchantId}` }),
+          postgrestRequest('jstip_wishlist', { method: 'DELETE', query: `merchant_id=eq.${merchantId}` }),
+          postgrestRequest('jstip_sales', { method: 'DELETE', query: `merchant_id=eq.${merchantId}` }),
+          postgrestRequest('jstip_expenses', { method: 'DELETE', query: `merchant_id=eq.${merchantId}` }),
+          postgrestRequest('jstip_ledger', { method: 'DELETE', query: `merchant_id=eq.${merchantId}` }),
+          postgrestRequest('jstip_settings', { method: 'DELETE', query: `merchant_id=eq.${merchantId}` })
+        ]);
+      } catch (e) {
+        console.error('Failed to delete remote data:', e);
+        throw e;
+      }
+    }
   }
 };
