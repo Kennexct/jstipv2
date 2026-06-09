@@ -186,6 +186,7 @@ export function OwnerInventoryScreen() {
             enabled: tripSettings?.watermark?.enabled || false,
             image: tripSettings?.watermark?.image || '',
             opacity: tripSettings?.watermark?.opacity !== undefined ? tripSettings?.watermark?.opacity : 0.5,
+            showPriceBadge: tripSettings?.watermark?.showPriceBadge !== false,
             badgePosition: tripSettings?.watermark?.badgePosition || 'bottom-right'
           }
         });
@@ -225,6 +226,7 @@ export function OwnerInventoryScreen() {
           enabled: tripSettings?.watermark?.enabled || false,
           image: tripSettings?.watermark?.image || '',
           opacity: tripSettings?.watermark?.opacity !== undefined ? tripSettings?.watermark?.opacity : 0.5,
+          showPriceBadge: tripSettings?.watermark?.showPriceBadge !== false,
           badgePosition: tripSettings?.watermark?.badgePosition || 'bottom-right'
         }
       });
@@ -436,7 +438,9 @@ export function OwnerInventoryScreen() {
                             <span className="text-xs font-bold text-slate-500 line-through decoration-slate-300">
                               {item.cost} {item.currency}
                             </span>
-                            <span className="text-[10px] font-black text-[#0D1B2E]">→ Rp {item.price.toLocaleString()}</span>
+                            {tripSettings?.watermark?.showPriceBadge !== false && (
+                              <span className="text-[10px] font-black text-[#0D1B2E]">→ Rp {item.price.toLocaleString()}</span>
+                            )}
                           </div>
                           <div className="flex items-center gap-2 mt-1">
                             <Badge className={cn("px-1.5 py-0 text-[9px] uppercase font-black border-none h-4", getMarginColor(item.marginPct))}>
@@ -500,7 +504,11 @@ export function OwnerInventoryScreen() {
                         <div className="p-3 flex flex-col flex-1 justify-between gap-1.5">
                           <h4 className="text-xs font-black text-[#0D1B2E] line-clamp-2 leading-tight">{item.name}</h4>
                           <div>
-                            <p className="text-sm font-black text-[#0D1B2E] tracking-tight">Rp {(item.price / 1000).toLocaleString()}k</p>
+                            {tripSettings?.watermark?.showPriceBadge !== false ? (
+                              <p className="text-sm font-black text-[#0D1B2E] tracking-tight">Rp {(item.price / 1000).toLocaleString()}k</p>
+                            ) : (
+                              <p className="text-sm font-black text-slate-400 tracking-tight">{item.cost} {item.currency}</p>
+                            )}
                             <p className="text-[9px] font-bold text-slate-400 mt-0.5">
                               {item.timesSold > 0 ? <span className="text-emerald-600">{item.timesSold} sold</span> : '0 sales'}
                             </p>

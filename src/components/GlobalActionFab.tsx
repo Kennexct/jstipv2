@@ -312,7 +312,7 @@ export function GlobalActionFab({ variant = 'mobile' }: { variant?: 'mobile' | '
 
       {/* Expenses Dialog */}
       <Dialog open={isExpenseOpen} onOpenChange={setIsExpenseOpen}>
-        <DialogContent>
+        <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-h-[90vh] overflow-y-auto">
           <DialogHeader className="text-left pb-2">
             <DialogTitle className="text-lg font-black tracking-tight uppercase italic text-primary flex items-center gap-2">
               <Wallet className="h-5 w-5" /> Record Operational Expense
@@ -382,7 +382,7 @@ export function GlobalActionFab({ variant = 'mobile' }: { variant?: 'mobile' | '
 
       {/* Record Sale Dialog */}
       <Dialog open={isSaleOpen} onOpenChange={setIsSaleOpen}>
-        <DialogContent>
+        <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-h-[90vh] overflow-y-auto">
           <DialogHeader className="text-left pb-2">
             <DialogTitle className="text-lg font-black tracking-tight uppercase italic text-primary flex items-center gap-2">
               <Banknote className="h-5 w-5" /> Record Customer Sale

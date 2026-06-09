@@ -125,6 +125,7 @@ export function ExploreScreen() {
   const [formImage, setFormImage] = useState<string>('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
 
 
@@ -443,7 +444,7 @@ export function ExploreScreen() {
             <DialogTrigger className="flex h-10 w-10 items-center justify-center rounded-full bg-[#0D1B2E] text-white hover:bg-[#162847] shrink-0 outline-none">
               <Plus className="h-5 w-5" />
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-h-[90vh] overflow-y-auto">
               <DialogHeader className="text-left">
                 <DialogTitle className="text-xl font-black text-[#0D1B2E] tracking-tight">
                   Record Request
@@ -559,7 +560,7 @@ export function ExploreScreen() {
                 <DialogTrigger className={cn(buttonVariants({ variant: 'outline' }), "h-12 w-12 rounded-2xl border-dashed p-0 shrink-0 inline-flex items-center justify-center")}>
                   <Filter className="h-5 w-5" />
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-h-[90vh] overflow-y-auto">
                   <DialogHeader className="text-left">
                     <DialogTitle className="text-lg font-black text-[#0D1B2E] tracking-tight">Filter by Status</DialogTitle>
                     <DialogDescription className="text-sm text-slate-500 font-medium">Narrow down tasks by state</DialogDescription>
@@ -728,7 +729,7 @@ export function ExploreScreen() {
           await handleCloseDetail();
         } 
       }}>
-        <DialogContent>
+        <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-h-[90vh] overflow-y-auto">
           {selectedDetailItem && (
             <div className="space-y-5 text-left">
               <DialogHeader className="text-left pb-2">
@@ -748,8 +749,8 @@ export function ExploreScreen() {
                 </DialogDescription>
               </DialogHeader>
 
-              {/* Product picture rendering (Clickable to upload/take photo) */}
-              <div className="space-y-1">
+              {/* Product picture rendering (Clickable to preview, icon to upload) */}
+              <div className="space-y-1 relative">
                 <input 
                   type="file" 
                   accept="image/*" 
@@ -758,12 +759,18 @@ export function ExploreScreen() {
                   onChange={handleDetailImageUpload} 
                 />
                 {selectedDetailItem.image ? (
-                  <label htmlFor="detail-image-upload" className="cursor-pointer block relative group w-full h-48 rounded-2xl overflow-hidden bg-[#f2f5f7]">
-                    <img src={selectedDetailItem.image} className="h-full w-full object-cover" alt={selectedDetailItem.name} referrerPolicy="no-referrer" />
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 text-white font-bold text-xs uppercase">
-                      <Camera className="h-4 w-4" /> Change Photo
-                    </div>
-                  </label>
+                  <div className="relative w-full h-48 rounded-2xl overflow-hidden bg-[#f2f5f7] group">
+                    <img 
+                      src={selectedDetailItem.image} 
+                      className="h-full w-full object-cover cursor-pointer" 
+                      alt={selectedDetailItem.name} 
+                      referrerPolicy="no-referrer" 
+                      onClick={() => setPreviewImage(selectedDetailItem.image!)}
+                    />
+                    <label htmlFor="detail-image-upload" className="absolute top-2 right-2 h-8 w-8 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm cursor-pointer hover:bg-white transition-colors">
+                      <Camera className="h-4 w-4 text-slate-700" />
+                    </label>
+                  </div>
                 ) : (
                   <label htmlFor="detail-image-upload" className="cursor-pointer block w-full h-32 rounded-2xl border-2 border-dashed border-slate-200 hover:bg-slate-50 transition-colors flex flex-col items-center justify-center p-4 bg-[#f2f5f7] text-slate-500 gap-2 text-center">
                     <Camera className="h-8 w-8 text-slate-400" />
@@ -945,10 +952,20 @@ export function ExploreScreen() {
         </DialogContent>
       </Dialog>
 
-
-
+      {/* PHOTO PREVIEW MODAL */}
+      <Dialog open={previewImage !== null} onOpenChange={(open) => !open && setPreviewImage(null)}>
+        <DialogContent className="max-w-md w-full bg-transparent border-none p-0 shadow-none flex items-center justify-center h-screen" showClose={false} onOpenAutoFocus={(e) => e.preventDefault()}>
+          <div className="relative w-full max-w-sm mx-auto p-4 flex flex-col items-center">
+            {previewImage && (
+              <img src={previewImage} className="w-full rounded-2xl object-contain max-h-[80vh]" alt="Preview" />
+            )}
+            <Button variant="ghost" className="mt-4 text-white bg-black/50 hover:bg-black/70 rounded-full font-bold px-6" onClick={() => setPreviewImage(null)}>
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
     </div>
   );
 }
-

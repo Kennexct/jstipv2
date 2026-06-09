@@ -144,7 +144,7 @@ export function OwnerDashboard() {
               </Avatar>
             </div>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-h-[90vh] overflow-y-auto">
               <DialogHeader className="text-left pb-2">
                 <DialogTitle className="text-xl font-bold text-foreground">
                   Account Details
@@ -304,8 +304,8 @@ export function OwnerDashboard() {
       </main>
 
       {/* EDIT ACTIVITY MODAL */}
-      <Dialog open={editingActivity !== null} onOpenChange={(open) => { if (!open) setEditingActivity(null); }}>
-        <DialogContent className="sm:max-w-md rounded-[2rem] p-6 border-none bg-background shadow-2xl">
+      <Dialog open={editingActivity !== null} onOpenChange={(o) => !o && setEditingActivity(null)}>
+        <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="sm:max-w-md rounded-[2rem] p-6 border-none bg-background shadow-2xl max-h-[90vh] overflow-y-auto">
           {editingActivity && (
             <div className="space-y-4">
               <DialogHeader>

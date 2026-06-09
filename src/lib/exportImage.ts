@@ -8,6 +8,7 @@ export interface ExportConfig {
     enabled: boolean;
     image: string;
     opacity: number;
+    showPriceBadge?: boolean;
     badgePosition?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'none';
   };
 }
@@ -70,8 +71,9 @@ export const exportProductImage = async (config: ExportConfig): Promise<string> 
       }
 
       // 3. Draw Price Badge
+      const showPriceBadge = config.watermark.showPriceBadge !== false;
       const badgePos = config.watermark.badgePosition || 'bottom-right';
-      if (badgePos !== 'none') {
+      if (showPriceBadge && badgePos !== 'none') {
         const text = `Rp ${config.item.price.toLocaleString()}`;
         
         // Dynamic sizing based on canvas width

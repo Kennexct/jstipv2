@@ -108,6 +108,7 @@ export function TripSettingsScreen() {
   const [watermarkEnabled, setWatermarkEnabled] = useState(false);
   const [watermarkImage, setWatermarkImage] = useState<string | null>(null);
   const [watermarkOpacity, setWatermarkOpacity] = useState<number>(0.5);
+  const [showPriceBadge, setShowPriceBadge] = useState(true);
   const [badgePosition, setBadgePosition] = useState<'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'none'>('bottom-right');
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -175,6 +176,7 @@ export function TripSettingsScreen() {
         setWatermarkEnabled(!!tripSettings.watermark.enabled);
         setWatermarkImage(tripSettings.watermark.image || null);
         setWatermarkOpacity(tripSettings.watermark.opacity !== undefined ? tripSettings.watermark.opacity : 0.5);
+        setShowPriceBadge(tripSettings.watermark.showPriceBadge !== false);
         setBadgePosition(tripSettings.watermark.badgePosition || 'bottom-right');
       }
 
@@ -192,6 +194,7 @@ export function TripSettingsScreen() {
         watermarkEnabled: !!tripSettings.watermark?.enabled,
         watermarkImage: tripSettings.watermark?.image || null,
         watermarkOpacity: tripSettings.watermark?.opacity !== undefined ? tripSettings.watermark?.opacity : 0.5,
+        showPriceBadge: tripSettings.watermark?.showPriceBadge !== false,
         badgePosition: tripSettings.watermark?.badgePosition || 'bottom-right'
       });
     }
@@ -208,6 +211,7 @@ export function TripSettingsScreen() {
     watermarkEnabled !== initialState.watermarkEnabled ||
     watermarkImage !== initialState.watermarkImage ||
     watermarkOpacity !== initialState.watermarkOpacity ||
+    showPriceBadge !== initialState.showPriceBadge ||
     badgePosition !== initialState.badgePosition
   );
 
@@ -244,6 +248,7 @@ export function TripSettingsScreen() {
         enabled: watermarkEnabled,
         image: watermarkImage || '',
         opacity: watermarkOpacity,
+        showPriceBadge: showPriceBadge,
         badgePosition: badgePosition
       }
     };
@@ -375,7 +380,7 @@ export function TripSettingsScreen() {
                     <DialogTrigger render={<Button variant="outline" size="sm" className="font-bold text-[10px] uppercase tracking-widest h-8 px-4 rounded-xl border-dashed hover:bg-slate-50" />}>
                       Change
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-md rounded-[2rem] p-6 border-none bg-white shadow-2xl">
+                    <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="sm:max-w-md rounded-[2rem] p-6 border-none bg-white shadow-2xl max-h-[90vh] overflow-y-auto">
                       <DialogHeader>
                         <DialogTitle className="text-left font-black text-xl text-[#0D1B2E]">Select Shopping Currency</DialogTitle>
                       </DialogHeader>
@@ -458,7 +463,7 @@ export function TripSettingsScreen() {
                     <DialogTrigger render={<Button variant="outline" size="sm" className="font-bold text-[10px] uppercase tracking-widest h-8 px-4 rounded-xl border-dashed hover:bg-slate-50" />}>
                       Change
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-md rounded-[2rem] p-6 border-none bg-white shadow-2xl">
+                    <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="sm:max-w-md rounded-[2rem] p-6 border-none bg-white shadow-2xl max-h-[90vh] overflow-y-auto">
                       <DialogHeader>
                         <DialogTitle className="text-left font-black text-xl text-[#0D1B2E]">Select Payout Currency</DialogTitle>
                       </DialogHeader>
@@ -597,21 +602,39 @@ export function TripSettingsScreen() {
               </div>
             )}
             
-            <div className="pt-4 border-t border-slate-100 space-y-3">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block ml-1">Sell Price Badge Position</label>
-              <select 
-                value={badgePosition} 
-                onChange={(e) => setBadgePosition(e.target.value as any)}
-                className="w-full h-14 bg-[#f2f5f7] border-none rounded-2xl px-4 text-sm font-bold text-[#0D1B2E] appearance-none cursor-pointer outline-none ring-0"
-                style={{ WebkitAppearance: 'none' }}
-              >
-                <option value="bottom-right">Bottom Right</option>
-                <option value="bottom-left">Bottom Left</option>
-                <option value="top-right">Top Right</option>
-                <option value="top-left">Top Left</option>
-                <option value="none">Hide Badge</option>
-              </select>
-              <p className="text-[10px] text-slate-400 font-medium px-2">Position of the price badge when exporting photos.</p>
+            <div className="pt-4 border-t border-slate-100 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1 text-left">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block ml-1">Enable Sell Price Badge</label>
+                  <p className="text-[10px] text-slate-400 font-medium px-1">Display sell price on catalog and exported photos.</p>
+                </div>
+                <div 
+                  className={cn("h-8 w-14 rounded-full relative p-1.5 cursor-pointer shadow-inner transition-colors", showPriceBadge ? "bg-emerald-500" : "bg-slate-200")}
+                  onClick={() => setShowPriceBadge(!showPriceBadge)}
+                >
+                  <div className={cn("h-5 w-5 bg-white rounded-full shadow-sm transition-transform", showPriceBadge ? "ml-auto" : "ml-0")} />
+                </div>
+              </div>
+
+              {showPriceBadge && (
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block ml-1">Sell Price Badge Position</label>
+                  <select 
+                    value={badgePosition} 
+                    onChange={(e) => setBadgePosition(e.target.value as any)}
+                    className="w-full h-14 bg-[#f2f5f7] border-none rounded-2xl px-4 text-sm font-bold text-[#0D1B2E] appearance-none cursor-pointer outline-none ring-0"
+                    style={{ WebkitAppearance: 'none' }}
+                  >
+                    <option value="bottom-right">Bottom Right</option>
+                    <option value="bottom-left">Bottom Left</option>
+                    <option value="top-right">Top Right</option>
+                    <option value="top-left">Top Left</option>
+                  </select>
+                  <p className="text-[10px] text-slate-400 font-medium px-2">Position of the price badge when exporting photos.</p>
+                </div>
+              )}
+            </div>
+
             </div>
           </div>
         </section>
@@ -651,7 +674,7 @@ export function TripSettingsScreen() {
                    Reset All Data
                  </Button>
                </DialogTrigger>
-               <DialogContent className="sm:max-w-md rounded-[2rem] p-6 border-none bg-white shadow-2xl">
+               <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="sm:max-w-md rounded-[2rem] p-6 border-none bg-white shadow-2xl max-h-[90vh] overflow-y-auto">
                  <DialogHeader>
                    <DialogTitle className="text-xl font-black text-red-600 flex items-center gap-2">
                      <AlertTriangle className="h-5 w-5" /> Reset Data
