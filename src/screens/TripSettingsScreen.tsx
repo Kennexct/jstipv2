@@ -634,8 +634,6 @@ export function TripSettingsScreen() {
                 </div>
               )}
             </div>
-
-            </div>
           </div>
         </section>
 
