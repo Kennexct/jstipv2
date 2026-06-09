@@ -429,12 +429,12 @@ export function TripSettingsScreen() {
                       <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">Rp</div>
                       <Input 
                         type="text" 
-                        value={settings.manualRate === 0 ? '' : settings.manualRate.toLocaleString()} 
+                        value={settings.manualRate === 0 ? '' : settings.manualRate} 
                         onChange={(e) => {
-                          const cleaned = e.target.value.replace(/[^0-9]/g, '');
+                          const cleaned = e.target.value.replace(/[^0-9.]/g, '');
                           setSettings({...settings, manualRate: Number(cleaned) || 0});
                         }}
-                        inputMode="numeric"
+                        inputMode="decimal"
                         className="h-14 pl-12 rounded-2xl bg-[#f2f5f7] border-none font-black text-lg text-[#0D1B2E] focus:ring-2 focus:ring-primary"
                       />
                     </div>

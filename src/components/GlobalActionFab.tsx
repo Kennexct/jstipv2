@@ -113,7 +113,7 @@ export function GlobalActionFab({ variant = 'mobile' }: { variant?: 'mobile' | '
     if (!expenseDesc.trim() || !expenseAmount) return;
     
     setIsSubmittingExpense(true);
-    const enteredAmount = parseInt(expenseAmount.replace(/[^0-9]/g, '')) || 0;
+    const enteredAmount = parseFloat(expenseAmount.replace(/[^0-9.]/g, '')) || 0;
     const amountInIdr = expenseCurrency === shoppingCurrencyCode
       ? Math.round(enteredAmount * (tripSettings?.currency?.manualRate || 13500))
       : enteredAmount;
@@ -341,8 +341,8 @@ export function GlobalActionFab({ variant = 'mobile' }: { variant?: 'mobile' | '
                 </button>
                 <Input 
                   value={expenseAmount}
-                  onChange={e => setExpenseAmount(e.target.value)}
-                  inputMode="numeric"
+                  onChange={e => setExpenseAmount(e.target.value.replace(/[^0-9.]/g, ''))}
+                  inputMode="decimal"
                   className="h-11 pl-16 rounded-xl bg-muted/30 border-none font-bold text-sm text-slate-800" 
                 />
               </div>

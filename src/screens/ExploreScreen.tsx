@@ -102,8 +102,8 @@ export function ExploreScreen() {
 
   const conversionRate = tripSettings?.currency?.manualRate || 13500;
   const computedPriceInIdr = editBudgetCurrency === shoppingCurrencyCode
-    ? Math.round((parseInt(editBudgetAmount.replace(/[^0-9]/g, '')) || 0) * conversionRate)
-    : (parseInt(editBudgetAmount.replace(/[^0-9]/g, '')) || 0);
+    ? Math.round((parseFloat(editBudgetAmount.replace(/[^0-9.]/g, '')) || 0) * conversionRate)
+    : (parseFloat(editBudgetAmount.replace(/[^0-9.]/g, '')) || 0);
 
   const handleCycleBudgetCurrency = () => {
     const sequence = [payoutCurrencyCode, shoppingCurrencyCode];
@@ -836,15 +836,15 @@ export function ExploreScreen() {
                         </div>
                         <Input 
                           type="text"
-                          inputMode="numeric"
-                          pattern="[0-9]*"
+                          inputMode="decimal"
+                          pattern="[0-9.]*"
                           placeholder="0"
                           value={editBudgetAmount}
                           onChange={(e) => {
-                            const val = e.target.value.replace(/[^0-9]/g, '');
+                            const val = e.target.value.replace(/[^0-9.]/g, '');
                             setEditBudgetAmount(val);
                             if (selectedDetailItem) {
-                              const parsedAmount = parseInt(val) || 0;
+                              const parsedAmount = parseFloat(val) || 0;
                               const finalIdrPrice = editBudgetCurrency === shoppingCurrencyCode
                                 ? Math.round(parsedAmount * conversionRate)
                                 : parsedAmount;
