@@ -36,6 +36,7 @@ export function OwnerInventoryScreen() {
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [sortBy, setSortBy] = useState<'recent' | 'price_asc' | 'price_desc' | 'margin' | 'sold'>('recent');
   const [filterBy, setFilterBy] = useState<'all' | 'high_margin' | 'low_margin' | 'no_sales'>('all');
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   
   const { catalogItems: inventory, removeItem, sales, tripSettings, currentUser } = useMaster();
   const confirm = useConfirm();
@@ -526,7 +527,7 @@ export function OwnerInventoryScreen() {
 
       {/* Catalog Product Detail Enhanced Modal */}
       <Dialog open={selectedItem !== null} onOpenChange={(open) => { if (!open) setSelectedItem(null); }}>
-        <DialogContent className="max-w-md w-[95%] border-none rounded-[2rem] max-h-[85dvh] overflow-y-auto">
+        <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-md w-[95%] border-none rounded-[2rem] max-h-[85dvh] overflow-y-auto">
           {selectedItem && (
             <div className="space-y-5 text-left">
               <DialogHeader className="text-left pb-2">
@@ -551,7 +552,13 @@ export function OwnerInventoryScreen() {
                 {selectedItem.image ? (
                   <div className="relative w-full h-48 rounded-2xl overflow-hidden bg-[#f2f5f7]">
                     <WatermarkOverlay />
-                    <img src={selectedItem.image} className="h-full w-full object-cover" alt={selectedItem.name} referrerPolicy="no-referrer" />
+                    <img 
+                      src={selectedItem.image} 
+                      className="h-full w-full object-cover cursor-pointer" 
+                      alt={selectedItem.name} 
+                      referrerPolicy="no-referrer" 
+                      onClick={() => setPreviewImage(selectedItem.image!)}
+                    />
                   </div>
                 ) : (
                   <div className="w-full h-32 rounded-2xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center p-4 bg-[#f2f5f7] text-slate-500 gap-2 text-center">
@@ -658,6 +665,20 @@ export function OwnerInventoryScreen() {
                 </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* PHOTO PREVIEW MODAL */}
+      <Dialog open={previewImage !== null} onOpenChange={(open) => !open && setPreviewImage(null)}>
+        <DialogContent className="max-w-md w-full bg-transparent border-none p-0 shadow-none flex items-center justify-center h-screen" showClose={false} onOpenAutoFocus={(e) => e.preventDefault()}>
+          <div className="relative w-full max-w-sm mx-auto p-4 flex flex-col items-center">
+            {previewImage && (
+              <img src={previewImage} className="w-full rounded-2xl object-contain max-h-[80vh]" alt="Preview" />
+            )}
+            <Button variant="ghost" className="mt-4 text-white bg-black/50 hover:bg-black/70 rounded-full font-bold px-6" onClick={() => setPreviewImage(null)}>
+              Close
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
