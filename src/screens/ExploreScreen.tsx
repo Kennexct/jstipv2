@@ -733,7 +733,7 @@ export function ExploreScreen() {
           {selectedDetailItem && (
             <div className="space-y-5 text-left">
               <DialogHeader className="text-left pb-2">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between pr-8">
                   <Badge className="bg-slate-100 text-slate-600 border-none font-bold uppercase tracking-widest text-[10px]">
                     Wishlist Request
                   </Badge>
